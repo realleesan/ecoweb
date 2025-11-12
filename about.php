@@ -1,4 +1,4 @@
-<?php include '../includes/header.php'; ?>
+<?php include 'includes/header.php'; ?>
 
 <!-- Main Content -->
 <main style="min-height: 60vh; padding: 60px 5%; background-color: var(--white);">
@@ -126,5 +126,5 @@
     </div>
 </main>
 
-<?php include '../includes/footer.php'; ?>
+<?php include 'includes/footer.php'; ?>
 

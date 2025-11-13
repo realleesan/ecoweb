@@ -446,7 +446,7 @@
                             <h4>${product.name}</h4>
                             <p>Mã SP: ${product.code}</p>
                             <p>Danh mục: ${getCategoryName(product.category)}</p>
-                            <a href="../views/product_detail.php?id=${product.id}" class="overlay-button">XEM CHI TIẾT</a>
+                            <a href="../views/products-detail.php?id=${product.id}" class="overlay-button">XEM CHI TIẾT</a>
                         </div>
                     </div>
                 </div>
@@ -454,7 +454,7 @@
                     <h3 class="product-name">${product.name}</h3>
                     <div class="product-price">${formatPrice(product.price)}</div>
                     <p class="product-description">${truncateDescription(product.description)}</p>
-                    <a href="../views/product_detail.php?id=${product.id}" class="product-detail-btn">XEM CHI TIẾT</a>
+                    <a href="../views/product-detail.php?id=${product.id}" class="product-detail-btn">XEM CHI TIẾT</a>
                 </div>
             </div>
         `;

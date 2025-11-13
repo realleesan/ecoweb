@@ -1,3 +1,13 @@
+<?php
+// Xác định base path
+$current_dir = dirname($_SERVER['PHP_SELF']);
+$base_path = '';
+$public_path = 'public/';
+if (strpos($current_dir, '/public') !== false || basename(dirname($_SERVER['PHP_SELF'])) == 'public') {
+    $base_path = '../';
+    $public_path = '';
+}
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -195,7 +205,7 @@
 <body>
     <!-- Top Bar -->
     <div class="top-bar">
-        <a href="index.php" class="logo">
+        <a href="<?php echo $base_path; ?>index.php" class="logo">
             <span style="font-size: 28px; font-weight: 700;">GROWHOPE</span>
         </a>
         
@@ -223,10 +233,11 @@
     <!-- Main Navigation -->
     <nav class="main-menu">
         <ul class="menu-list">
-            <li><a href="index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">Trang chủ</a></li>
-            <li><a href="about.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'about.php' ? 'active' : ''; ?>">Giới thiệu</a></li>
-            <li><a href="products.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'products.php' ? 'active' : ''; ?>">Sản phẩm</a></li>
-            <li><a href="news.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'news.php' ? 'active' : ''; ?>">Tin tức</a></li>
-            <li><a href="contact.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'contact.php' ? 'active' : ''; ?>">Liên hệ</a></li>
+            <li><a href="<?php echo $base_path; ?>index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">Trang chủ</a></li>
+            <li><a href="<?php echo $base_path . $public_path; ?>about.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'about.php' ? 'active' : ''; ?>">Giới thiệu</a></li>
+            <li><a href="<?php echo $base_path . $public_path; ?>products.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'products.php' ? 'active' : ''; ?>">Sản phẩm</a></li>
+            <li><a href="<?php echo $base_path . $public_path; ?>categories.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'categories.php' ? 'active' : ''; ?>">Danh mục</a></li>
+            <li><a href="<?php echo $base_path . $public_path; ?>news.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'news.php' ? 'active' : ''; ?>">Tin tức</a></li>
+            <li><a href="<?php echo $base_path . $public_path; ?>contact.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'contact.php' ? 'active' : ''; ?>">Liên hệ</a></li>
         </ul>
     </nav>

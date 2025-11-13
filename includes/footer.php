@@ -1,3 +1,15 @@
+    <?php 
+    // Get current page and set active states
+    $current_page = basename($_SERVER['PHP_SELF']);
+    $is_home = ($current_page == 'index.php' || $current_page == '');
+    
+    // Always use the full path for the homepage
+    $index_link = '/ecoweb/index.php';
+    
+    // Set base path for other links
+    $is_public = (strpos($_SERVER['PHP_SELF'], 'public') !== false);
+    $base_path = $is_public ? '' : '/ecoweb/public/';
+    ?>
     <!-- Footer -->
     <footer style="background-color: var(--dark); color: var(--white); padding: 50px 5% 20px;">
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; max-width: 1200px; margin: 0 auto;">
@@ -8,11 +20,11 @@
                     <span style="position: absolute; bottom: 0; left: 0; width: 50px; height: 2px; background: var(--secondary);"></span>
                 </h3>
                 <ul style="list-style: none; padding: 0;">
-                    <li style="margin-bottom: 8px;"><a href="/ecoweb/public/index.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Trang chủ</a></li>
-                    <li style="margin-bottom: 8px;"><a href="/ecoweb/public/about.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Giới thiệu</a></li>
-                    <li style="margin-bottom: 8px;"><a href="/ecoweb/public/products.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Sản phẩm</a></li>
-                    <li style="margin-bottom: 8px;"><a href="/ecoweb/public/news.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Tin tức</a></li>
-                    <li><a href="/ecoweb/public/contact.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Liên hệ</a></li>
+                    <li style="margin-bottom: 8px;"><a href="<?php echo $index_link; ?>" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Trang chủ</a></li>
+                    <li style="margin-bottom: 8px;"><a href="<?php echo $base_path; ?>about.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Giới thiệu</a></li>
+                    <li style="margin-bottom: 8px;"><a href="<?php echo $base_path; ?>products.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Sản phẩm</a></li>
+                    <li style="margin-bottom: 8px;"><a href="<?php echo $base_path; ?>news.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Tin tức</a></li>
+                    <li><a href="<?php echo $base_path; ?>contact.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Liên hệ</a></li>
                 </ul>
             </div>
 

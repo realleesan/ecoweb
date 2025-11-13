@@ -3,7 +3,8 @@
 <style>
         /* News Page Styles */
         .news-container {
-            background-color: var(--light);
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 40px 5%;
             min-height: 80vh;
         }

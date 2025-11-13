@@ -286,6 +286,10 @@
                     <i class="fas fa-envelope"></i>
                     <span>Liên hệ</span>
                 </a>
+                <a href="../public/categories.php" class="link-item">
+                    <i class="fas fa-list"></i>
+                    <span>Danh mục sản phẩm</span>
+                </a>
             </div>
         </div>
     </div>

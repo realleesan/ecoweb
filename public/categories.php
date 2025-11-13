@@ -13,6 +13,10 @@ try {
     $pdo = null;
 }
 
+// Lọc và sắp xếp
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'name_asc'; // name_asc, name_desc, count_asc, count_desc
+
 // Phân trang
 $items_per_page = 12; // 4 hàng x 3 cột = 12 items
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -60,6 +64,38 @@ if (empty($categories)) {
         ['category_id' => 16, 'category_name' => 'Cây Hữu Cơ', 'slug' => 'cay-huu-co', 'description' => 'Những loại cây được trồng theo phương pháp hữu cơ, an toàn và thân thiện môi trường.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Hữu+Cơ', 'product_count' => 21],
     ];
     
+    // Lọc theo tìm kiếm
+    if (!empty($search)) {
+        $sample_categories = array_filter($sample_categories, function($cat) use ($search) {
+            return stripos($cat['category_name'], $search) !== false || 
+                   stripos($cat['description'], $search) !== false;
+        });
+    }
+    
+    // Sắp xếp
+    switch($sort) {
+        case 'name_asc':
+            usort($sample_categories, function($a, $b) {
+                return strcmp($a['category_name'], $b['category_name']);
+            });
+            break;
+        case 'name_desc':
+            usort($sample_categories, function($a, $b) {
+                return strcmp($b['category_name'], $a['category_name']);
+            });
+            break;
+        case 'count_asc':
+            usort($sample_categories, function($a, $b) {
+                return ($a['product_count'] ?? 0) - ($b['product_count'] ?? 0);
+            });
+            break;
+        case 'count_desc':
+            usort($sample_categories, function($a, $b) {
+                return ($b['product_count'] ?? 0) - ($a['product_count'] ?? 0);
+            });
+            break;
+    }
+    
     $total_categories = count($sample_categories);
     $categories = array_slice($sample_categories, $offset, $items_per_page);
 }
@@ -94,10 +130,23 @@ include '../includes/header.php';
         font-family: 'Poppins', sans-serif;
         font-weight: 700;
         font-size: 42px;
-        color: var(--dark);
+        color: var(--primary);
         margin-bottom: 15px;
         text-transform: uppercase;
         letter-spacing: 2px;
+        position: relative;
+        padding-bottom: 20px;
+    }
+
+    .page-header h1::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 3px;
+        background: var(--secondary);
     }
 
     .page-header p {
@@ -287,6 +336,133 @@ include '../includes/header.php';
         pointer-events: none;
     }
 
+    /* Filter Bar */
+    .filters-section {
+        background-color: var(--white);
+        padding: 25px 30px;
+        border-radius: 10px;
+        margin-bottom: 40px;
+        box-shadow: 0 2px 10px rgba(116, 73, 61, 0.1);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .filter-label {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .filter-label i {
+        color: var(--primary);
+    }
+
+    .search-input {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 400;
+        font-size: 14px;
+        padding: 10px 20px;
+        padding-right: 45px;
+        border: 2px solid rgba(116, 73, 61, 0.2);
+        border-radius: 25px;
+        outline: none;
+        transition: all 0.3s ease;
+        min-width: 250px;
+    }
+
+    .search-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(60, 96, 60, 0.1);
+    }
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-wrapper i {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--primary);
+        pointer-events: none;
+    }
+
+    .sort-select {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 400;
+        font-size: 14px;
+        padding: 10px 35px 10px 15px;
+        border: 2px solid rgba(116, 73, 61, 0.2);
+        border-radius: 25px;
+        outline: none;
+        background: var(--white);
+        color: var(--dark);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233C603C' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        padding-right: 40px;
+    }
+
+    .sort-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(60, 96, 60, 0.1);
+    }
+
+    .filter-btn {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        padding: 10px 25px;
+        background: var(--primary);
+        color: var(--white);
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .filter-btn:hover {
+        background: var(--secondary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(210, 100, 38, 0.3);
+    }
+
+    .filter-btn i {
+        font-size: 14px;
+    }
+
+    .results-count {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        color: var(--dark);
+        opacity: 0.7;
+    }
+
     /* Responsive */
     @media (max-width: 1200px) {
         .categories-grid {
@@ -303,6 +479,21 @@ include '../includes/header.php';
 
         .page-header h1 {
             font-size: 36px;
+        }
+
+        .filters-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .filter-group {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
         }
     }
 
@@ -323,6 +514,30 @@ include '../includes/header.php';
         .categories-page {
             padding: 40px 3%;
         }
+
+        .filters-section {
+            padding: 20px;
+        }
+
+        .filter-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-input {
+            width: 100%;
+            min-width: 100%;
+        }
+
+        .filter-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .results-count {
+            text-align: center;
+            width: 100%;
+        }
     }
 </style>
 
@@ -332,6 +547,49 @@ include '../includes/header.php';
         <h1>Danh Mục Sản Phẩm</h1>
         <p>Khám phá đa dạng các loại cây xanh, từ cây ăn quả đến cây cảnh quan, tất cả đều được chọn lọc kỹ lưỡng để mang lại giá trị tốt nhất cho bạn và môi trường.</p>
     </div>
+
+    <!-- Filter Bar -->
+    <form method="GET" action="" id="filterForm">
+        <div class="filters-section">
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-search"></i>
+                    Tìm kiếm:
+                </label>
+                <div class="search-wrapper">
+                    <input type="text" 
+                           name="search" 
+                           class="search-input" 
+                           placeholder="Nhập tên danh mục..." 
+                           value="<?php echo htmlspecialchars($search); ?>"
+                           onkeypress="if(event.key === 'Enter') { this.form.submit(); }">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">
+                    <i class="fas fa-sort"></i>
+                    Sắp xếp:
+                </label>
+                <select name="sort" class="sort-select" onchange="this.form.submit()">
+                    <option value="name_asc" <?php echo $sort == 'name_asc' ? 'selected' : ''; ?>>Tên A-Z</option>
+                    <option value="name_desc" <?php echo $sort == 'name_desc' ? 'selected' : ''; ?>>Tên Z-A</option>
+                    <option value="count_desc" <?php echo $sort == 'count_desc' ? 'selected' : ''; ?>>Nhiều sản phẩm nhất</option>
+                    <option value="count_asc" <?php echo $sort == 'count_asc' ? 'selected' : ''; ?>>Ít sản phẩm nhất</option>
+                </select>
+                <button type="submit" class="filter-btn">
+                    <i class="fas fa-filter"></i>
+                    Lọc
+                </button>
+            </div>
+
+            <div class="results-count">
+                <i class="fas fa-list"></i>
+                Tìm thấy: <strong><?php echo $total_categories; ?></strong> danh mục
+            </div>
+        </div>
+    </form>
 
     <div class="categories-grid">
         <?php foreach ($categories as $category): ?>
@@ -367,10 +625,16 @@ include '../includes/header.php';
     </div>
 
     <!-- Pagination -->
-    <?php if ($total_pages > 1): ?>
+    <?php if ($total_pages > 1): 
+        // Tạo query string cho phân trang
+        $query_params = [];
+        if (!empty($search)) $query_params['search'] = $search;
+        if ($sort != 'name_asc') $query_params['sort'] = $sort;
+        $query_string = !empty($query_params) ? '&' . http_build_query($query_params) : '';
+    ?>
         <div class="pagination">
             <?php if ($page > 1): ?>
-                <a href="?page=<?php echo $page - 1; ?>" class="prev">
+                <a href="?page=<?php echo $page - 1; ?><?php echo $query_string; ?>" class="prev">
                     <i class="fas fa-chevron-left"></i> Trước
                 </a>
             <?php else: ?>
@@ -384,7 +648,7 @@ include '../includes/header.php';
             $end_page = min($total_pages, $page + 2);
 
             if ($start_page > 1): ?>
-                <a href="?page=1">1</a>
+                <a href="?page=1<?php echo $query_string; ?>">1</a>
                 <?php if ($start_page > 2): ?>
                     <span>...</span>
                 <?php endif; ?>
@@ -394,7 +658,7 @@ include '../includes/header.php';
                 <?php if ($i == $page): ?>
                     <span class="current"><?php echo $i; ?></span>
                 <?php else: ?>
-                    <a href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                    <a href="?page=<?php echo $i; ?><?php echo $query_string; ?>"><?php echo $i; ?></a>
                 <?php endif; ?>
             <?php endfor; ?>
 
@@ -402,11 +666,11 @@ include '../includes/header.php';
                 <?php if ($end_page < $total_pages - 1): ?>
                     <span>...</span>
                 <?php endif; ?>
-                <a href="?page=<?php echo $total_pages; ?>"><?php echo $total_pages; ?></a>
+                <a href="?page=<?php echo $total_pages; ?><?php echo $query_string; ?>"><?php echo $total_pages; ?></a>
             <?php endif; ?>
 
             <?php if ($page < $total_pages): ?>
-                <a href="?page=<?php echo $page + 1; ?>" class="next">
+                <a href="?page=<?php echo $page + 1; ?><?php echo $query_string; ?>" class="next">
                     Sau <i class="fas fa-chevron-right"></i>
                 </a>
             <?php else: ?>

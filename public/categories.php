@@ -14,12 +14,13 @@ try {
 }
 
 // Lọc và sắp xếp
-$search = isset($_GET['search']) ? trim($_GET['search']) : '';
-$sort = isset($_GET['sort']) ? $_GET['sort'] : 'name_asc'; // name_asc, name_desc, count_asc, count_desc
+$search = isset($_GET['search']) ? htmlspecialchars(trim($_GET['search']), ENT_QUOTES, 'UTF-8') : '';
+$valid_sorts = ['name_asc', 'name_desc', 'count_asc', 'count_desc'];
+$sort = isset($_GET['sort']) && in_array($_GET['sort'], $valid_sorts) ? $_GET['sort'] : 'name_asc';
 
 // Phân trang
 $items_per_page = 12; // 4 hàng x 3 cột = 12 items
-$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($page - 1) * $items_per_page;
 
 // Lấy dữ liệu categories
@@ -343,7 +344,6 @@ include '../includes/header.php';
     }
 
     /* Responsive Design */
-    }
 
     .search-input:focus {
         border-color: var(--primary);
@@ -468,6 +468,7 @@ include '../includes/header.php';
         .page-header p {
             font-size: 16px;
         }
+    }
 
         .categories-page {
             padding: 40px 3%;

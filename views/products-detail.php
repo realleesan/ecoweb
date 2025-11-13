@@ -1,4 +1,39 @@
-<?php include '../includes/header.php'; ?>
+<?php
+require_once '../includes/database.php';
+
+try {
+    $pdo = getPDO();
+} catch (RuntimeException $e) {
+    $pdo = null;
+}
+
+$product_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+
+if ($product_id <= 0 || !$pdo) {
+    header('Location: ../public/products.php');
+    exit;
+}
+
+$productStmt = $pdo->prepare('SELECT p.*, c.category_name, c.slug AS category_slug
+                              FROM products p
+                              INNER JOIN categories c ON p.category_id = c.category_id
+                              WHERE p.product_id = :id');
+$productStmt->bindValue(':id', $product_id, PDO::PARAM_INT);
+$productStmt->execute();
+$product = $productStmt->fetch();
+
+if (!$product) {
+    header('Location: ../public/products.php');
+    exit;
+}
+
+$tagStmt = $pdo->prepare('SELECT tag FROM product_tags WHERE product_id = :id ORDER BY tag ASC');
+$tagStmt->bindValue(':id', $product_id, PDO::PARAM_INT);
+$tagStmt->execute();
+$product_tags = $tagStmt->fetchAll(PDO::FETCH_COLUMN);
+
+include '../includes/header.php';
+?>
 
 <style>
     /* Product Detail Page Styles */
@@ -467,151 +502,17 @@
 </style>
 
 <?php
-// Sample product data (same as in products.php)
-$products = [
-    [
-        'id' => 1,
-        'code' => 'A01',
-        'name' => 'Cây Kèn Hồng',
-        'price' => 100000,
-        'description' => 'Cây Kèn Hồng có rất nhiều tác dụng cho sức khỏe và tạo bóng mát tốt',
-        'full_description' => 'Cây Kèn Hồng là loại cây cảnh đẹp, có hoa màu hồng rực rỡ. Cây có khả năng tạo bóng mát tốt, giúp thanh lọc không khí và tạo không gian xanh mát cho ngôi nhà của bạn. Cây dễ trồng, phù hợp với nhiều loại đất và khí hậu khác nhau. Ngoài ra, cây còn có tác dụng tốt cho sức khỏe, giúp giảm căng thẳng và tạo không gian thư giãn.',
-        'category' => 'cay-trong',
-        'category_name' => 'Cây trồng',
-        'stock' => 50,
-        'rating' => 4.5,
-        'reviews_count' => 12,
-        'tags' => ['Tuổi đời dài', 'Cây cảnh', 'Tạo bóng mát']
-    ],
-    [
-        'id' => 2,
-        'code' => 'A02',
-        'name' => 'Cây Hoàng Nam',
-        'price' => 200000,
-        'description' => 'Cây Hoàng Nam có rất nhiều tác dụng cho sức khỏe và tạo bóng mát tốt',
-        'full_description' => 'Cây Hoàng Nam là loại cây cảnh quý, có hình dáng đẹp và tán lá xanh mướt. Cây có khả năng tạo bóng mát rất tốt, phù hợp trồng trong sân vườn hoặc công viên. Cây có tuổi thọ cao, dễ chăm sóc và phát triển nhanh.',
-        'category' => 'cay-trong',
-        'category_name' => 'Cây trồng',
-        'stock' => 30,
-        'rating' => 4.8,
-        'reviews_count' => 8,
-        'tags' => ['Tuổi đời dài', 'Cây cảnh', 'Tạo bóng mát']
-    ],
-    [
-        'id' => 3,
-        'code' => 'A03',
-        'name' => 'Cây Táo',
-        'price' => 300000,
-        'description' => 'Cây Táo có rất nhiều tác dụng cho sức khỏe và tạo bóng mát tốt',
-        'full_description' => 'Cây Táo là loại cây ăn quả phổ biến, cho trái ngon và bổ dưỡng. Cây có khả năng tạo bóng mát tốt, phù hợp trồng trong vườn nhà. Trái táo chứa nhiều vitamin và chất xơ, rất tốt cho sức khỏe. Cây dễ trồng, chịu được nhiều loại đất và khí hậu.',
-        'category' => 'cay-trong',
-        'category_name' => 'Cây trồng',
-        'stock' => 25,
-        'rating' => 4.7,
-        'reviews_count' => 15,
-        'tags' => ['Cây ăn quả', 'Tạo bóng mát', 'Dễ trồng']
-    ],
-    [
-        'id' => 4,
-        'code' => 'A04',
-        'name' => 'Cây Bưởi',
-        'price' => 400000,
-        'description' => 'Cây Bưởi có rất nhiều tác dụng cho sức khỏe và tạo bóng mát tốt',
-        'full_description' => 'Cây Bưởi là loại cây ăn quả có giá trị kinh tế cao. Cây cho trái to, ngon và nhiều nước. Bưởi chứa nhiều vitamin C, rất tốt cho sức khỏe. Cây có tán rộng, tạo bóng mát tốt cho sân vườn.',
-        'category' => 'cay-trong',
-        'category_name' => 'Cây trồng',
-        'stock' => 20,
-        'rating' => 4.6,
-        'reviews_count' => 10,
-        'tags' => ['Cây ăn quả', 'Giá trị cao', 'Tạo bóng mát']
-    ],
-    [
-        'id' => 5,
-        'code' => 'A05',
-        'name' => 'Cây Chanh Leo',
-        'price' => 500000,
-        'description' => 'Cây Chanh Dây có rất nhiều tác dụng cho sức khỏe và tạo bóng mát tốt',
-        'full_description' => 'Cây Chanh Leo là loại cây leo, cho trái chanh leo thơm ngon và bổ dưỡng. Trái chanh leo chứa nhiều vitamin và chất chống oxy hóa. Cây có thể leo giàn, tạo bóng mát và cho trái quanh năm.',
-        'category' => 'cay-trong',
-        'category_name' => 'Cây trồng',
-        'stock' => 15,
-        'rating' => 4.9,
-        'reviews_count' => 20,
-        'tags' => ['Cây leo', 'Cây ăn quả', 'Dễ trồng']
-    ],
-    [
-        'id' => 6,
-        'code' => 'A06',
-        'name' => 'Cây Xoài',
-        'price' => 600000,
-        'description' => 'Cây Xoài có rất nhiều tác dụng cho sức khỏe và tạo bóng mát tốt',
-        'full_description' => 'Cây Xoài là loại cây ăn quả nhiệt đới, cho trái xoài thơm ngon. Cây có tán rộng, tạo bóng mát tốt. Xoài chứa nhiều vitamin A và C, rất tốt cho sức khỏe. Cây phù hợp trồng trong vườn nhà.',
-        'category' => 'cay-trong',
-        'category_name' => 'Cây trồng',
-        'stock' => 18,
-        'rating' => 4.5,
-        'reviews_count' => 14,
-        'tags' => ['Cây ăn quả', 'Nhiệt đới', 'Tạo bóng mát']
-    ],
-    [
-        'id' => 7,
-        'code' => 'A07',
-        'name' => 'Tổ Ong',
-        'price' => 700000,
-        'description' => 'Tổ ong có rất nhiều tác dụng cho sức khỏe và tạo bóng mát tốt',
-        'full_description' => 'Tổ Ong là sản phẩm tự nhiên từ ong mật, chứa nhiều dưỡng chất quý giá. Mật ong từ tổ ong có vị ngọt tự nhiên, chứa nhiều vitamin và khoáng chất. Tổ ong có thể sử dụng để làm thuốc và thực phẩm bổ dưỡng.',
-        'category' => 'to-ong',
-        'category_name' => 'Tổ ong',
-        'stock' => 12,
-        'rating' => 5.0,
-        'reviews_count' => 25,
-        'tags' => ['Tổ ong', 'Tự nhiên', 'Bổ dưỡng']
-    ],
-    [
-        'id' => 8,
-        'code' => 'A08',
-        'name' => 'Cây Sung',
-        'price' => 800000,
-        'description' => 'Cây Sung có rất nhiều tác dụng cho sức khỏe và tạo bóng mát tốt',
-        'full_description' => 'Cây Sung là loại cây cảnh đẹp, có lá xanh mướt và tạo bóng mát tốt. Cây có tuổi thọ cao, dễ chăm sóc. Sung còn có thể cho trái, trái sung có vị ngọt và bổ dưỡng. Cây phù hợp trồng trong sân vườn hoặc công viên.',
-        'category' => 'cay-trong',
-        'category_name' => 'Cây trồng',
-        'stock' => 22,
-        'rating' => 4.4,
-        'reviews_count' => 11,
-        'tags' => ['Tuổi đời dài', 'Cây cảnh', 'Cây ăn quả']
-    ]
-];
-
-// Get product ID from URL
-$product_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-
-// Find product by ID
-$product = null;
-foreach ($products as $p) {
-    if ($p['id'] == $product_id) {
-        $product = $p;
-        break;
-    }
-}
-
-// If product not found, redirect to products page
-if (!$product) {
-    header('Location: ../public/products.php');
-    exit;
-}
-
-// Format price
-function formatPrice($price) {
+function formatPrice(float $price): string
+{
     return number_format($price, 0, ',', '.') . ' đ';
 }
 
-// Render stars
-function renderStars($rating) {
-    $fullStars = floor($rating);
+function renderStars(float $rating): string
+{
+    $fullStars = (int) floor($rating);
     $hasHalfStar = ($rating - $fullStars) >= 0.5;
     $emptyStars = 5 - $fullStars - ($hasHalfStar ? 1 : 0);
-    
+
     $html = '';
     for ($i = 0; $i < $fullStars; $i++) {
         $html .= '<span class="star filled">★</span>';
@@ -622,6 +523,7 @@ function renderStars($rating) {
     for ($i = 0; $i < $emptyStars; $i++) {
         $html .= '<span class="star">★</span>';
     }
+
     return $html;
 }
 ?>
@@ -664,10 +566,11 @@ function renderStars($rating) {
 
             <!-- Column 2: Info & Actions -->
             <div class="product-info-section">
-                <!-- Bestseller Tag -->
+                <?php if (!empty($product['is_bestseller'])): ?>
                 <div>
                     <span class="bestseller-tag">Bán Chạy</span>
                 </div>
+                <?php endif; ?>
 
                 <!-- Product Name -->
                 <h2 class="product-name-h2"><?php echo htmlspecialchars($product['name']); ?></h2>
@@ -675,25 +578,25 @@ function renderStars($rating) {
                 <!-- Rating -->
                 <div class="product-rating">
                     <div class="stars">
-                        <?php echo renderStars($product['rating']); ?>
+                        <?php echo renderStars((float) $product['rating']); ?>
                     </div>
-                    <span class="rating-count">(<?php echo $product['reviews_count']; ?> đánh giá)</span>
+                    <span class="rating-count"><?php echo (int) $product['reviews_count']; ?> đánh giá</span>
                 </div>
 
                 <!-- Price -->
-                <div class="product-price-large"><?php echo formatPrice($product['price']); ?></div>
+                <div class="product-price-large"><?php echo formatPrice((float) $product['price']); ?></div>
 
                 <!-- Short Description -->
                 <div class="product-short-description">
                     <strong>Mô tả ngắn:</strong><br>
-                    <?php echo htmlspecialchars($product['description']); ?>
+                    <?php echo nl2br(htmlspecialchars($product['short_description'] ?? '')); ?>
                 </div>
 
                 <!-- Quantity Selector & Action Buttons -->
                 <div class="quantity-section">
                     <div class="quantity-selector">
                         <button class="quantity-btn" onclick="decreaseQuantity()">-</button>
-                        <input type="number" id="quantity" class="quantity-input" value="1" min="1" max="<?php echo $product['stock']; ?>">
+                        <input type="number" id="quantity" class="quantity-input" value="1" min="1" max="<?php echo max(1, (int) $product['stock']); ?>">
                         <button class="quantity-btn" onclick="increaseQuantity()">+</button>
                     </div>
                 </div>
@@ -724,15 +627,19 @@ function renderStars($rating) {
                     </div>
                     <div class="info-item">
                         <span class="info-label">Tình Trạng:</span>
-                        <span class="info-value status-in-stock">Còn hàng (<?php echo $product['stock']; ?> sản phẩm)</span>
+                        <span class="info-value status-in-stock">Còn hàng (<?php echo (int) $product['stock']; ?> sản phẩm)</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Tags:</span>
                         <div class="info-value">
                             <div class="product-tags">
-                                <?php foreach ($product['tags'] as $tag): ?>
-                                    <span class="tag"><?php echo htmlspecialchars($tag); ?></span>
-                                <?php endforeach; ?>
+                                <?php if (!empty($product_tags)): ?>
+                                    <?php foreach ($product_tags as $tag): ?>
+                                        <span class="tag"><?php echo htmlspecialchars($tag); ?></span>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <span class="tag">Đang cập nhật</span>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -745,25 +652,25 @@ function renderStars($rating) {
             <div class="tabs-header">
                 <button class="tab-button active" onclick="switchTab('description')">Mô tả sản phẩm</button>
                 <button class="tab-button" onclick="switchTab('specifications')">Thông số kỹ thuật</button>
-                <button class="tab-button" onclick="switchTab('reviews')">Đánh giá (<?php echo $product['reviews_count']; ?>)</button>
+                <button class="tab-button" onclick="switchTab('reviews')">Đánh giá (<?php echo (int) $product['reviews_count']; ?>)</button>
             </div>
 
             <div id="tab-description" class="tab-content active">
-                <p><?php echo nl2br(htmlspecialchars($product['full_description'])); ?></p>
+                <p><?php echo nl2br(htmlspecialchars($product['full_description'] ?? '')); ?></p>
             </div>
 
             <div id="tab-specifications" class="tab-content">
-                <p><strong>Kích thước:</strong> Tùy theo loại cây</p>
-                <p><strong>Màu sắc:</strong> Xanh lá cây</p>
-                <p><strong>Chất liệu:</strong> Cây tự nhiên</p>
+                <p><strong>Kích thước:</strong> Đang cập nhật</p>
+                <p><strong>Màu sắc:</strong> Đang cập nhật</p>
+                <p><strong>Chất liệu:</strong> Đang cập nhật</p>
                 <p><strong>Xuất xứ:</strong> Việt Nam</p>
                 <p><strong>Bảo hành:</strong> 12 tháng</p>
                 <p><strong>Hướng dẫn sử dụng:</strong> Trồng ở nơi có ánh sáng mặt trời, tưới nước đều đặn.</p>
             </div>
 
             <div id="tab-reviews" class="tab-content">
-                <p>Hiện tại có <?php echo $product['reviews_count']; ?> đánh giá cho sản phẩm này.</p>
-                <p>Đánh giá trung bình: <?php echo number_format($product['rating'], 1); ?>/5.0</p>
+                <p>Hiện tại có <?php echo (int) $product['reviews_count']; ?> đánh giá cho sản phẩm này.</p>
+                <p>Đánh giá trung bình: <?php echo number_format((float) $product['rating'], 1); ?>/5.0</p>
                 <p style="margin-top: 20px; color: #999; font-style: italic;">Chức năng đánh giá chi tiết sẽ được cập nhật sau.</p>
             </div>
         </div>
@@ -805,7 +712,7 @@ function renderStars($rating) {
     // Add to cart
     function addToCart() {
         const quantity = document.getElementById('quantity').value;
-        const productId = <?php echo $product['id']; ?>;
+        const productId = <?php echo (int) $product['product_id']; ?>;
         // In a real application, you would send this to the server
         alert('Đã thêm ' + quantity + ' sản phẩm vào giỏ hàng!');
     }

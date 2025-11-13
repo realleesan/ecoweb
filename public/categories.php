@@ -1,109 +1,78 @@
-<?php 
-// Kết nối database
-$host = 'localhost';
-$dbname = 'growhope_db';
-$username = 'root';
-$password = '';
+<?php
+require_once '../includes/database.php';
 
+// Kết nối database
+$pdo = null;
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    // Nếu không kết nối được, sử dụng dữ liệu mẫu
+    $pdo = getPDO();
+} catch (RuntimeException $e) {
     $pdo = null;
 }
 
 // Lọc và sắp xếp
-$search = isset($_GET['search']) ? htmlspecialchars(trim($_GET['search']), ENT_QUOTES, 'UTF-8') : '';
-$valid_sorts = ['name_asc', 'name_desc', 'count_asc', 'count_desc'];
-$sort = isset($_GET['sort']) && in_array($_GET['sort'], $valid_sorts) ? $_GET['sort'] : 'name_asc';
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$valid_sorts = [
+    'name_asc' => 'category_name ASC',
+    'name_desc' => 'category_name DESC',
+    'count_asc' => 'product_count ASC',
+    'count_desc' => 'product_count DESC',
+];
+$sort = isset($_GET['sort']) && array_key_exists($_GET['sort'], $valid_sorts) ? $_GET['sort'] : 'name_asc';
 
 // Phân trang
 $items_per_page = 12; // 4 hàng x 3 cột = 12 items
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($page - 1) * $items_per_page;
 
-// Lấy dữ liệu categories
 $categories = [];
 $total_categories = 0;
+$query_params = [];
+$where_clauses = [];
+
+if ($search !== '') {
+    $where_clauses[] = '(c.category_name LIKE :search OR c.description LIKE :search)';
+    $query_params[':search'] = '%' . $search . '%';
+}
+
+$where_sql = $where_clauses ? 'WHERE ' . implode(' AND ', $where_clauses) : '';
 
 if ($pdo) {
     try {
-        // Đếm tổng số categories
-        $count_stmt = $pdo->query("SELECT COUNT(*) FROM categories");
-        $total_categories = $count_stmt->fetchColumn();
-        
-        // Lấy categories với phân trang
-        $stmt = $pdo->prepare("SELECT * FROM categories ORDER BY category_id ASC LIMIT :limit OFFSET :offset");
+        // Đếm tổng số categories phù hợp điều kiện
+        $count_sql = "SELECT COUNT(*) FROM categories c $where_sql";
+        $count_stmt = $pdo->prepare($count_sql);
+        foreach ($query_params as $key => $value) {
+            $count_stmt->bindValue($key, $value);
+        }
+        $count_stmt->execute();
+        $total_categories = (int) $count_stmt->fetchColumn();
+
+        // Lấy dữ liệu categories cùng số lượng sản phẩm liên quan
+        $order_sql = $valid_sorts[$sort];
+        $data_sql = "SELECT c.category_id, c.category_name, c.slug, c.description, c.image, 
+                            (SELECT COUNT(*) FROM products p WHERE p.category_id = c.category_id) AS product_count
+                     FROM categories c
+                     $where_sql
+                     ORDER BY $order_sql
+                     LIMIT :limit OFFSET :offset";
+
+        $stmt = $pdo->prepare($data_sql);
+        foreach ($query_params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
         $stmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
-        $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch(PDOException $e) {
-        $pdo = null;
+        $categories = $stmt->fetchAll();
+    } catch (PDOException $e) {
+        $categories = [];
+        $total_categories = 0;
     }
 }
 
-// Nếu không có dữ liệu từ database, sử dụng dữ liệu mẫu
-if (empty($categories)) {
-    $sample_categories = [
-        ['category_id' => 1, 'category_name' => 'Cây Ăn Quả', 'slug' => 'cay-an-qua', 'description' => 'Các loại cây ăn quả phù hợp với khí hậu Việt Nam, mang lại giá trị kinh tế cao và góp phần bảo vệ môi trường.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Ăn+Quả', 'product_count' => 25],
-        ['category_id' => 2, 'category_name' => 'Cây Lấy Gỗ', 'slug' => 'cay-lay-go', 'description' => 'Những loại cây lấy gỗ có giá trị kinh tế, sinh trưởng nhanh và thân thiện với môi trường.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Lấy+Gỗ', 'product_count' => 18],
-        ['category_id' => 3, 'category_name' => 'Cây Cảnh Quan', 'slug' => 'cay-canh-quan', 'description' => 'Các loại cây cảnh quan đẹp mắt, tạo không gian xanh mát và trong lành cho môi trường sống.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Cảnh+Quan', 'product_count' => 32],
-        ['category_id' => 4, 'category_name' => 'Cây Thuốc Nam', 'slug' => 'cay-thuoc-nam', 'description' => 'Những loại cây thuốc nam quý giá, có tác dụng chữa bệnh và bồi bổ sức khỏe.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Thuốc+Nam', 'product_count' => 15],
-        ['category_id' => 5, 'category_name' => 'Cây Công Nghiệp', 'slug' => 'cay-cong-nghiep', 'description' => 'Các loại cây công nghiệp phục vụ sản xuất, mang lại hiệu quả kinh tế cao.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Công+Nghiệp', 'product_count' => 22],
-        ['category_id' => 6, 'category_name' => 'Cây Phong Thủy', 'slug' => 'cay-phong-thuy', 'description' => 'Những loại cây phong thủy mang lại may mắn, tài lộc và năng lượng tích cực cho không gian.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Phong+Thủy', 'product_count' => 28],
-        ['category_id' => 7, 'category_name' => 'Cây Bóng Mát', 'slug' => 'cay-bong-mat', 'description' => 'Các loại cây bóng mát lớn, tạo bóng râm và làm mát không gian sống.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Bóng+Mát', 'product_count' => 20],
-        ['category_id' => 8, 'category_name' => 'Cây Rừng', 'slug' => 'cay-rung', 'description' => 'Những loại cây rừng bản địa, góp phần phục hồi và bảo tồn hệ sinh thái rừng.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Rừng', 'product_count' => 35],
-        ['category_id' => 9, 'category_name' => 'Cây Hoa', 'slug' => 'cay-hoa', 'description' => 'Các loại cây hoa đẹp, tô điểm cho không gian và thu hút ong bướm.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Hoa', 'product_count' => 30],
-        ['category_id' => 10, 'category_name' => 'Cây Thảo Mộc', 'slug' => 'cay-thao-moc', 'description' => 'Những loại cây thảo mộc có hương thơm, dùng trong ẩm thực và làm đẹp.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Thảo+Mộc', 'product_count' => 24],
-        ['category_id' => 11, 'category_name' => 'Cây Ven Biển', 'slug' => 'cay-ven-bien', 'description' => 'Các loại cây chịu mặn, phù hợp trồng ven biển và bảo vệ đất khỏi xói mòn.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Ven+Biển', 'product_count' => 16],
-        ['category_id' => 12, 'category_name' => 'Cây Nội Thất', 'slug' => 'cay-noi-that', 'description' => 'Những loại cây nội thất thanh lọc không khí, tạo không gian xanh trong nhà.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Nội+Thất', 'product_count' => 27],
-        ['category_id' => 13, 'category_name' => 'Cây Nhiệt Đới', 'slug' => 'cay-nhiet-doi', 'description' => 'Các loại cây nhiệt đới đặc trưng, thích hợp với khí hậu nóng ẩm của Việt Nam.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Nhiệt+Đới', 'product_count' => 19],
-        ['category_id' => 14, 'category_name' => 'Cây Cổ Thụ', 'slug' => 'cay-co-thu', 'description' => 'Những loại cây cổ thụ quý hiếm, có giá trị lịch sử và văn hóa cao.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Cổ+Thụ', 'product_count' => 12],
-        ['category_id' => 15, 'category_name' => 'Cây Chống Lũ', 'slug' => 'cay-chong-lu', 'description' => 'Các loại cây có khả năng chống lũ, giữ đất và bảo vệ môi trường.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Chống+Lũ', 'product_count' => 14],
-        ['category_id' => 16, 'category_name' => 'Cây Hữu Cơ', 'slug' => 'cay-huu-co', 'description' => 'Những loại cây được trồng theo phương pháp hữu cơ, an toàn và thân thiện môi trường.', 'image' => 'https://via.placeholder.com/300x200/3C603C/FFFFFF?text=Cây+Hữu+Cơ', 'product_count' => 21],
-    ];
-    
-    // Lọc theo tìm kiếm
-    if (!empty($search)) {
-        $sample_categories = array_filter($sample_categories, function($cat) use ($search) {
-            return stripos($cat['category_name'], $search) !== false || 
-                   stripos($cat['description'], $search) !== false;
-        });
-    }
-    
-    // Sắp xếp
-    switch($sort) {
-        case 'name_asc':
-            usort($sample_categories, function($a, $b) {
-                return strcmp($a['category_name'], $b['category_name']);
-            });
-            break;
-        case 'name_desc':
-            usort($sample_categories, function($a, $b) {
-                return strcmp($b['category_name'], $a['category_name']);
-            });
-            break;
-        case 'count_asc':
-            usort($sample_categories, function($a, $b) {
-                return ($a['product_count'] ?? 0) - ($b['product_count'] ?? 0);
-            });
-            break;
-        case 'count_desc':
-            usort($sample_categories, function($a, $b) {
-                return ($b['product_count'] ?? 0) - ($a['product_count'] ?? 0);
-            });
-            break;
-    }
-    
-    $total_categories = count($sample_categories);
-    $categories = array_slice($sample_categories, $offset, $items_per_page);
-}
+$total_pages = $total_categories > 0 ? (int)ceil($total_categories / $items_per_page) : 0;
 
-$total_pages = ceil($total_categories / $items_per_page);
-
-include '../includes/header.php'; 
+include '../includes/header.php';
 ?>
 
 <style>
@@ -566,16 +535,12 @@ include '../includes/header.php';
                         <div class="product-info">
                             <h3 class="product-title"><?php echo htmlspecialchars($category['category_name']); ?></h3>
                             <p class="product-description">
-                                <?php 
-                                echo isset($category['description']) 
-                                    ? htmlspecialchars($category['description']) 
-                                    : 'Danh mục chứa các sản phẩm chất lượng cao, được chọn lọc kỹ lưỡng.';
-                                ?>
+                                <?php echo htmlspecialchars($category['description'] ?? ''); ?>
                             </p>
                             <div class="product-meta">
                                 <span class="product-count">
                                     <i class="fas fa-leaf"></i>
-                                    <?php echo isset($category['product_count']) ? $category['product_count'] : rand(10, 50); ?> sản phẩm
+                                    <?php echo (int) ($category['product_count'] ?? 0); ?> sản phẩm
                                 </span>
                                 <a href="products.php?category=<?php echo isset($category['slug']) ? htmlspecialchars($category['slug']) : ''; ?>" class="view-btn">
                                     Xem thêm

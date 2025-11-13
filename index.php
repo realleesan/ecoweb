@@ -1,4 +1,35 @@
-<?php include 'includes/header.php'; ?>
+<?php
+require_once 'includes/database.php';
+
+$latestNews = [];
+$featuredProducts = [];
+$latestGallery = [];
+
+try {
+    $pdo = getPDO();
+} catch (RuntimeException $e) {
+    $pdo = null;
+}
+
+if ($pdo) {
+    try {
+        $newsStmt = $pdo->query('SELECT news_id, title, publish_date, excerpt FROM news ORDER BY publish_date DESC, news_id DESC LIMIT 4');
+        $latestNews = $newsStmt->fetchAll();
+
+        $productStmt = $pdo->query('SELECT product_id, name, price, short_description FROM products ORDER BY is_bestseller DESC, created_at DESC LIMIT 3');
+        $featuredProducts = $productStmt->fetchAll();
+
+        $galleryStmt = $pdo->query('SELECT image_url, alt_text FROM gallery_images ORDER BY created_at DESC, image_id DESC LIMIT 6');
+        $latestGallery = $galleryStmt->fetchAll();
+    } catch (PDOException $e) {
+        $latestNews = [];
+        $featuredProducts = [];
+        $latestGallery = [];
+    }
+}
+
+include 'includes/header.php';
+?>
 
 <style>
     :root {
@@ -472,46 +503,26 @@
             <i class="fas fa-newspaper"></i> Tin tức mới nhất
         </div>
         <div class="news-list">
-            <div class="news-item">
-                <a href="news.php">
-                    <h3>Cách thức trồng cây gây rừng</h3>
-                    <p>Hướng dẫn chi tiết các bước trồng cây và chăm sóc để tạo nên một khu rừng xanh...</p>
-                    <div class="news-date">
-                        <i class="far fa-calendar"></i>
-                        <span>15/12/2023</span>
-                    </div>
-                </a>
-            </div>
-            <div class="news-item">
-                <a href="news.php">
-                    <h3>Dự án phủ xanh 1000 ha rừng tại Tây Nguyên</h3>
-                    <p>Dự án lớn nhất trong năm với mục tiêu phủ xanh 1000 ha đất trống...</p>
-                    <div class="news-date">
-                        <i class="far fa-calendar"></i>
-                        <span>12/12/2023</span>
-                    </div>
-                </a>
-            </div>
-            <div class="news-item">
-                <a href="news.php">
-                    <h3>Hạt giống mới: Giống cây chịu hạn tốt</h3>
-                    <p>Giới thiệu các loại hạt giống mới có khả năng chịu hạn cao, phù hợp với khí hậu...</p>
-                    <div class="news-date">
-                        <i class="far fa-calendar"></i>
-                        <span>10/12/2023</span>
-                    </div>
-                </a>
-            </div>
-            <div class="news-item">
-                <a href="news.php">
-                    <h3>Thành công từ dự án trồng rừng tại miền Bắc</h3>
-                    <p>Kết quả tích cực từ dự án trồng rừng đã được triển khai tại các tỉnh miền Bắc...</p>
-                    <div class="news-date">
-                        <i class="far fa-calendar"></i>
-                        <span>08/12/2023</span>
-                    </div>
-                </a>
-            </div>
+            <?php if (empty($latestNews)): ?>
+                <div class="news-item" style="border-bottom: none; text-align: center;">
+                    <p>Chưa có tin tức để hiển thị.</p>
+                </div>
+            <?php else: ?>
+                <?php foreach ($latestNews as $news): ?>
+                <div class="news-item">
+                    <a href="views/news-detail.php?id=<?php echo $news['news_id']; ?>">
+                        <h3><?php echo htmlspecialchars($news['title']); ?></h3>
+                        <?php if (!empty($news['excerpt'])): ?>
+                            <p><?php echo htmlspecialchars($news['excerpt']); ?></p>
+                        <?php endif; ?>
+                        <div class="news-date">
+                            <i class="far fa-calendar"></i>
+                            <span><?php echo date('d/m/Y', strtotime($news['publish_date'])); ?></span>
+                        </div>
+                    </a>
+                </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
     </div>
 </section>
@@ -557,36 +568,29 @@
         <p>Những loại cây trồng được yêu thích nhất hiện nay</p>
     </div>
     <div class="products-grid">
-        <div class="product-card">
-            <div class="product-image">
-                <i class="fas fa-seedling"></i>
+        <?php if (empty($featuredProducts)): ?>
+            <p style="grid-column: 1 / -1; text-align: center; color: var(--dark);">Chưa có sản phẩm nổi bật.</p>
+        <?php else: ?>
+            <?php
+            $icons = ['fas fa-seedling', 'fas fa-tree', 'fas fa-leaf'];
+            $idx = 0;
+            ?>
+            <?php foreach ($featuredProducts as $product): ?>
+            <div class="product-card" onclick="window.location.href='views/products-detail.php?id=<?php echo $product['product_id']; ?>'">
+                <div class="product-image">
+                    <i class="<?php echo $icons[$idx % count($icons)]; ?>"></i>
+                </div>
+                <div class="product-info">
+                    <h3><?php echo htmlspecialchars($product['name']); ?></h3>
+                    <?php if (!empty($product['short_description'])): ?>
+                        <p><?php echo htmlspecialchars($product['short_description']); ?></p>
+                    <?php endif; ?>
+                    <div class="product-price"><?php echo number_format($product['price'], 0, ',', '.'); ?>đ</div>
+                </div>
             </div>
-            <div class="product-info">
-                <h3>Cây keo</h3>
-                <p>Giống cây keo phát triển nhanh, chịu hạn tốt, phù hợp trồng rừng phòng hộ</p>
-                <div class="product-price">50.000đ</div>
-            </div>
-        </div>
-        <div class="product-card">
-            <div class="product-image">
-                <i class="fas fa-tree"></i>
-            </div>
-            <div class="product-info">
-                <h3> Cây bạch đàn</h3>
-                <p>Loại cây có giá trị kinh tế cao, sinh trưởng mạnh, thích hợp nhiều loại đất</p>
-                <div class="product-price">45.000đ</div>
-            </div>
-        </div>
-        <div class="product-card">
-            <div class="product-image">
-                <i class="fas fa-leaf"></i>
-            </div>
-            <div class="product-info">
-                <h3>Cây tràm</h3>
-                <p>Cây tràm chịu mặn tốt, phù hợp trồng ven biển và vùng đất nhiễm mặn</p>
-                <div class="product-price">40.000đ</div>
-            </div>
-        </div>
+            <?php $idx++; ?>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
     <div class="view-all-container">
         <a href="public/products.php" class="view-all-btn">Xem tất cả</a>
@@ -600,42 +604,20 @@
         <p>Những khoảnh khắc đẹp từ các dự án trồng rừng đã hoàn thành</p>
     </div>
     <div class="gallery-grid">
-        <div class="gallery-item">
-            <div>
-                <i class="fas fa-mountain" style="font-size: 48px; margin-bottom: 15px;"></i>
-                <p>Dự án Tây Nguyên</p>
+        <?php if (empty($latestGallery)): ?>
+            <div class="gallery-item" style="height: auto; padding: 40px; display: block; text-align: center;">
+                <p>Thư viện hình ảnh đang được cập nhật.</p>
             </div>
-        </div>
-        <div class="gallery-item">
-            <div>
-                <i class="fas fa-forest" style="font-size: 48px; margin-bottom: 15px;"></i>
-                <p>Rừng phòng hộ miền Bắc</p>
+        <?php else: ?>
+            <?php foreach ($latestGallery as $image): ?>
+            <div class="gallery-item" style="padding: 0;">
+                <img src="<?php echo htmlspecialchars($image['image_url']); ?>" alt="<?php echo htmlspecialchars($image['alt_text']); ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.4); padding: 12px; text-align: center;">
+                    <p style="margin: 0; color: #fff; font-weight: 600; font-size: 16px;"><?php echo htmlspecialchars($image['alt_text']); ?></p>
+                </div>
             </div>
-        </div>
-        <div class="gallery-item">
-            <div>
-                <i class="fas fa-water" style="font-size: 48px; margin-bottom: 15px;"></i>
-                <p>Trồng rừng ven biển</p>
-            </div>
-        </div>
-        <div class="gallery-item">
-            <div>
-                <i class="fas fa-hands-holding-seedling" style="font-size: 48px; margin-bottom: 15px;"></i>
-                <p>Hoạt động tình nguyện</p>
-            </div>
-        </div>
-        <div class="gallery-item">
-            <div>
-                <i class="fas fa-globe-americas" style="font-size: 48px; margin-bottom: 15px;"></i>
-                <p>Khu vực phủ xanh</p>
-            </div>
-        </div>
-        <div class="gallery-item">
-            <div>
-                <i class="fas fa-users" style="font-size: 48px; margin-bottom: 15px;"></i>
-                <p>Cộng đồng tham gia</p>
-            </div>
-        </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
     <div class="view-all-container">
         <a href="public/galleries.php" class="view-all-btn">Xem tất cả</a>

@@ -116,67 +116,6 @@
         font-size: 14px;
     }
 
-    .product-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(60, 96, 60, 0.95);
-        color: var(--white);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        z-index: 2;
-    }
-
-    .product-card:hover .product-overlay {
-        opacity: 1;
-    }
-
-    .overlay-content {
-        text-align: center;
-    }
-
-    .overlay-content h4 {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 700;
-        font-size: 20px;
-        margin-bottom: 10px;
-        color: var(--white);
-    }
-
-    .overlay-content p {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 400;
-        font-size: 14px;
-        margin: 5px 0;
-        color: rgba(255,255,255,0.9);
-    }
-
-    .overlay-button {
-        margin-top: 15px;
-        padding: 10px 20px;
-        background-color: var(--secondary);
-        color: var(--white);
-        border: none;
-        border-radius: 5px;
-        font-family: 'Poppins', sans-serif;
-        font-weight: 500;
-        font-size: 14px;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-block;
-        transition: background-color 0.3s ease;
-    }
-
-    .overlay-button:hover {
-        background-color: #b8551f;
-    }
 
     .product-info {
         padding: 20px;
@@ -193,6 +132,16 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
         min-height: 54px;
+    }
+
+    .product-name a {
+        color: var(--dark);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .product-name a:hover {
+        color: var(--primary);
     }
 
     .product-price {
@@ -212,7 +161,7 @@
         line-height: 1.5;
     }
 
-    .product-detail-btn {
+    .add-to-cart-btn {
         width: 100%;
         padding: 12px;
         background-color: #3C603C;
@@ -229,8 +178,41 @@
         transition: background-color 0.3s ease;
     }
 
-    .product-detail-btn:hover {
+    .add-to-cart-btn:hover {
         background-color: #2d4a2d;
+    }
+
+    /* Toast notification */
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #3C603C;
+        color: var(--white);
+        padding: 15px 25px;
+        border-radius: 5px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        z-index: 1000;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        display: none;
+        animation: slideIn 0.3s ease;
+    }
+
+    .toast.show {
+        display: block;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
 
     .pagination {
@@ -435,26 +417,83 @@
         return categories[category] || category;
     }
 
+    // Cart management
+    function getCart() {
+        const cart = localStorage.getItem('cart');
+        return cart ? JSON.parse(cart) : [];
+    }
+
+    function saveCart(cart) {
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+    }
+
+    function addToCart(productId, productName) {
+        const cart = getCart();
+        const existingItem = cart.find(item => item.id === productId);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            cart.push({
+                id: productId,
+                name: productName,
+                quantity: 1
+            });
+        }
+        
+        saveCart(cart);
+        showToast('Đã thêm sản phẩm vào giỏ hàng!');
+    }
+
+    // Wrapper function for onclick handler
+    function handleAddToCart(productId, productName) {
+        addToCart(productId, productName);
+    }
+
+    function updateCartCount() {
+        const cart = getCart();
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const cartCountElement = document.querySelector('.cart-icon span');
+        if (cartCountElement) {
+            cartCountElement.textContent = totalItems;
+            // Always show the count badge
+            cartCountElement.style.display = 'flex';
+        }
+    }
+
+    function showToast(message) {
+        let toast = document.getElementById('toast-notification');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toast-notification';
+            toast.className = 'toast';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
     // Render product card
     function renderProductCard(product) {
         return `
             <div class="product-card">
                 <div class="product-image">
                     <div class="product-image-placeholder">Hình ảnh sản phẩm</div>
-                    <div class="product-overlay">
-                        <div class="overlay-content">
-                            <h4>${product.name}</h4>
-                            <p>Mã SP: ${product.code}</p>
-                            <p>Danh mục: ${getCategoryName(product.category)}</p>
-                            <a href="../views/products-detail.php?id=${product.id}" class="overlay-button">XEM CHI TIẾT</a>
-                        </div>
-                    </div>
                 </div>
                 <div class="product-info">
-                    <h3 class="product-name">${product.name}</h3>
+                    <h3 class="product-name">
+                        <a href="../views/products-detail.php?id=${product.id}">${product.name}</a>
+                    </h3>
                     <div class="product-price">${formatPrice(product.price)}</div>
                     <p class="product-description">${truncateDescription(product.description)}</p>
-                    <a href="../views/product-detail.php?id=${product.id}" class="product-detail-btn">XEM CHI TIẾT</a>
+                    <button class="add-to-cart-btn" onclick="handleAddToCart(${product.id}, '${product.name.replace(/'/g, "\\'").replace(/"/g, '&quot;')}')">
+                        THÊM VÀO GIỎ HÀNG
+                    </button>
                 </div>
             </div>
         `;
@@ -566,6 +605,9 @@
 
         // Initial render
         renderProducts();
+        
+        // Update cart count on page load
+        updateCartCount();
     });
 </script>
 

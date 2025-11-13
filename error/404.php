@@ -276,6 +276,10 @@
                     <i class="fas fa-seedling"></i>
                     <span>Sản phẩm</span>
                 </a>
+                <a href="../public/categories.php" class="link-item">
+                    <i class="fas fa-list"></i>
+                    <span>Danh mục</span>
+                </a>
                 <a href="../public/news.php" class="link-item">
                     <i class="fas fa-newspaper"></i>
                     <span>Tin tức</span>

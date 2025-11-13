@@ -294,6 +294,31 @@
         color: var(--secondary);
     }
 
+    /* View All Button */
+    .view-all-btn {
+        display: inline-block;
+        background-color: #D26426;
+        color: var(--white);
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .view-all-btn:hover {
+        background-color: var(--dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(210, 100, 38, 0.3);
+    }
+
+    .view-all-container {
+        text-align: center;
+        margin-top: 15px;
+    }
+
     /* Gallery Section */
     .gallery-grid {
         display: grid;
@@ -528,8 +553,8 @@
 <!-- Trending Seeds Section -->
 <section class="section">
     <div class="section-header">
-        <h2>Hạt giống thịnh hành</h2>
-        <p>Những loại hạt giống được yêu thích nhất hiện nay</p>
+        <h2>Cây trồng thịnh hành</h2>
+        <p>Những loại cây trồng được yêu thích nhất hiện nay</p>
     </div>
     <div class="products-grid">
         <div class="product-card">
@@ -537,7 +562,7 @@
                 <i class="fas fa-seedling"></i>
             </div>
             <div class="product-info">
-                <h3>Hạt giống cây keo</h3>
+                <h3>Cây keo</h3>
                 <p>Giống cây keo phát triển nhanh, chịu hạn tốt, phù hợp trồng rừng phòng hộ</p>
                 <div class="product-price">50.000đ</div>
             </div>
@@ -547,7 +572,7 @@
                 <i class="fas fa-tree"></i>
             </div>
             <div class="product-info">
-                <h3>Hạt giống cây bạch đàn</h3>
+                <h3> Cây bạch đàn</h3>
                 <p>Loại cây có giá trị kinh tế cao, sinh trưởng mạnh, thích hợp nhiều loại đất</p>
                 <div class="product-price">45.000đ</div>
             </div>
@@ -557,11 +582,14 @@
                 <i class="fas fa-leaf"></i>
             </div>
             <div class="product-info">
-                <h3>Hạt giống cây tràm</h3>
+                <h3>Cây tràm</h3>
                 <p>Cây tràm chịu mặn tốt, phù hợp trồng ven biển và vùng đất nhiễm mặn</p>
                 <div class="product-price">40.000đ</div>
             </div>
         </div>
+    </div>
+    <div class="view-all-container">
+        <a href="public/products.php" class="view-all-btn">Xem tất cả</a>
     </div>
 </section>
 
@@ -608,6 +636,9 @@
                 <p>Cộng đồng tham gia</p>
             </div>
         </div>
+    </div>
+    <div class="view-all-container">
+        <a href="public/galleries.php" class="view-all-btn">Xem tất cả</a>
     </div>
 </section>
 

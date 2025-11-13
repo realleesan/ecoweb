@@ -20,11 +20,20 @@
                     <span style="position: absolute; bottom: 0; left: 0; width: 50px; height: 2px; background: var(--secondary);"></span>
                 </h3>
                 <ul style="list-style: none; padding: 0;">
+<<<<<<< HEAD
                     <li style="margin-bottom: 8px;"><a href="<?php echo $index_link; ?>" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Trang chủ</a></li>
                     <li style="margin-bottom: 8px;"><a href="<?php echo $base_path; ?>about.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Giới thiệu</a></li>
                     <li style="margin-bottom: 8px;"><a href="<?php echo $base_path; ?>products.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Sản phẩm</a></li>
                     <li style="margin-bottom: 8px;"><a href="<?php echo $base_path; ?>news.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Tin tức</a></li>
                     <li><a href="<?php echo $base_path; ?>contact.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Liên hệ</a></li>
+=======
+                    <li style="margin-bottom: 8px;"><a href="<?php echo isset($base_path) ? $base_path : ''; ?>index.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Trang chủ</a></li>
+                    <li style="margin-bottom: 8px;"><a href="<?php echo (isset($base_path) ? $base_path : '') . (isset($public_path) ? $public_path : 'public/'); ?>about.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Giới thiệu</a></li>
+                    <li style="margin-bottom: 8px;"><a href="<?php echo (isset($base_path) ? $base_path : '') . (isset($public_path) ? $public_path : 'public/'); ?>products.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Sản phẩm</a></li>
+                    <li style="margin-bottom: 8px;"><a href="<?php echo (isset($base_path) ? $base_path : '') . (isset($public_path) ? $public_path : 'public/'); ?>categories.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Danh mục</a></li>
+                    <li style="margin-bottom: 8px;"><a href="<?php echo (isset($base_path) ? $base_path : '') . (isset($public_path) ? $public_path : 'public/'); ?>news.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Tin tức</a></li>
+                    <li><a href="<?php echo (isset($base_path) ? $base_path : '') . (isset($public_path) ? $public_path : 'public/'); ?>contact.php" style="color: #ddd; text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='#ddd'">Liên hệ</a></li>
+>>>>>>> 18cc47c3b44348d83ff4d08e0d8692eee5b0b81d
                 </ul>
             </div>
 

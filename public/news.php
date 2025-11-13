@@ -44,6 +44,12 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
         }
 
+        .news-card a {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+
         .news-image {
             width: 100%;
             height: 200px;
@@ -281,19 +287,21 @@
         <div class="news-grid">
             <?php foreach ($news as $item): ?>
             <article class="news-card">
-                <div class="news-image">
-                    <i class="fas fa-leaf"></i>
-                </div>
-                <div class="news-content">
-                    <div class="news-date">
-                        <i class="far fa-calendar"></i>
-                        <?php echo date('d/m/Y', strtotime($item['date'])); ?>
+                <a href="../views/news-detail.php?id=<?php echo $item['id']; ?>" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="news-image">
+                        <i class="fas fa-leaf"></i>
                     </div>
-                    <h2 class="news-title"><?php echo htmlspecialchars($item['title']); ?></h2>
-                    <div class="news-excerpt">
-                        <?php echo htmlspecialchars($item['excerpt']); ?>
+                    <div class="news-content">
+                        <div class="news-date">
+                            <i class="far fa-calendar"></i>
+                            <?php echo date('d/m/Y', strtotime($item['date'])); ?>
+                        </div>
+                        <h2 class="news-title"><?php echo htmlspecialchars($item['title']); ?></h2>
+                        <div class="news-excerpt">
+                            <?php echo htmlspecialchars($item['excerpt']); ?>
+                        </div>
                     </div>
-                </div>
+                </a>
             </article>
             <?php endforeach; ?>
         </div>

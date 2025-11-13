@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php 
 // Get current page and set active states
 $current_page = basename($_SERVER['PHP_SELF']);
@@ -9,6 +10,17 @@ $index_link = '/ecoweb/index.php';
 // Set base path for other links
 $is_public = (strpos($_SERVER['PHP_SELF'], 'public') !== false);
 $base_path = $is_public ? '' : '/ecoweb/public/';
+=======
+<?php
+// Xác định base path
+$current_dir = dirname($_SERVER['PHP_SELF']);
+$base_path = '';
+$public_path = 'public/';
+if (strpos($current_dir, '/public') !== false || basename(dirname($_SERVER['PHP_SELF'])) == 'public') {
+    $base_path = '../';
+    $public_path = '';
+}
+>>>>>>> 18cc47c3b44348d83ff4d08e0d8692eee5b0b81d
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -207,7 +219,11 @@ $base_path = $is_public ? '' : '/ecoweb/public/';
 <body>
     <!-- Top Bar -->
     <div class="top-bar">
+<<<<<<< HEAD
         <a href="<?php echo $base_url; ?>" class="logo">
+=======
+        <a href="<?php echo $base_path; ?>index.php" class="logo">
+>>>>>>> 18cc47c3b44348d83ff4d08e0d8692eee5b0b81d
             <span style="font-size: 28px; font-weight: 700;">GROWHOPE</span>
         </a>
         
@@ -239,10 +255,19 @@ $base_path = $is_public ? '' : '/ecoweb/public/';
         $current_page = basename($_SERVER['PHP_SELF']);
         ?>
         <ul class="menu-list">
+<<<<<<< HEAD
             <li><a href="<?php echo $index_link; ?>" class="<?php echo $is_home ? 'active' : ''; ?>">Trang chủ</a></li>
             <li><a href="<?php echo $base_path; ?>about.php" class="<?php echo ($current_page == 'about.php') ? 'active' : ''; ?>">Giới thiệu</a></li>
             <li><a href="<?php echo $base_path; ?>products.php" class="<?php echo ($current_page == 'products.php') ? 'active' : ''; ?>">Sản phẩm</a></li>
             <li><a href="<?php echo $base_path; ?>news.php" class="<?php echo ($current_page == 'news.php') ? 'active' : ''; ?>">Tin tức</a></li>
             <li><a href="<?php echo $base_path; ?>contact.php" class="<?php echo ($current_page == 'contact.php') ? 'active' : ''; ?>">Liên hệ</a></li>
+=======
+            <li><a href="<?php echo $base_path; ?>index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">Trang chủ</a></li>
+            <li><a href="<?php echo $base_path . $public_path; ?>about.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'about.php' ? 'active' : ''; ?>">Giới thiệu</a></li>
+            <li><a href="<?php echo $base_path . $public_path; ?>products.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'products.php' ? 'active' : ''; ?>">Sản phẩm</a></li>
+            <li><a href="<?php echo $base_path . $public_path; ?>categories.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'categories.php' ? 'active' : ''; ?>">Danh mục</a></li>
+            <li><a href="<?php echo $base_path . $public_path; ?>news.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'news.php' ? 'active' : ''; ?>">Tin tức</a></li>
+            <li><a href="<?php echo $base_path . $public_path; ?>contact.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'contact.php' ? 'active' : ''; ?>">Liên hệ</a></li>
+>>>>>>> 18cc47c3b44348d83ff4d08e0d8692eee5b0b81d
         </ul>
     </nav>

@@ -195,7 +195,7 @@
 <body>
     <!-- Top Bar -->
     <div class="top-bar">
-        <a href="index.php" class="logo">
+        <a href="/ecoweb/public/index.php" class="logo">
             <span style="font-size: 28px; font-weight: 700;">GROWHOPE</span>
         </a>
         
@@ -223,10 +223,10 @@
     <!-- Main Navigation -->
     <nav class="main-menu">
         <ul class="menu-list">
-            <li><a href="index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">Trang chủ</a></li>
-            <li><a href="about.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'about.php' ? 'active' : ''; ?>">Giới thiệu</a></li>
-            <li><a href="products.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'products.php' ? 'active' : ''; ?>">Sản phẩm</a></li>
-            <li><a href="news.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'news.php' ? 'active' : ''; ?>">Tin tức</a></li>
-            <li><a href="contact.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'contact.php' ? 'active' : ''; ?>">Liên hệ</a></li>
+            <li><a href="/ecoweb/public/index.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'index.php' ? 'active' : ''; ?>">Trang chủ</a></li>
+            <li><a href="/ecoweb/public/about.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'about.php' ? 'active' : ''; ?>">Giới thiệu</a></li>
+            <li><a href="/ecoweb/public/products.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'products.php' ? 'active' : ''; ?>">Sản phẩm</a></li>
+            <li><a href="/ecoweb/public/news.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'news.php' ? 'active' : ''; ?>">Tin tức</a></li>
+            <li><a href="/ecoweb/public/contact.php" class="<?php echo basename($_SERVER['PHP_SELF']) == 'contact.php' ? 'active' : ''; ?>">Liên hệ</a></li>
         </ul>
     </nav>

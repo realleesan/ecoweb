@@ -3,12 +3,13 @@
 <style>
     /* News Detail Page Styles */
     .news-detail-container {
+        background-color: var(--light);
         padding: 40px 5%;
         min-height: 80vh;
     }
 
     .news-detail-wrapper {
-        max-width: 1200px;
+        max-width: 900px;
         margin: 0 auto;
         background-color: var(--white);
         border-radius: 10px;

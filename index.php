@@ -20,10 +20,9 @@
         display: grid;
         grid-template-columns: 2fr 1fr;
         gap: 30px;
-        margin: 30px 5%;
-        max-width: 1400px;
-        margin-left: auto;
-        margin-right: auto;
+        margin: 30px auto;
+        max-width: 1200px;
+        padding: 0 5%;
     }
 
     .hero-banner {
@@ -151,15 +150,14 @@
 
     /* Section Styles */
     .section {
-        margin: 60px 5%;
-        max-width: 1400px;
-        margin-left: auto;
-        margin-right: auto;
+        margin: 40px auto;
+        max-width: 1200px;
+        padding: 0 5%;
     }
 
     .section-header {
         text-align: center;
-        margin-bottom: 40px;
+        margin-bottom: 30px;
     }
 
     .section-header h2 {
@@ -196,7 +194,7 @@
     /* Introduction Section */
     .intro-content {
         background-color: var(--white);
-        padding: 50px;
+        padding: 40px;
         border-radius: 15px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         line-height: 1.8;
@@ -212,9 +210,9 @@
     .map-container {
         background-color: var(--white);
         border-radius: 15px;
-        padding: 30px;
+        padding: 20px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        height: 500px;
+        height: 400px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -244,7 +242,7 @@
     .products-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 30px;
+        gap: 24px;
     }
 
     .product-card {
@@ -299,7 +297,7 @@
     /* Gallery Section */
     .gallery-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 20px;
     }
 
@@ -328,22 +326,27 @@
     /* CTA Section */
     .cta-section {
         background: linear-gradient(135deg, var(--primary) 0%, var(--bg-green) 100%);
-        padding: 80px 5%;
+        padding: 60px 5%;
         text-align: center;
         color: var(--white);
-        margin: 60px 0 0;
+        margin: 40px 0 0;
+    }
+
+    .cta-content {
+        max-width: 1200px;
+        margin: 0 auto;
     }
 
     .cta-content h2 {
-        font-size: 42px;
+        font-size: 36px;
         font-weight: 700;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     .cta-content p {
-        font-size: 20px;
-        margin-bottom: 40px;
+        font-size: 18px;
+        margin-bottom: 30px;
         line-height: 1.6;
         max-width: 800px;
         margin-left: auto;
@@ -409,6 +412,14 @@
 
         .intro-content {
             padding: 30px 20px;
+        }
+
+        .map-container {
+            height: 300px;
+        }
+
+        .cta-section {
+            padding: 40px 5%;
         }
 
         .cta-content h2 {
@@ -551,16 +562,6 @@
                 <div class="product-price">40.000đ</div>
             </div>
         </div>
-        <div class="product-card">
-            <div class="product-image">
-                <i class="fas fa-spa"></i>
-            </div>
-            <div class="product-info">
-                <h3>Hạt giống cây phi lao</h3>
-                <p>Giống cây chắn gió, chắn cát hiệu quả, thường dùng trồng ven biển</p>
-                <div class="product-price">35.000đ</div>
-            </div>
-        </div>
     </div>
 </section>
 
@@ -620,4 +621,5 @@
 </section>
 
 <?php include 'includes/footer.php'; ?>
+
 

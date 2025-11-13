@@ -106,39 +106,25 @@ include '../includes/header.php';
 ?>
 
 <style>
-    :root {
-        --primary: #3C603C;
-        --secondary: #D26426;
-        --dark: #74493D;
-        --light: #FFF7ED;
-        --white: #FFFFFF;
-        --bg-main: #9FBD48;
+    /* Categories Page Styles - Matching Products Page */
+    .products-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 5%;
     }
 
-    .categories-page {
-        min-height: 60vh;
-        padding: 60px 5%;
-        background: var(--light);
-    }
-
-    .page-header {
-        text-align: center;
-        margin-bottom: 50px;
-    }
-
-    .page-header h1 {
+    .page-title {
         font-family: 'Poppins', sans-serif;
         font-weight: 700;
-        font-size: 42px;
+        font-size: 36px;
         color: var(--primary);
-        margin-bottom: 15px;
-        text-transform: uppercase;
-        letter-spacing: 2px;
+        margin-bottom: 30px;
+        text-align: center;
         position: relative;
         padding-bottom: 20px;
     }
 
-    .page-header h1::after {
+    .page-title::after {
         content: '';
         position: absolute;
         bottom: 0;
@@ -149,242 +135,214 @@ include '../includes/header.php';
         background: var(--secondary);
     }
 
-    .page-header p {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 400;
-        font-size: 18px;
-        color: var(--dark);
-        max-width: 700px;
-        margin: 0 auto;
-        line-height: 1.6;
-    }
-
-    .categories-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 30px;
-        margin-bottom: 50px;
-        max-width: 1400px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .category-card {
-        background: var(--white);
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 4px 15px rgba(116, 73, 61, 0.15);
-        transition: all 0.3s ease;
+    .filters-section {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
         display: flex;
-        flex-direction: column;
-        height: 100%;
+        gap: 20px;
+        flex-wrap: wrap;
+        align-items: center;
     }
 
-    .category-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 8px 25px rgba(116, 73, 61, 0.25);
-    }
-
-    .category-image {
-        width: 100%;
-        height: 220px;
-        object-fit: cover;
-        background: linear-gradient(135deg, var(--primary), var(--bg-main));
+    .filter-group {
         display: flex;
         align-items: center;
-        justify-content: center;
-        color: var(--white);
-        font-size: 32px;
-        font-weight: 700;
+        gap: 10px;
+    }
+
+    .filter-group label {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 500;
+        color: var(--dark);
+        font-size: 14px;
+    }
+
+    .filter-group select, 
+    .filter-group input[type="text"] {
+        padding: 8px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        color: var(--dark);
+        background-color: var(--white);
+        cursor: pointer;
+    }
+
+    .filter-group select:focus,
+    .filter-group input[type="text"]:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .products-info {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 400;
+        font-size: 16px;
+        color: var(--dark);
+        margin-bottom: 20px;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 32px;
+        margin-bottom: 40px;
+    }
+
+    .product-card {
+        background-color: var(--white);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
         position: relative;
+        cursor: pointer;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+
+    .product-image {
+        width: 100%;
+        height: 200px;
         overflow: hidden;
     }
 
-    .category-image::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(116, 73, 61, 0.1);
-        transition: all 0.3s ease;
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
     }
 
-    .category-card:hover .category-image {
-        background: linear-gradient(135deg, var(--secondary), var(--primary));
+    .product-card:hover .product-image img {
+        transform: scale(1.05);
     }
 
-    .category-card:hover .category-image::before {
-        background: rgba(116, 73, 61, 0.15);
+    .product-info {
+        padding: 15px;
     }
 
-    .category-content {
-        padding: 25px;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .category-title {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 700;
-        font-size: 22px;
+    .product-title {
+        font-size: 16px;
+        font-weight: 600;
         color: var(--dark);
-        margin-bottom: 12px;
-        line-height: 1.3;
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 3em;
     }
 
-    .category-description {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 400;
+    .product-description {
         font-size: 14px;
-        color: var(--dark);
-        opacity: 0.7;
-        line-height: 1.6;
+        color: var(--gray);
         margin-bottom: 15px;
-        flex-grow: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 4.5em;
     }
 
-    .category-meta {
+    .product-meta {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-top: 15px;
-        border-top: 1px solid rgba(116, 73, 61, 0.1);
+        font-size: 14px;
+        color: var(--gray);
     }
 
     .product-count {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 500;
-        font-size: 14px;
-        color: var(--secondary);
         display: flex;
         align-items: center;
         gap: 5px;
     }
 
-    .product-count i {
-        font-size: 16px;
-    }
-
     .view-btn {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 500;
-        font-size: 14px;
-        color: var(--white);
-        background: var(--primary);
-        padding: 8px 20px;
-        border-radius: 20px;
-        text-decoration: none;
-        transition: all 0.3s ease;
         display: inline-block;
+        padding: 6px 12px;
+        background-color: var(--primary);
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
     }
 
     .view-btn:hover {
-        background: var(--secondary);
-        transform: scale(1.05);
+        background-color: #2d4a2d;
     }
 
-    /* Pagination */
+    .no-results {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 50px 20px;
+    }
+
+    .no-results i {
+        font-size: 3rem;
+        color: var(--gray);
+        margin-bottom: 15px;
+        opacity: 0.7;
+    }
+
+    .no-results h3 {
+        font-size: 1.5rem;
+        color: var(--dark);
+        margin-bottom: 10px;
+    }
+
     .pagination {
         display: flex;
         justify-content: center;
-        align-items: center;
-        gap: 10px;
-        margin-top: 50px;
+        margin-top: 40px;
         flex-wrap: wrap;
+        gap: 8px;
     }
 
-    .pagination a,
+    .pagination a, 
     .pagination span {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 500;
-        font-size: 16px;
-        padding: 10px 18px;
-        border-radius: 8px;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        display: inline-block;
-        min-width: 44px;
-        text-align: center;
-    }
-
-    .pagination a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
         color: var(--dark);
-        background: var(--white);
-        border: 2px solid var(--primary);
+        text-decoration: none;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        transition: all 0.3s ease;
     }
 
     .pagination a:hover {
         background: var(--primary);
         color: var(--white);
         border-color: var(--primary);
-        transform: translateY(-2px);
     }
 
     .pagination .current {
-        background: var(--secondary);
+        background: var(--primary);
         color: var(--white);
-        border: 2px solid var(--secondary);
-        font-weight: 600;
+        border-color: var(--primary);
+        font-weight: 500;
     }
 
     .pagination .disabled {
         opacity: 0.5;
-        cursor: not-allowed;
         pointer-events: none;
     }
 
-    /* Filter Bar */
-    .filters-section {
-        background-color: var(--white);
-        padding: 25px 30px;
-        border-radius: 10px;
-        margin-bottom: 40px;
-        box-shadow: 0 2px 10px rgba(116, 73, 61, 0.1);
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        align-items: center;
-        justify-content: space-between;
-        max-width: 1400px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .filter-group {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        flex-wrap: wrap;
-    }
-
-    .filter-label {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 600;
-        font-size: 14px;
-        color: var(--dark);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .filter-label i {
-        color: var(--primary);
-    }
-
-    .search-input {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 400;
-        font-size: 14px;
-        padding: 10px 20px;
-        padding-right: 45px;
-        border: 2px solid rgba(116, 73, 61, 0.2);
-        border-radius: 25px;
-        outline: none;
-        transition: all 0.3s ease;
-        min-width: 250px;
+    /* Responsive Design */
     }
 
     .search-input:focus {
@@ -537,91 +495,96 @@ include '../includes/header.php';
         .results-count {
             text-align: center;
             width: 100%;
-        }
-    }
 </style>
 
 <!-- Main Content -->
-<main class="categories-page">
-    <div class="page-header">
-        <h1>Danh Mục Sản Phẩm</h1>
-        <p>Khám phá đa dạng các loại cây xanh, từ cây ăn quả đến cây cảnh quan, tất cả đều được chọn lọc kỹ lưỡng để mang lại giá trị tốt nhất cho bạn và môi trường.</p>
-    </div>
-
-    <!-- Filter Bar -->
-    <form method="GET" action="" id="filterForm">
-        <div class="filters-section">
-            <div class="filter-group">
-                <label class="filter-label">
-                    <i class="fas fa-search"></i>
-                    Tìm kiếm:
-                </label>
-                <div class="search-wrapper">
+<main style="min-height: 60vh; padding: 60px 0; background-color: var(--white);">
+    <div class="products-container">
+        <h1 class="page-title">Danh Mục Sản Phẩm</h1>
+        
+        <!-- Filter Section -->
+        <form method="GET" action="" id="filterForm">
+            <div class="filters-section">
+                <div class="filter-group">
+                    <label for="search">Tìm kiếm:</label>
                     <input type="text" 
+                           id="search" 
                            name="search" 
-                           class="search-input" 
-                           placeholder="Nhập tên danh mục..." 
+                           placeholder="Tên danh mục..." 
                            value="<?php echo htmlspecialchars($search); ?>"
                            onkeypress="if(event.key === 'Enter') { this.form.submit(); }">
-                    <i class="fas fa-search"></i>
                 </div>
-            </div>
-
-            <div class="filter-group">
-                <label class="filter-label">
-                    <i class="fas fa-sort"></i>
-                    Sắp xếp:
-                </label>
-                <select name="sort" class="sort-select" onchange="this.form.submit()">
-                    <option value="name_asc" <?php echo $sort == 'name_asc' ? 'selected' : ''; ?>>Tên A-Z</option>
-                    <option value="name_desc" <?php echo $sort == 'name_desc' ? 'selected' : ''; ?>>Tên Z-A</option>
-                    <option value="count_desc" <?php echo $sort == 'count_desc' ? 'selected' : ''; ?>>Nhiều sản phẩm nhất</option>
-                    <option value="count_asc" <?php echo $sort == 'count_asc' ? 'selected' : ''; ?>>Ít sản phẩm nhất</option>
-                </select>
+                
+                <div class="filter-group">
+                    <label for="sort">Sắp xếp:</label>
+                    <select id="sort" name="sort" onchange="this.form.submit()">
+                        <option value="name_asc" <?php echo $sort == 'name_asc' ? 'selected' : ''; ?>>Tên A-Z</option>
+                        <option value="name_desc" <?php echo $sort == 'name_desc' ? 'selected' : ''; ?>>Tên Z-A</option>
+                        <option value="count_desc" <?php echo $sort == 'count_desc' ? 'selected' : ''; ?>>Nhiều sản phẩm nhất</option>
+                        <option value="count_asc" <?php echo $sort == 'count_asc' ? 'selected' : ''; ?>>Ít sản phẩm nhất</option>
+                    </select>
+                </div>
+                
                 <button type="submit" class="filter-btn">
                     <i class="fas fa-filter"></i>
                     Lọc
                 </button>
             </div>
-
-            <div class="results-count">
-                <i class="fas fa-list"></i>
-                Tìm thấy: <strong><?php echo $total_categories; ?></strong> danh mục
-            </div>
+        </form>
+        
+        <div class="products-info">
+            Tìm thấy: <?php echo $total_categories; ?> danh mục
         </div>
-    </form>
 
-    <div class="categories-grid">
-        <?php foreach ($categories as $category): ?>
-            <div class="category-card">
-                <div class="category-image" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">
-                    <?php 
-                    $category_name = $category['category_name'];
-                    $first_letter = mb_substr($category_name, 0, 1, 'UTF-8');
-                    echo $first_letter;
-                    ?>
-                </div>
-                <div class="category-content">
-                    <h3 class="category-title"><?php echo htmlspecialchars($category['category_name']); ?></h3>
-                    <p class="category-description">
-                        <?php 
-                        echo isset($category['description']) 
-                            ? htmlspecialchars($category['description']) 
-                            : 'Danh mục chứa các sản phẩm chất lượng cao, được chọn lọc kỹ lưỡng để đảm bảo chất lượng tốt nhất.';
-                        ?>
-                    </p>
-                    <div class="category-meta">
-                        <span class="product-count">
-                            <i class="fas fa-leaf"></i>
-                            <?php echo isset($category['product_count']) ? $category['product_count'] : rand(10, 50); ?> sản phẩm
-                        </span>
-                        <a href="products.php?category=<?php echo htmlspecialchars($category['slug']); ?>" class="view-btn">
-                            Xem thêm
-                        </a>
-                    </div>
-                </div>
+        <?php if (empty($categories)): ?>
+            <div class="no-results">
+                <i class="fas fa-inbox"></i>
+                <h3>Không tìm thấy danh mục nào</h3>
+                <p>Xin lỗi, chúng tôi không tìm thấy danh mục nào phù hợp với tìm kiếm của bạn.</p>
+                <a href="categories.php" class="view-btn" style="margin-top: 15px;">
+                    <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                </a>
             </div>
-        <?php endforeach; ?>
+        <?php else: ?>
+            <div class="products-grid">
+                <?php foreach ($categories as $category): ?>
+                    <div class="product-card">
+                        <div class="product-image">
+                            <?php if (isset($category['image'])): ?>
+                                <img src="<?php echo htmlspecialchars($category['image']); ?>" alt="<?php echo htmlspecialchars($category['category_name']); ?>">
+                            <?php else: ?>
+                                <?php 
+                                $category_name = $category['category_name'];
+                                $first_letter = mb_substr($category_name, 0, 1, 'UTF-8');
+                                ?>
+                                <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; font-size: 48px; font-weight: bold;">
+                                    <?php echo $first_letter; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title"><?php echo htmlspecialchars($category['category_name']); ?></h3>
+                            <p class="product-description">
+                                <?php 
+                                echo isset($category['description']) 
+                                    ? htmlspecialchars($category['description']) 
+                                    : 'Danh mục chứa các sản phẩm chất lượng cao, được chọn lọc kỹ lưỡng.';
+                                ?>
+                            </p>
+                            <div class="product-meta">
+                                <span class="product-count">
+                                    <i class="fas fa-leaf"></i>
+                                    <?php echo isset($category['product_count']) ? $category['product_count'] : rand(10, 50); ?> sản phẩm
+                                </span>
+                                <a href="products.php?category=<?php echo isset($category['slug']) ? htmlspecialchars($category['slug']) : ''; ?>" class="view-btn">
+                                    Xem thêm
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- Pagination -->

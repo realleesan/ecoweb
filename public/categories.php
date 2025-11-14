@@ -465,6 +465,7 @@ include '../includes/header.php';
         .results-count {
             text-align: center;
             width: 100%;
+        }
 </style>
 
 <!-- Main Content -->

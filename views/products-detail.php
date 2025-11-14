@@ -1,4 +1,5 @@
 <?php
+require_once '../includes/config.php';
 require_once '../includes/database.php';
 
 try {
@@ -38,15 +39,15 @@ include '../includes/header.php';
 <style>
     /* Product Detail Page Styles */
     .product-detail-container {
-        max-width: 1200px;
+        max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
         margin: 0 auto;
-        padding: 40px 5%;
-        background-color: var(--white);
+        padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
+        background-color: var(--light);
     }
 
     /* Page Title */
     .page-title {
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 700;
         font-size: 48px;
         color: var(--primary);
@@ -58,7 +59,7 @@ include '../includes/header.php';
     .breadcrumb {
         text-align: center;
         margin-bottom: 40px;
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 400;
         font-size: 16px;
         color: var(--dark);
@@ -83,7 +84,7 @@ include '../includes/header.php';
     .product-detail-grid {
         display: grid;
         grid-template-columns: 40% 60%;
-        gap: 40px;
+        gap: <?php echo GRID_GAP; ?>;
         margin-bottom: 60px;
     }
 
@@ -158,7 +159,7 @@ include '../includes/header.php';
         color: #74493D;
         padding: 6px 15px;
         border-radius: 20px;
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 700;
         font-size: 12px;
         text-transform: uppercase;
@@ -166,7 +167,7 @@ include '../includes/header.php';
     }
 
     .product-name-h2 {
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 700;
         font-size: 32px;
         color: var(--primary);
@@ -194,14 +195,14 @@ include '../includes/header.php';
     }
 
     .rating-count {
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 400;
         font-size: 14px;
         color: #666;
     }
 
     .product-price-large {
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 700;
         font-size: 36px;
         color: #D26426;
@@ -209,7 +210,7 @@ include '../includes/header.php';
     }
 
     .product-short-description {
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 400;
         font-size: 16px;
         color: var(--dark);
@@ -261,7 +262,7 @@ include '../includes/header.php';
         height: 45px;
         border: none;
         text-align: center;
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 500;
         font-size: 16px;
         outline: none;
@@ -280,7 +281,7 @@ include '../includes/header.php';
         color: var(--white);
         border: none;
         border-radius: 5px;
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 700;
         font-size: 16px;
         cursor: pointer;
@@ -330,7 +331,7 @@ include '../includes/header.php';
     }
 
     .technical-info h3 {
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 700;
         font-size: 20px;
         color: var(--primary);
@@ -341,7 +342,7 @@ include '../includes/header.php';
         display: flex;
         align-items: center;
         margin-bottom: 15px;
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 400;
         font-size: 14px;
     }
@@ -421,7 +422,7 @@ include '../includes/header.php';
         background: none;
         border: none;
         padding: 15px 0;
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 500;
         font-size: 16px;
         color: #999;
@@ -451,7 +452,7 @@ include '../includes/header.php';
 
     .tab-content {
         display: none;
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 400;
         font-size: 16px;
         color: var(--dark);
@@ -468,7 +469,7 @@ include '../includes/header.php';
     }
 
     /* Responsive */
-    @media (max-width: 992px) {
+    @media (max-width: <?php echo BREAKPOINT_LG; ?>) {
         .product-detail-grid {
             grid-template-columns: 1fr;
         }
@@ -486,7 +487,7 @@ include '../includes/header.php';
         }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: <?php echo BREAKPOINT_MD; ?>) {
         .thumbnail-images {
             grid-template-columns: repeat(3, 1fr);
         }
@@ -529,14 +530,14 @@ function renderStars(float $rating): string
 ?>
 
 <!-- Main Content -->
-<main style="min-height: 60vh; padding: 60px 0; background-color: var(--white);">
+<main style="min-height: 60vh; padding: <?php echo CONTAINER_PADDING_LARGE; ?> 0; background-color: var(--white);">
     <div class="product-detail-container">
         <!-- Page Title -->
         <h1 class="page-title"><?php echo strtoupper(htmlspecialchars($product['name'])); ?></h1>
         
         <!-- Breadcrumb -->
         <div class="breadcrumb">
-            <a href="../index.php">Trang Chủ</a>
+            <a href="<?php echo BASE_URL; ?>/index.php">Trang Chủ</a>
             <span>/</span>
             <span><?php echo strtoupper(htmlspecialchars($product['name'])); ?></span>
         </div>

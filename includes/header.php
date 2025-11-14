@@ -1,4 +1,6 @@
 <?php 
+require_once __DIR__ . '/config.php';
+
 // Get current page and set active states
 $current_page = basename($_SERVER['PHP_SELF']);
 $is_home = ($current_page == 'index.php' || $current_page == '');
@@ -7,33 +9,34 @@ $is_home = ($current_page == 'index.php' || $current_page == '');
 $is_public = (strpos($_SERVER['PHP_SELF'], 'public') !== false);
 
 // Set paths
-$base_path = $is_public ? '' : '/ecoweb/public/';
-$index_link = $is_public ? '/ecoweb/index.php' : '/ecoweb/public/index.php';
+$base_path = $is_public ? '' : BASE_URL . '/public/';
+$index_link = $is_public ? BASE_URL . '/index.php' : BASE_URL . '/public/index.php';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECOWEB - Trồng cây gây rừng</title>
+    <title><?php echo SITE_NAME; ?> - <?php echo SITE_TAGLINE; ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="<?php echo FONT_GOOGLE_URL; ?>" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --primary: #3C603C;
-            --secondary: #D26426;
-            --dark: #74493D;
-            --light: #FFF7ED;
-            --white: #FFFFFF;
+            --primary: <?php echo COLOR_PRIMARY; ?>;
+            --secondary: <?php echo COLOR_SECONDARY; ?>;
+            --dark: <?php echo COLOR_DARK; ?>;
+            --light: <?php echo COLOR_LIGHT; ?>;
+            --white: <?php echo COLOR_WHITE; ?>;
+            --bg-green: <?php echo COLOR_BG_GREEN; ?>;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+            font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         }
 
         h1, h2, h3, h4, h5, h6, .bold {
@@ -43,11 +46,12 @@ $index_link = $is_public ? '/ecoweb/index.php' : '/ecoweb/public/index.php';
         /* Top Bar Styles */
         .top-bar {
             background-color: var(--primary);
-            padding: 8px 5%;
+            padding: 8px <?php echo CONTAINER_PADDING; ?>;
             display: flex;
             justify-content: space-between;
             align-items: center;
             color: var(--white);
+            gap: 20px;
         }
 
         .logo {
@@ -57,6 +61,7 @@ $index_link = $is_public ? '/ecoweb/index.php' : '/ecoweb/public/index.php';
             text-decoration: none;
             display: flex;
             align-items: center;
+            flex-shrink: 0;
         }
 
         .logo img {
@@ -67,7 +72,7 @@ $index_link = $is_public ? '/ecoweb/index.php' : '/ecoweb/public/index.php';
         .search-bar {
             flex-grow: 1;
             max-width: 500px;
-            margin: 0 20px;
+            margin-left: 20px;
             position: relative;
         }
 
@@ -92,6 +97,7 @@ $index_link = $is_public ? '/ecoweb/index.php' : '/ecoweb/public/index.php';
             display: flex;
             align-items: center;
             gap: 15px;
+            flex-shrink: 0;
         }
 
         .hotline, .account, .cart-icon {
@@ -136,6 +142,29 @@ $index_link = $is_public ? '/ecoweb/index.php' : '/ecoweb/public/index.php';
             font-size: 20px;
         }
 
+        .land-management-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            background-color: var(--white);
+            color: var(--primary);
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            margin-right: 15px;
+        }
+
+        .land-management-btn:hover {
+            background-color: var(--secondary);
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
         /* Navigation Menu */
         .main-menu {
             background-color: var(--dark);
@@ -150,7 +179,7 @@ $index_link = $is_public ? '/ecoweb/index.php' : '/ecoweb/public/index.php';
             margin: 0 auto;
             padding: 0;
             width: 100%;
-            max-width: 1200px;
+            max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
             justify-content: space-around;
         }
 
@@ -177,7 +206,7 @@ $index_link = $is_public ? '/ecoweb/index.php' : '/ecoweb/public/index.php';
         }
 
         /* Responsive */
-        @media (max-width: 992px) {
+        @media (max-width: <?php echo BREAKPOINT_LG; ?>) {
             .top-bar {
                 flex-direction: column;
                 gap: 10px;
@@ -187,6 +216,11 @@ $index_link = $is_public ? '/ecoweb/index.php' : '/ecoweb/public/index.php';
             .search-bar {
                 width: 100%;
                 max-width: 100%;
+                margin: 0;
+            }
+
+            .land-management-btn {
+                width: 100%;
                 margin: 10px 0;
             }
 
@@ -196,7 +230,7 @@ $index_link = $is_public ? '/ecoweb/index.php' : '/ecoweb/public/index.php';
             }
         }
 
-        @media (max-width: 576px) {
+        @media (max-width: <?php echo BREAKPOINT_SM; ?>) {
             .menu-list {
                 flex-direction: column;
                 text-align: center;
@@ -208,7 +242,7 @@ $index_link = $is_public ? '/ecoweb/index.php' : '/ecoweb/public/index.php';
     <!-- Top Bar -->
     <div class="top-bar">
         <a href="<?php echo $index_link; ?>" class="logo">
-            <span style="font-size: 28px; font-weight: 700;">GROWHOPE</span>
+            <span style="font-size: 28px; font-weight: 700;"><?php echo BRAND_NAME; ?></span>
         </a>
         
         <div class="search-bar">
@@ -216,10 +250,16 @@ $index_link = $is_public ? '/ecoweb/index.php' : '/ecoweb/public/index.php';
             <i class="fas fa-search"></i>
         </div>
         
+        <div style="flex: 1;"></div>
+        
+        <a href="#" class="land-management-btn">
+            Quản lý đất đai
+        </a>
+        
         <div class="contact-info">
             <div class="hotline">
                 <i class="fas fa-phone-alt"></i>
-                <span>Hotline: 0123 456 789</span>
+                <span>Hotline: <?php echo CONTACT_HOTLINE; ?></span>
             </div>
             <div class="cart-icon">
                 <i class="fas fa-shopping-cart"></i>

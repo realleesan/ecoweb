@@ -1,4 +1,5 @@
 <?php
+require_once '../includes/config.php';
 require_once '../includes/database.php';
 
 try {
@@ -7,7 +8,7 @@ try {
     $pdo = null;
 }
 
-$items_per_page = 8;
+$items_per_page = PAGINATION_NEWS_PER_PAGE;
 $current_page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $offset = ($current_page - 1) * $items_per_page;
 
@@ -46,10 +47,15 @@ include '../includes/header.php';
 ?>
 
 <style>
+        body {
+            background-color: var(--light);
+        }
+
         /* News Page Styles */
         .news-container {
-            background-color: var(--light);
-            padding: 40px 5%;
+            max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
+            margin: 0 auto;
+            padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
             min-height: 80vh;
         }
 
@@ -72,7 +78,7 @@ include '../includes/header.php';
         .news-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 30px;
+            gap: <?php echo GRID_GAP_SMALL; ?>;
             margin-bottom: 50px;
         }
 
@@ -97,18 +103,18 @@ include '../includes/header.php';
 
         .news-image {
             width: 100%;
-            height: 200px;
+            height: 160px;
             object-fit: cover;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--white);
-            font-size: 48px;
+            font-size: 40px;
         }
 
         .news-content {
-            padding: 20px;
+            padding: 16px;
         }
 
         .news-date {
@@ -124,7 +130,7 @@ include '../includes/header.php';
             font-size: 18px;
             font-weight: 700;
             color: var(--primary);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             line-height: 1.4;
             min-height: 50px;
         }
@@ -132,8 +138,8 @@ include '../includes/header.php';
         .news-excerpt {
             color: var(--dark);
             font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 15px;
+            line-height: 1.5;
+            margin-bottom: 12px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -199,20 +205,20 @@ include '../includes/header.php';
         }
 
         /* Responsive */
-        @media (max-width: 1200px) {
+        @media (max-width: <?php echo BREAKPOINT_XL; ?>) {
             .news-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
 
-        @media (max-width: 992px) {
+        @media (max-width: <?php echo BREAKPOINT_LG; ?>) {
             .news-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
+                gap: <?php echo GRID_GAP_SMALL; ?>;
             }
         }
 
-        @media (max-width: 576px) {
+        @media (max-width: <?php echo BREAKPOINT_SM; ?>) {
             .news-grid {
                 grid-template-columns: 1fr;
             }

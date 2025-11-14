@@ -1,4 +1,5 @@
 <?php
+require_once 'includes/config.php';
 require_once 'includes/database.php';
 
 $latestNews = [];
@@ -16,10 +17,10 @@ if ($pdo) {
         $newsStmt = $pdo->query('SELECT news_id, title, publish_date, excerpt FROM news ORDER BY publish_date DESC, news_id DESC LIMIT 4');
         $latestNews = $newsStmt->fetchAll();
 
-        $productStmt = $pdo->query('SELECT product_id, name, price, short_description FROM products ORDER BY is_bestseller DESC, created_at DESC LIMIT 3');
+        $productStmt = $pdo->query('SELECT product_id, name, price, short_description FROM products ORDER BY is_bestseller DESC, created_at DESC LIMIT 8');
         $featuredProducts = $productStmt->fetchAll();
 
-        $galleryStmt = $pdo->query('SELECT image_url, alt_text FROM gallery_images ORDER BY created_at DESC, image_id DESC LIMIT 6');
+        $galleryStmt = $pdo->query('SELECT image_url, alt_text FROM gallery_images ORDER BY created_at DESC, image_id DESC LIMIT 8');
         $latestGallery = $galleryStmt->fetchAll();
     } catch (PDOException $e) {
         $latestNews = [];
@@ -32,28 +33,19 @@ include 'includes/header.php';
 ?>
 
 <style>
-    :root {
-        --primary: #3C603C;
-        --secondary: #D26426;
-        --dark: #74493D;
-        --light: #FFF7ED;
-        --white: #FFFFFF;
-        --bg-green: #9FBD48;
-    }
-
     body {
         background-color: var(--light);
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
     }
 
     /* Hero Section */
     .hero-section {
         display: grid;
         grid-template-columns: 2fr 1fr;
-        gap: 30px;
+        gap: <?php echo GRID_GAP; ?>;
         margin: 30px auto;
-        max-width: 1200px;
-        padding: 0 5%;
+        max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
+        padding: 0 <?php echo CONTAINER_PADDING; ?>;
     }
 
     .hero-banner {
@@ -112,7 +104,7 @@ include 'includes/header.php';
     .news-sidebar {
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        height: 500px;
     }
 
     .news-header {
@@ -122,28 +114,32 @@ include 'includes/header.php';
         border-radius: 10px 10px 0 0;
         font-weight: 700;
         font-size: 20px;
+        flex-shrink: 0;
     }
 
     .news-list {
         background-color: var(--white);
         border-radius: 0 0 10px 10px;
-        padding: 20px;
+        padding: 12px 15px 15px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        gap: 8px;
         flex: 1;
+        overflow-y: auto;
     }
 
     .news-item {
-        padding-bottom: 15px;
+        padding-bottom: 8px;
         border-bottom: 1px solid #e0e0e0;
         transition: all 0.3s ease;
+        flex-shrink: 0;
     }
 
     .news-item:last-child {
         border-bottom: none;
         padding-bottom: 0;
+        margin-bottom: 0;
     }
 
     .news-item:hover {
@@ -157,18 +153,27 @@ include 'includes/header.php';
     }
 
     .news-item h3 {
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 700;
-        margin-bottom: 8px;
+        margin-bottom: 5px;
         color: var(--primary);
-        line-height: 1.4;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     .news-item p {
-        font-size: 14px;
-        color: #666;
-        line-height: 1.5;
-        margin-bottom: 5px;
+        font-size: 12px;
+        color: var(--dark);
+        line-height: 1.4;
+        margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .news-date {
@@ -182,8 +187,8 @@ include 'includes/header.php';
     /* Section Styles */
     .section {
         margin: 40px auto;
-        max-width: 1200px;
-        padding: 0 5%;
+        max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
+        padding: 0 <?php echo CONTAINER_PADDING; ?>;
     }
 
     .section-header {
@@ -216,7 +221,7 @@ include 'includes/header.php';
         font-size: 16px;
         color: var(--dark);
         margin-top: 20px;
-        max-width: 700px;
+        max-width: <?php echo CONTAINER_MAX_WIDTH_XSMALL; ?>;
         margin-left: auto;
         margin-right: auto;
         line-height: 1.6;
@@ -225,7 +230,7 @@ include 'includes/header.php';
     /* Introduction Section */
     .intro-content {
         background-color: var(--white);
-        padding: 40px;
+        padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
         border-radius: 15px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         line-height: 1.8;
@@ -272,63 +277,74 @@ include 'includes/header.php';
     /* Products Section */
     .products-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 24px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: <?php echo GRID_GAP_SMALL; ?>;
+        margin-bottom: 40px;
     }
 
     .product-card {
         background-color: var(--white);
-        border-radius: 15px;
+        border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
         cursor: pointer;
+        position: relative;
     }
 
     .product-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
     }
 
     .product-image {
         width: 100%;
-        height: 200px;
+        height: 160px;
         background: linear-gradient(135deg, var(--bg-green) 0%, var(--primary) 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         color: var(--white);
-        font-size: 48px;
+        font-size: 40px;
     }
 
     .product-info {
-        padding: 20px;
+        padding: 16px;
     }
 
     .product-info h3 {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 700;
         color: var(--primary);
-        margin-bottom: 10px;
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 50px;
     }
 
     .product-info p {
         font-size: 14px;
-        color: #666;
-        margin-bottom: 15px;
+        color: var(--dark);
+        margin-bottom: 12px;
         line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     .product-price {
-        font-size: 18px;
-        font-weight: 700;
+        font-size: 20px;
+        font-weight: 600;
         color: var(--secondary);
     }
 
     /* View All Button */
     .view-all-btn {
         display: inline-block;
-        background-color: #D26426;
+        background-color: var(--secondary);
         color: var(--white);
         padding: 12px 30px;
         border-radius: 25px;
@@ -353,15 +369,16 @@ include 'includes/header.php';
     /* Gallery Section */
     .gallery-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: <?php echo GRID_GAP_SMALL; ?>;
+        margin-bottom: 40px;
     }
 
     .gallery-item {
         position: relative;
-        border-radius: 15px;
+        border-radius: 10px;
         overflow: hidden;
-        height: 250px;
+        height: 160px;
         background: linear-gradient(135deg, var(--primary) 0%, var(--bg-green) 100%);
         display: flex;
         align-items: center;
@@ -369,27 +386,27 @@ include 'includes/header.php';
         color: var(--white);
         font-size: 18px;
         font-weight: 600;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
         cursor: pointer;
     }
 
     .gallery-item:hover {
-        transform: scale(1.05);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
     }
 
     /* CTA Section */
     .cta-section {
         background: linear-gradient(135deg, var(--primary) 0%, var(--bg-green) 100%);
-        padding: 60px 5%;
+        padding: <?php echo CONTAINER_PADDING_LARGE; ?>;
         text-align: center;
         color: var(--white);
         margin: 40px 0 0;
     }
 
     .cta-content {
-        max-width: 1200px;
+        max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
         margin: 0 auto;
     }
 
@@ -404,7 +421,7 @@ include 'includes/header.php';
         font-size: 18px;
         margin-bottom: 30px;
         line-height: 1.6;
-        max-width: 800px;
+        max-width: <?php echo CONTAINER_MAX_WIDTH_SMALL; ?>;
         margin-left: auto;
         margin-right: auto;
     }
@@ -431,7 +448,17 @@ include 'includes/header.php';
     }
 
     /* Responsive */
-    @media (max-width: 992px) {
+    @media (max-width: <?php echo BREAKPOINT_XL; ?>) {
+        .products-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .gallery-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: <?php echo BREAKPOINT_LG; ?>) {
         .hero-section {
             grid-template-columns: 1fr;
         }
@@ -445,15 +472,15 @@ include 'includes/header.php';
         }
 
         .products-grid {
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
         }
 
         .gallery-grid {
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
         }
     }
 
-    @media (max-width: 576px) {
+    @media (max-width: <?php echo BREAKPOINT_SM; ?>) {
         .hero-content h1 {
             font-size: 24px;
         }
@@ -475,7 +502,7 @@ include 'includes/header.php';
         }
 
         .cta-section {
-            padding: 40px 5%;
+            padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
         }
 
         .cta-content h2 {
@@ -484,6 +511,14 @@ include 'includes/header.php';
 
         .cta-content p {
             font-size: 16px;
+        }
+
+        .products-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .gallery-grid {
+            grid-template-columns: 1fr;
         }
     }
 </style>

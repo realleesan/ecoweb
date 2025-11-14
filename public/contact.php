@@ -1,25 +1,19 @@
-<?php include '../includes/header.php'; ?>
+<?php 
+require_once '../includes/config.php';
+include '../includes/header.php'; 
+?>
 
 <style>
-    :root {
-        --primary: #3C603C;
-        --secondary: #D26426;
-        --dark: #74493D;
-        --light: #FFF7ED;
-        --white: #FFFFFF;
-        --bg-green: #9FBD48;
-    }
-
     body {
         background-color: var(--light);
-        font-family: 'Poppins', sans-serif;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
     }
 
     /* Contact Page Content */
     .contact-container {
-        max-width: 1200px;
+        max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
         margin: 0 auto;
-        padding: 60px 20px;
+        padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
     }
 
     .contact-header {
@@ -37,14 +31,14 @@
     .contact-header p {
         font-size: 16px;
         color: var(--dark);
-        max-width: 600px;
+        max-width: <?php echo CONTAINER_MAX_WIDTH_XSMALL; ?>;
         margin: 0 auto;
     }
 
     .contact-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 30px;
+        gap: <?php echo GRID_GAP; ?>;
         margin-bottom: 50px;
     }
 
@@ -153,7 +147,7 @@
     }
 
     .contact-form {
-        max-width: 800px;
+        max-width: <?php echo CONTAINER_MAX_WIDTH_SMALL; ?>;
         margin: 0 auto;
     }
 
@@ -262,14 +256,14 @@
     }
 
     /* Responsive */
-    @media (max-width: 992px) {
+    @media (max-width: <?php echo BREAKPOINT_LG; ?>) {
         .contact-grid {
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
         }
     }
 
-    @media (max-width: 576px) {
+    @media (max-width: <?php echo BREAKPOINT_SM; ?>) {
         .contact-header h1 {
             font-size: 28px;
         }
@@ -358,11 +352,9 @@
             </div>
             <h3>Địa chỉ</h3>
             <p><strong>Trụ sở chính:</strong></p>
-            <p>123 Đường Số 1, Phường 2, Quận 3</p>
-            <p>Thành phố Hồ Chí Minh, Việt Nam</p>
+            <p><?php echo CONTACT_ADDRESS; ?></p>
             <p style="margin-top: 15px;"><strong>Chi nhánh:</strong></p>
-            <p>456 Đường ABC, Phường XYZ, Quận 1</p>
-            <p>Thành phố Hồ Chí Minh, Việt Nam</p>
+            <p><?php echo CONTACT_ADDRESS_BRANCH; ?></p>
         </div>
 
         <!-- Điện thoại -->
@@ -372,12 +364,11 @@
             </div>
             <h3>Điện thoại</h3>
             <p><strong>Hotline:</strong></p>
-            <p><a href="tel:0123456789">0123 456 789</a></p>
+            <p><a href="tel:<?php echo str_replace(' ', '', CONTACT_HOTLINE); ?>"><?php echo CONTACT_HOTLINE; ?></a></p>
             <p style="margin-top: 15px;"><strong>Điện thoại bàn:</strong></p>
-            <p><a href="tel:0281234567">(028) 1234 567</a></p>
+            <p><a href="tel:<?php echo str_replace(' ', '', CONTACT_PHONE); ?>"><?php echo CONTACT_PHONE; ?></a></p>
             <p style="margin-top: 15px;"><strong>Thời gian làm việc:</strong></p>
-            <p>Thứ 2 - Thứ 6: 8:00 - 17:30</p>
-            <p>Thứ 7: 8:00 - 12:00</p>
+            <p><?php echo CONTACT_WORKING_HOURS; ?></p>
         </div>
 
         <!-- Email -->
@@ -387,11 +378,11 @@
             </div>
             <h3>Email</h3>
             <p><strong>Email chính:</strong></p>
-            <p><a href="mailto:info@growhope.vn">info@growhope.vn</a></p>
+            <p><a href="mailto:<?php echo CONTACT_EMAIL; ?>"><?php echo CONTACT_EMAIL; ?></a></p>
             <p style="margin-top: 15px;"><strong>Hỗ trợ khách hàng:</strong></p>
-            <p><a href="mailto:support@growhope.vn">support@growhope.vn</a></p>
+            <p><a href="mailto:<?php echo CONTACT_EMAIL_SUPPORT; ?>"><?php echo CONTACT_EMAIL_SUPPORT; ?></a></p>
             <p style="margin-top: 15px;"><strong>Đối tác:</strong></p>
-            <p><a href="mailto:partner@growhope.vn">partner@growhope.vn</a></p>
+            <p><a href="mailto:<?php echo CONTACT_EMAIL_PARTNER; ?>"><?php echo CONTACT_EMAIL_PARTNER; ?></a></p>
         </div>
 
         <!-- Mạng xã hội -->
@@ -401,11 +392,11 @@
             </div>
             <h3>Mạng xã hội</h3>
             <p><strong>Facebook:</strong></p>
-            <p><a href="https://facebook.com/growhope" target="_blank">facebook.com/growhope</a></p>
+            <p><a href="<?php echo SOCIAL_FACEBOOK; ?>" target="_blank"><?php echo SOCIAL_FACEBOOK; ?></a></p>
             <p style="margin-top: 15px;"><strong>Instagram:</strong></p>
-            <p><a href="https://instagram.com/growhope" target="_blank">@growhope</a></p>
+            <p><a href="<?php echo SOCIAL_INSTAGRAM; ?>" target="_blank"><?php echo SOCIAL_INSTAGRAM; ?></a></p>
             <p style="margin-top: 15px;"><strong>Zalo:</strong></p>
-            <p><a href="tel:0123456789">0123 456 789</a></p>
+            <p><a href="tel:<?php echo str_replace(' ', '', SOCIAL_ZALO); ?>"><?php echo SOCIAL_ZALO; ?></a></p>
         </div>
 
         <!-- Giờ làm việc -->
@@ -415,11 +406,10 @@
             </div>
             <h3>Giờ làm việc</h3>
             <p><strong>Văn phòng:</strong></p>
-            <p>Thứ 2 - Thứ 6: 8:00 - 17:30</p>
-            <p>Thứ 7: 8:00 - 12:00</p>
+            <p><?php echo CONTACT_WORKING_HOURS; ?></p>
             <p>Chủ nhật: Nghỉ</p>
             <p style="margin-top: 15px;"><strong>Hotline 24/7:</strong></p>
-            <p>Hỗ trợ khẩn cấp: <a href="tel:0123456789">0123 456 789</a></p>
+            <p>Hỗ trợ khẩn cấp: <a href="tel:<?php echo str_replace(' ', '', CONTACT_HOTLINE); ?>"><?php echo CONTACT_HOTLINE; ?></a></p>
         </div>
 
         <!-- Phương thức thanh toán -->
@@ -442,7 +432,7 @@
         <div class="map-container">
             <div class="map-placeholder">
                 <i class="fas fa-map-marked-alt" style="font-size: 48px; color: var(--bg-green); margin-bottom: 15px; display: block;"></i>
-                <p>123 Đường Số 1, Phường 2, Quận 3, TP.HCM</p>
+                <p><?php echo CONTACT_ADDRESS; ?></p>
                 <p style="margin-top: 10px; font-size: 14px; color: var(--dark);">Bản đồ sẽ được tích hợp tại đây</p>
             </div>
         </div>

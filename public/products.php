@@ -1,4 +1,5 @@
 <?php
+require_once '../includes/config.php';
 require_once '../includes/database.php';
 
 try {
@@ -49,9 +50,9 @@ include '../includes/header.php';
 <style>
     /* Products Page Styles */
     .products-container {
-        max-width: 1200px;
+        max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
         margin: 0 auto;
-        padding: 40px 5%;
+        padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
     }
 
     .page-title {
@@ -127,7 +128,7 @@ include '../includes/header.php';
     .products-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 32px;
+        gap: <?php echo GRID_GAP_SMALL; ?>;
         margin-bottom: 40px;
     }
 
@@ -135,7 +136,7 @@ include '../includes/header.php';
         background-color: var(--white);
         border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         position: relative;
         cursor: pointer;
@@ -148,7 +149,7 @@ include '../includes/header.php';
 
     .product-image {
         width: 100%;
-        height: 192px;
+        height: 160px;
         background-color: #e0e0e0;
         display: flex;
         align-items: center;
@@ -158,26 +159,26 @@ include '../includes/header.php';
     }
 
     .product-image-placeholder {
-        color: #999;
+        color: var(--dark);
         font-size: 14px;
     }
 
 
     .product-info {
-        padding: 20px;
+        padding: 16px;
     }
 
     .product-name {
         font-family: 'Poppins', sans-serif;
         font-weight: 700;
         font-size: 18px;
-        color: var(--dark);
-        margin-bottom: 10px;
+        color: var(--primary);
+        margin-bottom: 8px;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        min-height: 54px;
+        min-height: 50px;
     }
 
     .product-name a {
@@ -194,23 +195,23 @@ include '../includes/header.php';
         font-family: 'Poppins', sans-serif;
         font-weight: 600;
         font-size: 20px;
-        color: #D26426;
-        margin-bottom: 10px;
+        color: var(--secondary);
+        margin-bottom: 8px;
     }
 
     .product-description {
         font-family: 'Poppins', sans-serif;
         font-weight: 400;
         font-size: 14px;
-        color: #666;
-        margin-bottom: 15px;
+        color: var(--dark);
+        margin-bottom: 12px;
         line-height: 1.5;
     }
 
     .add-to-cart-btn {
         width: 100%;
         padding: 12px;
-        background-color: #3C603C;
+        background-color: var(--primary);
         color: var(--white);
         border: none;
         border-radius: 5px;
@@ -233,7 +234,7 @@ include '../includes/header.php';
         position: fixed;
         top: 20px;
         right: 20px;
-        background-color: #3C603C;
+        background-color: var(--primary);
         color: var(--white);
         padding: 15px 25px;
         border-radius: 5px;
@@ -292,20 +293,20 @@ include '../includes/header.php';
     }
 
     .pagination .active {
-        background-color: #D26426;
+        background-color: var(--secondary);
         color: var(--white);
     }
 
-    @media (max-width: 1200px) {
+    @media (max-width: <?php echo BREAKPOINT_XL; ?>) {
         .products-grid {
             grid-template-columns: repeat(3, 1fr);
         }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: <?php echo BREAKPOINT_MD; ?>) {
         .products-grid {
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            gap: <?php echo GRID_GAP_SMALL; ?>;
         }
 
         .filters-section {
@@ -319,7 +320,7 @@ include '../includes/header.php';
         }
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: <?php echo BREAKPOINT_XS; ?>) {
         .products-grid {
             grid-template-columns: 1fr;
         }
@@ -327,7 +328,7 @@ include '../includes/header.php';
 </style>
 
 <!-- Main Content -->
-<main style="min-height: 60vh; padding: 60px 0; background-color: var(--white);">
+<main style="min-height: 60vh; padding: 60px 0; background-color: var(--light);">
     <div class="products-container">
         <h1 class="page-title">Sản Phẩm</h1>
 
@@ -380,7 +381,7 @@ include '../includes/header.php';
     const categoryMap = <?php echo json_encode($categoryMap, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
 
     // Configuration
-    const PRODUCTS_PER_PAGE = 16;
+    const PRODUCTS_PER_PAGE = <?php echo PAGINATION_PRODUCTS_PER_PAGE; ?>;
     let currentPage = 1;
     let filteredProducts = [...products];
 

@@ -1,4 +1,5 @@
 <?php 
+require_once '../includes/config.php';
 require_once '../includes/database.php';
 
 $pageTitle = 'Thư viện ảnh - GROWHOPE';
@@ -10,7 +11,7 @@ try {
 }
 
 // Pagination settings
-$itemsPerPage = 16; // 4 rows x 4 images = 16 images per page
+$itemsPerPage = PAGINATION_GALLERY_PER_PAGE;
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $page = max(1, $page); // Đảm bảo page không nhỏ hơn 1
 
@@ -50,10 +51,10 @@ include '../includes/header.php';
 ?>
 
 <!-- Gallery Section -->
-<main class="gallery-container" style="padding: 40px 5%;">
+<main class="gallery-container" style="padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>; max-width: <?php echo CONTAINER_MAX_WIDTH; ?>; margin: 0 auto;">
     <h1 style="text-align: center; margin-bottom: 30px; color: var(--dark);">Thư viện ảnh</h1>
     
-    <div class="gallery-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+    <div class="gallery-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: <?php echo GRID_GAP_SMALL; ?>;">
         <?php if (empty($images)): ?>
             <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
                 <i class="fas fa-image" style="font-size: 48px; color: var(--secondary); margin-bottom: 20px;"></i>
@@ -119,17 +120,21 @@ include '../includes/header.php';
 
 <!-- Add some responsive styles -->
 <style>
-    @media (max-width: 1200px) {
+    body {
+        background-color: var(--light);
+    }
+
+    @media (max-width: <?php echo BREAKPOINT_XL; ?>) {
         .gallery-grid {
             grid-template-columns: repeat(3, 1fr) !important;
         }
     }
-    @media (max-width: 900px) {
+    @media (max-width: <?php echo BREAKPOINT_MD; ?>) {
         .gallery-grid {
             grid-template-columns: repeat(2, 1fr) !important;
         }
     }
-    @media (max-width: 600px) {
+    @media (max-width: <?php echo BREAKPOINT_SM; ?>) {
         .gallery-grid {
             grid-template-columns: 1fr !important;
         }

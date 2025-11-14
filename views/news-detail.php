@@ -1,4 +1,5 @@
 <?php
+require_once '../includes/config.php';
 require_once '../includes/database.php';
 
 try {
@@ -10,7 +11,7 @@ try {
 $news_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
 if ($news_id <= 0 || !$pdo) {
-    header('Location: /ecoweb/public/news.php');
+    header('Location: ' . BASE_URL . '/public/news.php');
     exit;
 }
 
@@ -22,7 +23,7 @@ $newsStmt->execute();
 $article = $newsStmt->fetch();
 
 if (!$article) {
-    header('Location: /ecoweb/public/news.php');
+    header('Location: ' . BASE_URL . '/public/news.php');
     exit;
 }
 
@@ -35,15 +36,20 @@ include '../includes/header.php';
 ?>
 
 <style>
+    body {
+        background-color: var(--light);
+    }
+
     /* News Detail Page Styles */
     .news-detail-container {
-        background-color: var(--light);
-        padding: 40px 5%;
+        max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
+        margin: 0 auto;
+        padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
         min-height: 80vh;
     }
 
     .news-detail-wrapper {
-        max-width: 900px;
+        max-width: <?php echo CONTAINER_MAX_WIDTH_SMALL; ?>;
         margin: 0 auto;
         background-color: var(--white);
         border-radius: 10px;
@@ -229,7 +235,7 @@ include '../includes/header.php';
     }
 
     /* Responsive */
-    @media (max-width: 768px) {
+    @media (max-width: <?php echo BREAKPOINT_MD; ?>) {
         .news-detail-header,
         .news-content {
             padding: 30px 20px;
@@ -266,7 +272,7 @@ include '../includes/header.php';
         <!-- Header -->
         <div class="news-detail-header">
             <div class="news-breadcrumb">
-                <a href="/ecoweb/public/news.php">Tin tức</a>
+                    <a href="<?php echo BASE_URL; ?>/public/news.php">Tin tức</a>
                 <span>/</span>
                 <span><?php echo htmlspecialchars($article['title']); ?></span>
             </div>
@@ -278,7 +284,7 @@ include '../includes/header.php';
             <div class="news-meta">
                 <div class="news-meta-item">
                     <i class="far fa-calendar"></i>
-                    <span><?php echo date('d/m/Y', strtotime($article['publish_date'])); ?></span>
+                    <span><?php echo date(DATE_FORMAT, strtotime($article['publish_date'])); ?></span>
                 </div>
                 <div class="news-meta-item">
                     <i class="far fa-user"></i>
@@ -313,7 +319,7 @@ include '../includes/header.php';
             <div class="news-tags">
                 <span class="news-tags-label">Tags:</span>
                 <?php foreach ($article_tags as $tag): ?>
-                    <a href="/ecoweb/public/news.php?tag=<?php echo urlencode($tag); ?>" class="news-tag">
+                    <a href="<?php echo BASE_URL; ?>/public/news.php?tag=<?php echo urlencode($tag); ?>" class="news-tag">
                         <?php echo htmlspecialchars($tag); ?>
                     </a>
                 <?php endforeach; ?>
@@ -322,7 +328,7 @@ include '../includes/header.php';
 
             <!-- Actions -->
             <div class="news-actions">
-                <a href="/ecoweb/public/news.php" class="news-action-btn secondary">
+                <a href="<?php echo BASE_URL; ?>/public/news.php" class="news-action-btn secondary">
                     <i class="fas fa-arrow-left"></i>
                     Quay lại danh sách
                 </a>

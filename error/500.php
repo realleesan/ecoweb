@@ -1,4 +1,7 @@
-<?php include '../includes/header.php'; ?>
+<?php 
+require_once '../includes/config.php';
+include '../includes/header.php'; 
+?>
 
 <style>
     :root {
@@ -20,8 +23,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 60px 5%;
-        max-width: 1200px;
+        padding: <?php echo CONTAINER_PADDING_LARGE; ?>;
+        max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
         margin: 0 auto;
         position: relative;
     }
@@ -29,10 +32,10 @@
     .error-content {
         text-align: center;
         background-color: var(--white);
-        padding: 60px 40px;
+        padding: <?php echo CONTAINER_PADDING_LARGE; ?>;
         border-radius: 20px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        max-width: 700px;
+        max-width: <?php echo CONTAINER_MAX_WIDTH_XSMALL; ?>;
         width: 100%;
     }
 
@@ -193,7 +196,7 @@
     }
 
     /* Responsive */
-    @media (max-width: 768px) {
+    @media (max-width: <?php echo BREAKPOINT_MD; ?>) {
         .error-content {
             padding: 40px 25px;
         }

@@ -1,4 +1,5 @@
 <?php
+require_once '../includes/config.php';
 require_once '../includes/database.php';
 
 // Kết nối database
@@ -20,7 +21,7 @@ $valid_sorts = [
 $sort = isset($_GET['sort']) && array_key_exists($_GET['sort'], $valid_sorts) ? $_GET['sort'] : 'name_asc';
 
 // Phân trang
-$items_per_page = 12; // 4 hàng x 3 cột = 12 items
+$items_per_page = PAGINATION_CATEGORIES_PER_PAGE;
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($page - 1) * $items_per_page;
 
@@ -78,9 +79,9 @@ include '../includes/header.php';
 <style>
     /* Categories Page Styles - Matching Products Page */
     .products-container {
-        max-width: 1200px;
+        max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
         margin: 0 auto;
-        padding: 40px 5%;
+        padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
     }
 
     .page-title {
@@ -158,7 +159,7 @@ include '../includes/header.php';
     .products-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 32px;
+        gap: <?php echo GRID_GAP_SMALL; ?>;
         margin-bottom: 40px;
     }
 
@@ -166,7 +167,7 @@ include '../includes/header.php';
         background-color: var(--white);
         border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
         position: relative;
         cursor: pointer;
@@ -179,7 +180,7 @@ include '../includes/header.php';
 
     .product-image {
         width: 100%;
-        height: 200px;
+        height: 160px;
         overflow: hidden;
     }
 
@@ -195,13 +196,13 @@ include '../includes/header.php';
     }
 
     .product-info {
-        padding: 15px;
+        padding: 16px;
     }
 
     .product-title {
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--dark);
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--primary);
         margin-bottom: 8px;
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -212,13 +213,13 @@ include '../includes/header.php';
 
     .product-description {
         font-size: 14px;
-        color: var(--gray);
-        margin-bottom: 15px;
+        color: var(--dark);
+        margin-bottom: 12px;
         display: -webkit-box;
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        height: 4.5em;
+        height: 4em;
     }
 
     .product-meta {
@@ -226,7 +227,7 @@ include '../includes/header.php';
         justify-content: space-between;
         align-items: center;
         font-size: 14px;
-        color: var(--gray);
+        color: var(--dark);
     }
 
     .product-count {
@@ -313,6 +314,12 @@ include '../includes/header.php';
     }
 
     /* Responsive Design */
+    @media (max-width: <?php echo BREAKPOINT_XL; ?>) {
+        .products-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: <?php echo GRID_GAP_SMALL; ?>;
+        }
+    }
 
     .search-input:focus {
         border-color: var(--primary);
@@ -391,17 +398,10 @@ include '../includes/header.php';
     }
 
     /* Responsive */
-    @media (max-width: 1200px) {
-        .categories-grid {
-            grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-        }
-    }
-
-    @media (max-width: 992px) {
-        .categories-grid {
+    @media (max-width: <?php echo BREAKPOINT_LG; ?>) {
+        .products-grid {
             grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+            gap: <?php echo GRID_GAP_SMALL; ?>;
         }
 
         .page-header h1 {
@@ -424,10 +424,10 @@ include '../includes/header.php';
         }
     }
 
-    @media (max-width: 576px) {
-        .categories-grid {
+    @media (max-width: <?php echo BREAKPOINT_SM; ?>) {
+        .products-grid {
             grid-template-columns: 1fr;
-            gap: 20px;
+            gap: <?php echo GRID_GAP_SMALL; ?>;
         }
 
         .page-header h1 {
@@ -469,7 +469,7 @@ include '../includes/header.php';
 </style>
 
 <!-- Main Content -->
-<main style="min-height: 60vh; padding: 60px 0; background-color: var(--white);">
+<main style="min-height: 60vh; padding: 60px 0; background-color: var(--light);">
     <div class="products-container">
         <h1 class="page-title">Danh Mục Sản Phẩm</h1>
         

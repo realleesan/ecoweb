@@ -1,4 +1,6 @@
     <?php 
+    require_once __DIR__ . '/config.php';
+    
     // Get current page and set active states
     $current_page = basename($_SERVER['PHP_SELF']);
     $is_home = ($current_page == 'index.php' || $current_page == '');
@@ -7,16 +9,16 @@
     $is_public = (strpos($_SERVER['PHP_SELF'], 'public') !== false);
     
     // Set paths
-    $base_path = $is_public ? '' : '/ecoweb/public/';
-    $index_link = $is_public ? '/ecoweb/index.php' : '/ecoweb/public/index.php';
+    $base_path = $is_public ? '' : BASE_URL . '/public/';
+    $index_link = $is_public ? BASE_URL . '/index.php' : BASE_URL . '/public/index.php';
     ?>
     <!-- Footer -->
-    <footer style="background-color: var(--dark); color: var(--white); padding: 50px 5% 20px;">
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; max-width: 1200px; margin: 0 auto;">
+    <footer style="background-color: var(--dark); color: var(--white); padding: 50px <?php echo CONTAINER_PADDING; ?> 20px;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; max-width: <?php echo CONTAINER_MAX_WIDTH; ?>; margin: 0 auto;">
             <!-- Về GROWHOPE -->
             <div style="flex: 1; min-width: 250px; margin-bottom: 30px; padding: 0 15px;">
                 <h3 style="color: var(--secondary); margin-bottom: 20px; font-size: 18px; position: relative; padding-bottom: 10px;">
-                    Về GROWHOPE
+                    Về <?php echo BRAND_NAME; ?>
                     <span style="position: absolute; bottom: 0; left: 0; width: 50px; height: 2px; background: var(--secondary);"></span>
                 </h3>
                 <ul style="list-style: none; padding: 0;">
@@ -31,7 +33,7 @@
             <!-- Sản phẩm của GROWHOPE -->
             <div style="flex: 1; min-width: 250px; margin-bottom: 30px; padding: 0 15px;">
                 <h3 style="color: var(--secondary); margin-bottom: 20px; font-size: 18px; position: relative; padding-bottom: 10px;">
-                    Sản phẩm của GROWHOPE
+                    Sản phẩm của <?php echo BRAND_NAME; ?>
                     <span style="position: absolute; bottom: 0; left: 0; width: 50px; height: 2px; background: var(--secondary);"></span>
                 </h3>
                 <ul style="list-style: none; padding: 0;">
@@ -67,15 +69,15 @@
                 <div style="margin-bottom: 20px;">
                     <p style="margin: 0 0 15px 0; color: #ddd; display: flex; align-items: flex-start;">
                         <i class="fas fa-map-marker-alt" style="color: var(--secondary); margin-right: 10px; margin-top: 5px;"></i>
-                        <span>123 Đường Số 1, Phường 2, Quận 3, TP.HCM, Việt Nam</span>
+                        <span><?php echo CONTACT_ADDRESS; ?></span>
                     </p>
                     <p style="margin: 0 0 15px 0; color: #ddd; display: flex; align-items: center;">
                         <i class="fas fa-phone-alt" style="color: var(--secondary); margin-right: 10px;"></i>
-                        <span>0123 456 789</span>
+                        <span><?php echo CONTACT_PHONE; ?></span>
                     </p>
                     <p style="margin: 0 0 15px 0; color: #ddd; display: flex; align-items: center;">
                         <i class="fas fa-envelope" style="color: var(--secondary); margin-right: 10px;"></i>
-                        <span>info@growhope.vn</span>
+                        <span><?php echo CONTACT_EMAIL; ?></span>
                     </p>
                 </div>
                 
@@ -92,7 +94,7 @@
         <!-- Copyright -->
         <div style="text-align: center; padding: 20px 0 0; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1);">
             <p style="margin: 0; color: #aaa; font-size: 14px;">
-                &copy; 2023 GROWHOPE. Tất cả các quyền được bảo lưu.
+                &copy; <?php echo date('Y'); ?> <?php echo BRAND_NAME; ?>. Tất cả các quyền được bảo lưu.
             </p>
         </div>
     </footer>

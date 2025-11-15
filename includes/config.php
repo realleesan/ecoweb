@@ -100,3 +100,18 @@ define('DATETIME_FORMAT', 'd/m/Y H:i');
 // Set timezone
 date_default_timezone_set(TIMEZONE);
 
+// ============================================
+// EMAIL CONFIGURATION (PHPMailer)
+// ============================================
+define('SMTP_HOST', 'smtp.gmail.com');
+define('SMTP_PORT', 587);
+define('SMTP_USERNAME', 'baominhkpkp@gmail.com');
+define('SMTP_PASSWORD', 'gjvz qdrq pogq sheb'); // Mật khẩu ứng dụng sẽ được cung cấp sau
+define('SMTP_FROM_EMAIL', 'baominhkpkp@gmail.com');
+define('SMTP_FROM_NAME', 'GROWHOPE');
+define('SMTP_SECURE', 'tls'); // 'tls' hoặc 'ssl'
+define('SMTP_CHARSET', 'UTF-8');
+
+// Email nhận tin nhắn liên hệ từ form (email admin thực tế)
+define('CONTACT_EMAIL_RECEIVE', 'baominhkpkp@gmail.com'); // Email thực tế để nhận tin nhắn liên hệ
+

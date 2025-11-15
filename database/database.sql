@@ -1,5 +1,6 @@
 -- Database schema for GrowHope (ECOWEB)
 -- Drop existing tables if re-importing (optional)
+DROP TABLE IF EXISTS contact_messages;
 DROP TABLE IF EXISTS news_tags;
 DROP TABLE IF EXISTS product_tags;
 DROP TABLE IF EXISTS products;
@@ -71,6 +72,22 @@ CREATE TABLE gallery_images (
     alt_text VARCHAR(255) NOT NULL,
     category VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Contact messages table
+CREATE TABLE contact_messages (
+    message_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    subject VARCHAR(100) NOT NULL,
+    message TEXT NOT NULL,
+    status ENUM('new', 'read', 'replied', 'archived') DEFAULT 'new',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_email (email),
+    INDEX idx_status (status),
+    INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Users table for authentication

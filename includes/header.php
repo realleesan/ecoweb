@@ -245,10 +245,12 @@ $index_link = $is_public ? BASE_URL . '/index.php' : BASE_URL . '/public/index.p
             <span style="font-size: 28px; font-weight: 700;"><?php echo BRAND_NAME; ?></span>
         </a>
         
-        <div class="search-bar">
-            <input type="text" placeholder="Tìm kiếm sản phẩm...">
-            <i class="fas fa-search"></i>
-        </div>
+        <form class="search-bar" method="GET" action="<?php echo $base_path; ?>search.php">
+            <input type="text" name="q" placeholder="Tìm kiếm sản phẩm..." value="<?php echo isset($_GET['q']) ? htmlspecialchars($_GET['q']) : ''; ?>">
+            <button type="submit" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0;">
+                <i class="fas fa-search" style="color: var(--dark);"></i>
+            </button>
+        </form>
         
         <div style="flex: 1;"></div>
         

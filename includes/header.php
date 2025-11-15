@@ -1,6 +1,33 @@
 <?php 
 require_once __DIR__ . '/config.php';
 
+// Check if user is logged in
+$is_logged_in = false;
+$current_user_name = 'Tài khoản';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Verify session is valid
+if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
+    // Double check session values exist
+    if (isset($_SESSION['username']) || isset($_SESSION['full_name'])) {
+        $is_logged_in = true;
+        // Get display name
+        if (isset($_SESSION['full_name']) && !empty($_SESSION['full_name'])) {
+            $current_user_name = htmlspecialchars($_SESSION['full_name']);
+        } elseif (isset($_SESSION['username']) && !empty($_SESSION['username'])) {
+            $current_user_name = htmlspecialchars($_SESSION['username']);
+        }
+    } else {
+        // Session has user_id but missing username/full_name - invalid session, clear it
+        session_unset();
+        session_destroy();
+        session_start();
+    }
+}
+
 // Get current page and set active states
 $current_page = basename($_SERVER['PHP_SELF']);
 $is_home = ($current_page == 'index.php' || $current_page == '');
@@ -136,6 +163,13 @@ $index_link = $is_public ? BASE_URL . '/index.php' : BASE_URL . '/public/index.p
 
         .account {
             cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            transition: opacity 0.3s ease;
+        }
+
+        .account:hover {
+            opacity: 0.8;
         }
 
         .account i {
@@ -267,10 +301,10 @@ $index_link = $is_public ? BASE_URL . '/index.php' : BASE_URL . '/public/index.p
                 <i class="fas fa-shopping-cart"></i>
                 <span>0</span>
             </div>
-            <div class="account">
+            <a href="<?php echo $is_logged_in ? BASE_URL . '/auth/account.php' : BASE_URL . '/auth/login.php'; ?>" class="account" style="text-decoration: none; color: inherit;">
                 <i class="far fa-user"></i>
-                <span>Tài khoản</span>
-            </div>
+                <span><?php echo $current_user_name; ?></span>
+            </a>
         </div>
     </div>
 

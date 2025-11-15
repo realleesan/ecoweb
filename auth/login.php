@@ -326,7 +326,7 @@ include '../includes/header.php';
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-sign-in-alt"></i> Đăng Nhập
                     </button>
-                    <a href="#" class="btn-link">Quên mật khẩu</a>
+                    <a href="<?php echo BASE_URL; ?>/auth/forgot-password.php" class="btn-link">Quên mật khẩu</a>
                 </div>
             </form>
 

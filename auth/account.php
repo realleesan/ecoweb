@@ -12,6 +12,33 @@ if (!$user) {
     exit;
 }
 
+$addressTypeLabels = [
+    'home' => 'Nhà riêng',
+    'office' => 'Văn phòng',
+    'school' => 'Trường học'
+];
+
+$defaultAddress = null;
+$defaultAddressText = '';
+
+try {
+    $pdo = getPDO();
+    $stmt = $pdo->prepare('SELECT recipient_name, phone, street_address, ward, city, address_type FROM user_addresses WHERE user_id = :user_id ORDER BY is_default DESC, created_at DESC LIMIT 1');
+    $stmt->execute(['user_id' => $user['user_id']]);
+    $defaultAddress = $stmt->fetch();
+
+    if ($defaultAddress) {
+        $addressParts = array_filter([
+            $defaultAddress['street_address'] ?? '',
+            $defaultAddress['ward'] ?? '',
+            $defaultAddress['city'] ?? ''
+        ]);
+        $defaultAddressText = implode(', ', $addressParts);
+    }
+} catch (Exception $e) {
+    $defaultAddress = null;
+}
+
 include '../includes/header.php';
 ?>
 
@@ -85,6 +112,38 @@ include '../includes/header.php';
     .info-value {
         color: var(--dark);
         font-size: 15px;
+    }
+
+    .info-value .address-meta {
+        margin-top: 6px;
+        color: #555;
+        font-size: 14px;
+    }
+
+    .address-tag {
+        display: inline-block;
+        margin-top: 8px;
+        background-color: var(--light);
+        color: var(--primary);
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .manage-address-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 14px;
+        font-weight: 600;
+        color: var(--primary);
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .manage-address-link:hover {
+        text-decoration: underline;
     }
 
     .info-value.empty {
@@ -181,9 +240,36 @@ include '../includes/header.php';
                     <div class="info-label">
                         <i class="fas fa-map-marker-alt"></i> Địa chỉ
                     </div>
-                    <div class="info-value <?php echo empty($user['address']) ? 'empty' : ''; ?>">
-                        <?php echo !empty($user['address']) ? htmlspecialchars($user['address']) : 'Chưa cập nhật'; ?>
-                    </div>
+                    <?php if ($defaultAddress): ?>
+                        <div class="info-value">
+                            <div>
+                                <strong><?php echo htmlspecialchars($defaultAddress['recipient_name']); ?></strong>
+                            </div>
+                            <?php if (!empty($defaultAddressText)): ?>
+                                <div class="address-meta">
+                                    <?php echo htmlspecialchars($defaultAddressText); ?>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (!empty($defaultAddress['phone'])): ?>
+                                <div class="address-meta">
+                                    <i class="fas fa-phone"></i> <?php echo htmlspecialchars($defaultAddress['phone']); ?>
+                                </div>
+                            <?php endif; ?>
+                            <span class="address-tag">
+                                <?php echo $addressTypeLabels[$defaultAddress['address_type']] ?? 'Địa chỉ'; ?>
+                            </span>
+                            <a class="manage-address-link" href="<?php echo BASE_URL; ?>/auth/addresses.php">
+                                Quản lý sổ địa chỉ <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    <?php else: ?>
+                        <div class="info-value empty">
+                            Chưa cập nhật
+                            <a class="manage-address-link" href="<?php echo BASE_URL; ?>/auth/addresses.php">
+                                Thêm địa chỉ ngay <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <div class="info-group">

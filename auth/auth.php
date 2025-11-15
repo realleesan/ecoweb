@@ -121,6 +121,53 @@ function registerUser($username, $email, $password, $fullName = '', $phone = '')
 }
 
 /**
+ * Change user password
+ */
+function changePassword($userId, $currentPassword, $newPassword) {
+    try {
+        $pdo = getPDO();
+        
+        // Get current user password
+        $stmt = $pdo->prepare('SELECT password FROM users WHERE user_id = :user_id AND is_active = 1');
+        $stmt->execute(['user_id' => $userId]);
+        $user = $stmt->fetch();
+        
+        if (!$user) {
+            return ['success' => false, 'message' => 'Người dùng không tồn tại hoặc đã bị khóa'];
+        }
+        
+        // Verify current password
+        if (!password_verify($currentPassword, $user['password'])) {
+            return ['success' => false, 'message' => 'Mật khẩu hiện tại không chính xác'];
+        }
+        
+        // Validate new password
+        if (strlen($newPassword) < 6) {
+            return ['success' => false, 'message' => 'Mật khẩu mới phải có ít nhất 6 ký tự'];
+        }
+        
+        // Check if new password is same as current password
+        if (password_verify($newPassword, $user['password'])) {
+            return ['success' => false, 'message' => 'Mật khẩu mới phải khác mật khẩu hiện tại'];
+        }
+        
+        // Hash new password
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        
+        // Update password
+        $stmt = $pdo->prepare('UPDATE users SET password = :password WHERE user_id = :user_id');
+        $stmt->execute([
+            'password' => $hashedPassword,
+            'user_id' => $userId
+        ]);
+        
+        return ['success' => true, 'message' => 'Đổi mật khẩu thành công'];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()];
+    }
+}
+
+/**
  * Logout user
  */
 function logoutUser() {

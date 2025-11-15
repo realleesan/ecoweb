@@ -11,6 +11,11 @@ if (isLoggedIn()) {
 $error = '';
 $success = '';
 
+// Check if redirected from registration
+if (isset($_GET['registered']) && $_GET['registered'] == '1') {
+    $success = 'Đăng ký thành công! Vui lòng đăng nhập.';
+}
+
 // Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usernameOrEmail = trim($_POST['username_or_email'] ?? '');
@@ -21,9 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $result = loginUser($usernameOrEmail, $password);
         if ($result['success']) {
-            $success = $result['message'];
-            // Redirect after 1 second
-            header('refresh:1;url=' . BASE_URL . '/index.php');
+            // Redirect immediately on success
+            header('Location: ' . BASE_URL . '/index.php');
+            exit;
         } else {
             $error = $result['message'];
         }
@@ -38,9 +43,15 @@ include '../includes/header.php';
         background-color: var(--light);
         min-height: 100vh;
         display: flex;
+        flex-direction: column;
+    }
+
+    main {
+        flex: 1;
+        display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        padding: 40px 20px;
     }
 
     .auth-container {
@@ -238,6 +249,10 @@ include '../includes/header.php';
     }
 
     @media (max-width: <?php echo BREAKPOINT_SM; ?>) {
+        main {
+            padding: 20px 10px;
+        }
+
         .auth-container {
             max-width: 100%;
         }
@@ -261,68 +276,66 @@ include '../includes/header.php';
     }
 </style>
 
-<div class="auth-container">
-    <div class="auth-header">
-        <h1>Đăng Nhập</h1>
-        <p>Chào mừng bạn trở lại!</p>
-    </div>
+<main>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1>Đăng Nhập</h1>
+            <p>Chào mừng bạn trở lại!</p>
+        </div>
 
-    <div class="auth-body">
-        <?php if ($error): ?>
-            <div class="alert alert-error">
-                <i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($success): ?>
-            <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($success); ?>
-            </div>
-        <?php endif; ?>
-
-        <form method="POST" action="">
-            <div class="form-group">
-                <label for="username_or_email">Tên đăng nhập hoặc Email</label>
-                <div class="input-icon">
-                    <i class="fas fa-user"></i>
-                    <input type="text" 
-                           id="username_or_email" 
-                           name="username_or_email" 
-                           placeholder="Nhập tên đăng nhập hoặc email"
-                           value="<?php echo isset($_POST['username_or_email']) ? htmlspecialchars($_POST['username_or_email']) : ''; ?>"
-                           required>
+        <div class="auth-body">
+            <?php if ($error): ?>
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i> <?php echo htmlspecialchars($error); ?>
                 </div>
-            </div>
+            <?php endif; ?>
 
-            <div class="form-group">
-                <label for="password">Mật khẩu</label>
-                <div class="input-icon">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" 
-                           id="password" 
-                           name="password" 
-                           placeholder="Nhập mật khẩu"
-                           required>
+            <?php if ($success): ?>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($success); ?>
                 </div>
-            </div>
+            <?php endif; ?>
 
-            <div class="forgot-password">
-                <a href="#">Quên mật khẩu?</a>
-            </div>
+            <form method="POST" action="">
+                <div class="form-group">
+                    <label for="username_or_email">Tên đăng nhập hoặc Email</label>
+                    <div class="input-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" 
+                               id="username_or_email" 
+                               name="username_or_email" 
+                               placeholder="Nhập tên đăng nhập hoặc email"
+                               value="<?php echo isset($_POST['username_or_email']) ? htmlspecialchars($_POST['username_or_email']) : ''; ?>"
+                               required>
+                    </div>
+                </div>
 
-            <div class="btn-group">
-                <button type="submit" class="btn-primary">
-                    <i class="fas fa-sign-in-alt"></i> Đăng Nhập
-                </button>
-                <a href="#" class="btn-link">Quên mật khẩu</a>
-            </div>
-        </form>
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <div class="input-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               placeholder="Nhập mật khẩu"
+                               required>
+                    </div>
+                </div>
 
-        <div class="auth-footer">
-            <p>Chưa có tài khoản? <a href="<?php echo BASE_URL; ?>/auth/register.php">Đăng ký ngay</a></p>
+                <div class="btn-group">
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Đăng Nhập
+                    </button>
+                    <a href="#" class="btn-link">Quên mật khẩu</a>
+                </div>
+            </form>
+
+            <div class="auth-footer">
+                <p>Chưa có tài khoản? <a href="<?php echo BASE_URL; ?>/auth/register.php">Đăng ký ngay</a></p>
+            </div>
         </div>
     </div>
-</div>
+</main>
 
 <?php include '../includes/footer.php'; ?>
 

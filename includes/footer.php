@@ -5,12 +5,36 @@
     $current_page = basename($_SERVER['PHP_SELF']);
     $is_home = ($current_page == 'index.php' || $current_page == '');
     
-    // Determine if we're in the public directory
-    $is_public = (strpos($_SERVER['PHP_SELF'], 'public') !== false);
+    // Determine current directory from script path
+    $script_path = $_SERVER['PHP_SELF'];
+    $is_public = (strpos($script_path, '/public/') !== false);
+    $is_auth = (strpos($script_path, '/auth/') !== false);
+    $is_views = (strpos($script_path, '/views/') !== false);
+    $is_admin = (strpos($script_path, '/admin/') !== false);
+    $is_root = !$is_public && !$is_auth && !$is_views && !$is_admin;
     
-    // Set paths
-    $base_path = $is_public ? '' : BASE_URL . '/public/';
-    $index_link = $is_public ? BASE_URL . '/index.php' : BASE_URL . '/public/index.php';
+    // Set paths based on current directory
+    if ($is_root) {
+        // Root directory (index.php)
+        $base_path = BASE_URL . '/public/';
+        $index_link = BASE_URL . '/index.php';
+    } elseif ($is_public) {
+        // Public directory
+        $base_path = '';
+        $index_link = BASE_URL . '/index.php';
+    } elseif ($is_auth) {
+        // Auth directory
+        $base_path = BASE_URL . '/public/';
+        $index_link = BASE_URL . '/index.php';
+    } elseif ($is_views) {
+        // Views directory
+        $base_path = BASE_URL . '/public/';
+        $index_link = BASE_URL . '/index.php';
+    } else {
+        // Default fallback
+        $base_path = BASE_URL . '/public/';
+        $index_link = BASE_URL . '/index.php';
+    }
     ?>
     <!-- Footer -->
     <footer style="background-color: var(--dark); color: var(--white); padding: 50px <?php echo CONTAINER_PADDING; ?> 20px;">

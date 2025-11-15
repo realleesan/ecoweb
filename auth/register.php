@@ -34,13 +34,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $result = registerUser($username, $email, $password, $fullName, $phone);
         if ($result['success']) {
-            $success = $result['message'];
             // Auto login after registration
             $loginResult = loginUser($username, $password);
             if ($loginResult['success']) {
-                header('refresh:2;url=' . BASE_URL . '/index.php');
+                // Redirect immediately on success
+                header('Location: ' . BASE_URL . '/index.php');
+                exit;
             } else {
-                header('refresh:2;url=' . BASE_URL . '/auth/login.php');
+                // If auto login fails, redirect to login page
+                header('Location: ' . BASE_URL . '/auth/login.php?registered=1');
+                exit;
             }
         } else {
             $error = $result['message'];
@@ -56,9 +59,15 @@ include '../includes/header.php';
         background-color: var(--light);
         min-height: 100vh;
         display: flex;
+        flex-direction: column;
+    }
+
+    main {
+        flex: 1;
+        display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        padding: 40px 20px;
     }
 
     .auth-container {
@@ -229,6 +238,10 @@ include '../includes/header.php';
     }
 
     @media (max-width: <?php echo BREAKPOINT_SM; ?>) {
+        main {
+            padding: 20px 10px;
+        }
+
         .auth-container {
             max-width: 100%;
         }
@@ -247,8 +260,9 @@ include '../includes/header.php';
     }
 </style>
 
-<div class="auth-container">
-    <div class="auth-header">
+<main>
+    <div class="auth-container">
+        <div class="auth-header">
         <h1>Đăng Ký</h1>
         <p>Tạo tài khoản mới để bắt đầu</p>
     </div>
@@ -359,7 +373,7 @@ include '../includes/header.php';
             <p>Đã có tài khoản? <a href="<?php echo BASE_URL; ?>/auth/login.php">Đăng nhập ngay</a></p>
         </div>
     </div>
-</div>
+</main>
 
 <script>
     // Validate password match

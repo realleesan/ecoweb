@@ -995,4 +995,11 @@ include __DIR__ . '/../includes/components/page-header.php';
     <?php endif; ?>
 </script>
 
+<?php
+$cta_heading = 'Sẵn sàng bắt đầu hành trình phủ xanh cùng chúng tôi?';
+$cta_description = 'Hãy khám phá các sản phẩm và dịch vụ của chúng tôi ngay hôm nay!';
+$cta_button_text = 'Xem sản phẩm';
+$cta_button_link = BASE_URL . '/public/products.php';
+include '../includes/components/cta-section.php';
+?>
 <?php include '../includes/footer.php'; ?>

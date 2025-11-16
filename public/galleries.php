@@ -154,4 +154,11 @@ include __DIR__ . '/../includes/components/page-header.php';
     }
 </style>
 
+<?php
+$cta_heading = 'Tìm hiểu thêm về các dự án và hoạt động của chúng tôi';
+$cta_description = 'Sau khi xem hình ảnh, hãy tìm hiểu thêm về các dự án trồng rừng và cách bạn có thể tham gia.';
+$cta_button_text = 'Tìm hiểu thêm';
+$cta_button_link = BASE_URL . '/public/about.php';
+include '../includes/components/cta-section.php';
+?>
 <?php include '../includes/footer.php'; ?>

@@ -396,56 +396,6 @@ include 'includes/header.php';
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
     }
 
-    /* CTA Section */
-    .cta-section {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--bg-green) 100%);
-        padding: <?php echo CONTAINER_PADDING_LARGE; ?>;
-        text-align: center;
-        color: var(--white);
-        margin: 40px 0 0;
-    }
-
-    .cta-content {
-        max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
-        margin: 0 auto;
-    }
-
-    .cta-content h2 {
-        font-size: 36px;
-        font-weight: 700;
-        margin-bottom: 20px;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .cta-content p {
-        font-size: 18px;
-        margin-bottom: 30px;
-        line-height: 1.6;
-        max-width: <?php echo CONTAINER_MAX_WIDTH_SMALL; ?>;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .cta-btn {
-        background-color: var(--secondary);
-        color: var(--white);
-        padding: 18px 50px;
-        border: none;
-        border-radius: 30px;
-        font-size: 18px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-block;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    .cta-btn:hover {
-        background-color: var(--dark);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-    }
 
     /* Responsive */
     @media (max-width: <?php echo BREAKPOINT_XL; ?>) {
@@ -501,17 +451,6 @@ include 'includes/header.php';
             height: 300px;
         }
 
-        .cta-section {
-            padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
-        }
-
-        .cta-content h2 {
-            font-size: 28px;
-        }
-
-        .cta-content p {
-            font-size: 16px;
-        }
 
         .products-grid {
             grid-template-columns: 1fr;
@@ -659,14 +598,13 @@ include 'includes/header.php';
     </div>
 </section>
 
-<!-- CTA Section -->
-<section class="cta-section">
-    <div class="cta-content">
-        <h2>Hãy cùng gieo thêm một mầm xanh cho Trái Đất hôm nay</h2>
-        <p>Mỗi cây xanh bạn trồng là một đóng góp ý nghĩa cho tương lai của hành tinh. Hãy tham gia cùng chúng tôi trong hành trình phủ xanh Trái Đất!</p>
-        <a href="products.php" class="cta-btn">Tham gia phủ xanh</a>
-    </div>
-</section>
+<?php
+$cta_heading = 'Hãy cùng gieo thêm một mầm xanh cho Trái Đất hôm nay';
+$cta_description = 'Mỗi cây xanh bạn trồng là một đóng góp ý nghĩa cho tương lai của hành tinh. Hãy tham gia cùng chúng tôi trong hành trình phủ xanh Trái Đất!';
+$cta_button_text = 'Tham gia phủ xanh';
+$cta_button_link = BASE_URL . '/public/products.php';
+include 'includes/components/cta-section.php';
+?>
 
 <?php include 'includes/footer.php'; ?>
 

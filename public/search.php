@@ -802,4 +802,11 @@ include '../includes/header.php';
     });
 </script>
 
+<?php
+$cta_heading = 'Khám phá thêm các sản phẩm và dịch vụ của chúng tôi';
+$cta_description = 'Nếu không tìm thấy những gì bạn cần, hãy xem tất cả sản phẩm hoặc liên hệ với chúng tôi để được tư vấn.';
+$cta_button_text = 'Xem tất cả sản phẩm';
+$cta_button_link = BASE_URL . '/public/products.php';
+include '../includes/components/cta-section.php';
+?>
 <?php include '../includes/footer.php'; ?>

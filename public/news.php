@@ -304,5 +304,12 @@ include '../includes/header.php';
         <?php endif; ?>
     </div>
 
+<?php
+$cta_heading = 'Khám phá các sản phẩm cây trồng chất lượng';
+$cta_description = 'Sau khi đọc tin tức, hãy khám phá các sản phẩm cây trồng đa dạng của chúng tôi để bắt đầu hành trình phủ xanh.';
+$cta_button_text = 'Xem sản phẩm';
+$cta_button_link = BASE_URL . '/public/products.php';
+include '../includes/components/cta-section.php';
+?>
 <?php include '../includes/footer.php'; ?>
 

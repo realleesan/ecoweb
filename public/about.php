@@ -134,5 +134,12 @@ include '../includes/header.php';
     </div>
 </main>
 
+<?php
+$cta_heading = 'Bạn muốn tìm hiểu thêm về chúng tôi?';
+$cta_description = 'Hãy liên hệ với chúng tôi để biết thêm về các dự án và cách bạn có thể tham gia vào hành trình phủ xanh Trái Đất.';
+$cta_button_text = 'Liên hệ ngay';
+$cta_button_link = BASE_URL . '/public/contact.php';
+include '../includes/components/cta-section.php';
+?>
 <?php include '../includes/footer.php'; ?>
 

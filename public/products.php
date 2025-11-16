@@ -620,5 +620,12 @@ include '../includes/header.php';
     });
 </script>
 
+<?php
+$cta_heading = 'Theo dõi tin tức mới nhất về môi trường và trồng rừng';
+$cta_description = 'Cập nhật các hoạt động, dự án và tin tức mới nhất từ cộng đồng phủ xanh Trái Đất.';
+$cta_button_text = 'Đọc tin tức';
+$cta_button_link = BASE_URL . '/public/news.php';
+include '../includes/components/cta-section.php';
+?>
 <?php include '../includes/footer.php'; ?>
 

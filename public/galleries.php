@@ -80,44 +80,12 @@ include __DIR__ . '/../includes/components/page-header.php';
 
     <!-- Pagination -->
     <?php if ($totalPages > 1 && !empty($images)): ?>
-    <div class="pagination" style="margin-top: 40px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;">
-        <?php if ($page > 1): ?>
-            <a href="?page=<?php echo $page - 1; ?>" class="page-link" 
-               style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #f0f0f0; color: var(--dark); text-decoration: none; border-radius: 4px; font-weight: 500;"
-               onmouseover="this.style.background='var(--secondary)'; this.style.color='white'" 
-               onmouseout="this.style.background='#f0f0f0'; this.style.color='var(--dark)'">
-                <i class="fas fa-chevron-left"></i>
-            </a>
-        <?php endif; ?>
-
         <?php
-        $startPage = max(1, $page - 2);
-        $endPage = min($totalPages, $page + 2);
-
-        if ($startPage > 1) {
-            echo '<a href="?page=1" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #f0f0f0; color: var(--dark); text-decoration: none; border-radius: 4px; font-weight: 500;">1</a>';
-            if ($startPage > 2) {
-                echo '<span style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px;">...</span>';
-            }
-        }
-
-        for ($i = $startPage; $i <= $endPage; $i++) {
-            $isActive = ($i === $page);
-            echo '<a href="?page=' . $i . '" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: ' . ($isActive ? 'var(--primary)' : '#f0f0f0') . '; color: ' . ($isActive ? 'white' : 'var(--dark)') . '; text-decoration: none; border-radius: 4px; font-weight: 500;">' . $i . '</a>';
-        }
-
-        if ($endPage < $totalPages) {
-            if ($endPage < $totalPages - 1) {
-                echo '<span style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px;">...</span>';
-            }
-            echo '<a href="?page=' . $totalPages . '" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #f0f0f0; color: var(--dark); text-decoration: none; border-radius: 4px; font-weight: 500;">' . $totalPages . '</a>';
-        }
-
-        if ($page < $totalPages) {
-            echo '<a href="?page=' . ($page + 1) . '" class="page-link" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #f0f0f0; color: var(--dark); text-decoration: none; border-radius: 4px; font-weight: 500;"><i class="fas fa-chevron-right"></i></a>';
-        }
+        $current_page = $page;
+        $total_pages = $totalPages;
+        $base_url = 'galleries.php?';
+        include __DIR__ . '/../includes/components/pagination.php';
         ?>
-    </div>
     <?php endif; ?>
 </main>
 

@@ -8,24 +8,41 @@ try {
     $pdo = null;
 }
 
+// Hỗ trợ cả slug và id để tương thích
+$slug = isset($_GET['slug']) ? trim($_GET['slug']) : '';
 $news_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-if ($news_id <= 0 || !$pdo) {
+if (!$pdo) {
     header('Location: ' . BASE_URL . '/public/news.php');
     exit;
 }
 
-$newsStmt = $pdo->prepare('SELECT news_id, title, slug, publish_date, created_at, author, category, excerpt, description, content
-                            FROM news
-                            WHERE news_id = :id');
-$newsStmt->bindValue(':id', $news_id, PDO::PARAM_INT);
-$newsStmt->execute();
-$article = $newsStmt->fetch();
+// Tìm tin tức theo slug hoặc id
+if (!empty($slug)) {
+    $newsStmt = $pdo->prepare('SELECT news_id, title, slug, publish_date, created_at, author, category, excerpt, description, content
+                                FROM news
+                                WHERE slug = :slug');
+    $newsStmt->bindValue(':slug', $slug, PDO::PARAM_STR);
+    $newsStmt->execute();
+    $article = $newsStmt->fetch();
+} elseif ($news_id > 0) {
+    $newsStmt = $pdo->prepare('SELECT news_id, title, slug, publish_date, created_at, author, category, excerpt, description, content
+                                FROM news
+                                WHERE news_id = :id');
+    $newsStmt->bindValue(':id', $news_id, PDO::PARAM_INT);
+    $newsStmt->execute();
+    $article = $newsStmt->fetch();
+} else {
+    $article = false;
+}
 
 if (!$article) {
     header('Location: ' . BASE_URL . '/public/news.php');
     exit;
 }
+
+// Lấy news_id từ article để lấy tags
+$news_id = (int) $article['news_id'];
 
 $tagStmt = $pdo->prepare('SELECT tag FROM news_tags WHERE news_id = :id ORDER BY tag ASC');
 $tagStmt->bindValue(':id', $news_id, PDO::PARAM_INT);

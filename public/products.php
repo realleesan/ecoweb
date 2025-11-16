@@ -242,39 +242,77 @@ include '../includes/header.php';
         }
     }
 
-    .pagination {
+    /* Pagination styles - matching component */
+    .pagination-component {
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 10px;
-        margin-top: 40px;
+        gap: 8px;
+        margin: 40px 0;
+        flex-wrap: wrap;
     }
 
-    .pagination a,
-    .pagination span {
-        padding: 10px 15px;
-        border-radius: 5px;
+    .pagination-component .page-link,
+    .pagination-component .page-item {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 12px;
+        border-radius: 4px;
         font-family: 'Poppins', sans-serif;
         font-weight: 500;
         font-size: 14px;
         text-decoration: none;
         transition: all 0.3s ease;
-        min-width: 40px;
-        text-align: center;
+        cursor: pointer;
+        border: none;
+        background: none;
     }
 
-    .pagination a {
-        background-color: #e0e0e0;
+    .pagination-component .page-link {
+        background-color: #e8e8e8;
         color: var(--dark);
     }
 
-    .pagination a:hover {
-        background-color: #d0d0d0;
+    .pagination-component .page-link:hover {
+        background-color: #d8d8d8;
     }
 
-    .pagination .active {
-        background-color: var(--secondary);
+    .pagination-component .page-item.active .page-link {
+        background-color: var(--primary);
         color: var(--white);
+    }
+
+    .pagination-component .page-item.disabled .page-link {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .pagination-component .page-link.next,
+    .pagination-component .page-link.prev {
+        background-color: #e8e8e8;
+        color: var(--dark);
+    }
+
+    .pagination-component .page-link.next:hover,
+    .pagination-component .page-link.prev:hover {
+        background-color: #d8d8d8;
+    }
+
+    @media (max-width: <?php echo BREAKPOINT_XS; ?>) {
+        .pagination-component {
+            gap: 4px;
+        }
+
+        .pagination-component .page-link,
+        .pagination-component .page-item {
+            min-width: 36px;
+            height: 36px;
+            font-size: 13px;
+        }
     }
 
     @media (max-width: <?php echo BREAKPOINT_XL; ?>) {
@@ -528,27 +566,62 @@ include '../includes/header.php';
             return;
         }
 
-        let paginationHTML = '';
+        let paginationHTML = '<nav class="pagination-component" aria-label="Phân trang">';
 
         // Previous button
         if (currentPage > 1) {
-            paginationHTML += `<a href="#" onclick="changePage(${currentPage - 1}); return false;">«</a>`;
+            paginationHTML += `<a href="#" onclick="changePage(${currentPage - 1}); return false;" class="page-link prev" aria-label="Trang trước"><i class="fas fa-chevron-left"></i></a>`;
+        } else {
+            paginationHTML += `<span class="page-item disabled"><span class="page-link prev" aria-label="Trang trước"><i class="fas fa-chevron-left"></i></span></span>`;
+        }
+
+        // Calculate page range
+        const maxVisible = 2;
+        let startPage = Math.max(1, currentPage - maxVisible);
+        let endPage = Math.min(totalPages, currentPage + maxVisible);
+
+        // Adjust to show enough pages
+        if (endPage - startPage < (maxVisible * 2)) {
+            if (startPage === 1) {
+                endPage = Math.min(totalPages, startPage + (maxVisible * 2));
+            } else {
+                startPage = Math.max(1, endPage - (maxVisible * 2));
+            }
+        }
+
+        // First page with ellipsis if needed
+        if (startPage > 1) {
+            paginationHTML += `<a href="#" onclick="changePage(1); return false;" class="page-link">1</a>`;
+            if (startPage > 2) {
+                paginationHTML += `<span class="page-item disabled"><span class="page-link">...</span></span>`;
+            }
         }
 
         // Page numbers
-        for (let i = 1; i <= totalPages; i++) {
+        for (let i = startPage; i <= endPage; i++) {
             if (i === currentPage) {
-                paginationHTML += `<span class="active">${i}</span>`;
+                paginationHTML += `<span class="page-item active"><span class="page-link">${i}</span></span>`;
             } else {
-                paginationHTML += `<a href="#" onclick="changePage(${i}); return false;">${i}</a>`;
+                paginationHTML += `<a href="#" onclick="changePage(${i}); return false;" class="page-link">${i}</a>`;
             }
+        }
+
+        // Last page with ellipsis if needed
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationHTML += `<span class="page-item disabled"><span class="page-link">...</span></span>`;
+            }
+            paginationHTML += `<a href="#" onclick="changePage(${totalPages}); return false;" class="page-link">${totalPages}</a>`;
         }
 
         // Next button
         if (currentPage < totalPages) {
-            paginationHTML += `<a href="#" onclick="changePage(${currentPage + 1}); return false;">»</a>`;
+            paginationHTML += `<a href="#" onclick="changePage(${currentPage + 1}); return false;" class="page-link next" aria-label="Trang sau"><i class="fas fa-chevron-right"></i></a>`;
+        } else {
+            paginationHTML += `<span class="page-item disabled"><span class="page-link next" aria-label="Trang sau"><i class="fas fa-chevron-right"></i></span></span>`;
         }
 
+        paginationHTML += '</nav>';
         pagination.innerHTML = paginationHTML;
     }
 

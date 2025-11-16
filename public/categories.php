@@ -250,48 +250,6 @@ include '../includes/header.php';
         margin-bottom: 10px;
     }
 
-    .pagination {
-        display: flex;
-        justify-content: center;
-        margin-top: 40px;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .pagination a, 
-    .pagination span {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 40px;
-        height: 40px;
-        padding: 0 15px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        color: var(--dark);
-        text-decoration: none;
-        font-family: 'Poppins', sans-serif;
-        font-size: 14px;
-        transition: all 0.3s ease;
-    }
-
-    .pagination a:hover {
-        background: var(--primary);
-        color: var(--white);
-        border-color: var(--primary);
-    }
-
-    .pagination .current {
-        background: var(--primary);
-        color: var(--white);
-        border-color: var(--primary);
-        font-weight: 500;
-    }
-
-    .pagination .disabled {
-        opacity: 0.5;
-        pointer-events: none;
-    }
 
     /* Responsive Design */
     @media (max-width: <?php echo BREAKPOINT_XL; ?>) {
@@ -532,60 +490,16 @@ include '../includes/header.php';
 
         <!-- Pagination -->
         <?php if ($total_pages > 1): 
-            // Tạo query string cho phân trang
+            // Tạo base URL với query params
             $query_params = [];
             if (!empty($search)) $query_params['search'] = $search;
             if ($sort != 'name_asc') $query_params['sort'] = $sort;
-            $query_string = !empty($query_params) ? '&' . http_build_query($query_params) : '';
-        ?>
-            <div class="pagination">
-                <?php if ($page > 1): ?>
-                    <a href="?page=<?php echo $page - 1; ?><?php echo $query_string; ?>" class="prev">
-                        <i class="fas fa-chevron-left"></i> Trước
-                    </a>
-                <?php else: ?>
-                    <span class="disabled">
-                        <i class="fas fa-chevron-left"></i> Trước
-                    </span>
-                <?php endif; ?>
-
-                <?php
-                $start_page = max(1, $page - 2);
-                $end_page = min($total_pages, $page + 2);
-
-                if ($start_page > 1): ?>
-                    <a href="?page=1<?php echo $query_string; ?>">1</a>
-                    <?php if ($start_page > 2): ?>
-                        <span>...</span>
-                    <?php endif; ?>
-                <?php endif; ?>
-
-                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
-                    <?php if ($i == $page): ?>
-                        <span class="current"><?php echo $i; ?></span>
-                    <?php else: ?>
-                        <a href="?page=<?php echo $i; ?><?php echo $query_string; ?>"><?php echo $i; ?></a>
-                    <?php endif; ?>
-                <?php endfor; ?>
-
-                <?php if ($end_page < $total_pages): ?>
-                    <?php if ($end_page < $total_pages - 1): ?>
-                        <span>...</span>
-                    <?php endif; ?>
-                    <a href="?page=<?php echo $total_pages; ?><?php echo $query_string; ?>"><?php echo $total_pages; ?></a>
-                <?php endif; ?>
-
-                <?php if ($page < $total_pages): ?>
-                    <a href="?page=<?php echo $page + 1; ?><?php echo $query_string; ?>" class="next">
-                        Sau <i class="fas fa-chevron-right"></i>
-                    </a>
-                <?php else: ?>
-                    <span class="disabled">
-                        Sau <i class="fas fa-chevron-right"></i>
-                    </span>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
+            $base_url = 'categories.php?' . (!empty($query_params) ? http_build_query($query_params) . '&' : '');
+            
+            $current_page = $page;
+            $total_pages = $total_pages;
+            include __DIR__ . '/../includes/components/pagination.php';
+        endif; ?>
     </div>
 </main>
 

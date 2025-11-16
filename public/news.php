@@ -199,45 +199,6 @@ include '../includes/header.php';
         background-color: #2d4a2d;
     }
 
-    .pagination {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        margin-top: 40px;
-    }
-
-    .pagination a,
-    .pagination span {
-        padding: 10px 15px;
-        border-radius: 5px;
-        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
-        font-weight: 500;
-        font-size: 14px;
-        text-decoration: none;
-        transition: all 0.3s ease;
-        min-width: 40px;
-        text-align: center;
-    }
-
-    .pagination a {
-        background-color: #e0e0e0;
-        color: var(--dark);
-    }
-
-    .pagination a:hover {
-        background-color: #d0d0d0;
-    }
-
-    .pagination .active {
-        background-color: var(--secondary);
-        color: var(--white);
-    }
-
-    .pagination .disabled {
-        opacity: 0.5;
-        pointer-events: none;
-    }
 
     .no-news {
         text-align: center;
@@ -335,51 +296,12 @@ include '../includes/header.php';
         <?php endif; ?>
 
         <!-- Pagination -->
-        <?php if ($total_pages > 1): ?>
-            <div class="pagination">
-                <?php if ($page > 1): ?>
-                    <a href="?page=<?php echo $page - 1; ?>" class="prev">
-                        « Trước
-                    </a>
-                <?php else: ?>
-                    <span class="disabled">« Trước</span>
-                <?php endif; ?>
-
-                <?php
-                $start_page = max(1, $page - 2);
-                $end_page = min($total_pages, $page + 2);
-
-                if ($start_page > 1): ?>
-                    <a href="?page=1">1</a>
-                    <?php if ($start_page > 2): ?>
-                        <span>...</span>
-                    <?php endif; ?>
-                <?php endif; ?>
-
-                <?php for ($i = $start_page; $i <= $end_page; $i++): ?>
-                    <?php if ($i == $page): ?>
-                        <span class="active"><?php echo $i; ?></span>
-                    <?php else: ?>
-                        <a href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
-                    <?php endif; ?>
-                <?php endfor; ?>
-
-                <?php if ($end_page < $total_pages): ?>
-                    <?php if ($end_page < $total_pages - 1): ?>
-                        <span>...</span>
-                    <?php endif; ?>
-                    <a href="?page=<?php echo $total_pages; ?>"><?php echo $total_pages; ?></a>
-                <?php endif; ?>
-
-                <?php if ($page < $total_pages): ?>
-                    <a href="?page=<?php echo $page + 1; ?>" class="next">
-                        Sau »
-                    </a>
-                <?php else: ?>
-                    <span class="disabled">Sau »</span>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
+        <?php
+        $current_page = $page;
+        $total_pages = $total_pages;
+        $base_url = 'news.php?';
+        include __DIR__ . '/../includes/components/pagination.php';
+        ?>
     </div>
 </main>
 

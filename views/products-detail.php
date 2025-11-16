@@ -58,43 +58,10 @@ include '../includes/header.php';
         max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
         margin: 0 auto;
         padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
+        padding-top: 20px;
         background-color: var(--light);
     }
 
-    /* Page Title */
-    .page-title {
-        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
-        font-weight: 700;
-        font-size: 48px;
-        color: var(--primary);
-        text-align: center;
-        margin-bottom: 15px;
-    }
-
-    /* Breadcrumb */
-    .breadcrumb {
-        text-align: center;
-        margin-bottom: 40px;
-        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
-        font-weight: 400;
-        font-size: 16px;
-        color: var(--dark);
-    }
-
-    .breadcrumb a {
-        color: var(--primary);
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
-
-    .breadcrumb a:hover {
-        color: var(--secondary);
-    }
-
-    .breadcrumb span {
-        margin: 0 10px;
-        color: #999;
-    }
 
     /* Product Detail Grid */
     .product-detail-grid {
@@ -547,17 +514,17 @@ function renderStars(float $rating): string
 
 <!-- Main Content -->
 <main style="min-height: 60vh; padding: <?php echo CONTAINER_PADDING_LARGE; ?> 0; background-color: var(--white);">
+    <?php
+    $page_title = htmlspecialchars($product['name']);
+    $breadcrumbs = [
+        ['text' => 'Trang Chủ', 'url' => BASE_URL . '/index.php'],
+        ['text' => 'Sản Phẩm', 'url' => BASE_URL . '/public/products.php'],
+        ['text' => $product['name'], 'url' => '']
+    ];
+    include __DIR__ . '/../includes/components/page-header.php';
+    ?>
+    
     <div class="product-detail-container">
-        <!-- Page Title -->
-        <h1 class="page-title"><?php echo strtoupper(htmlspecialchars($product['name'])); ?></h1>
-        
-        <!-- Breadcrumb -->
-        <div class="breadcrumb">
-            <a href="<?php echo BASE_URL; ?>/index.php">Trang Chủ</a>
-            <span>/</span>
-            <span><?php echo strtoupper(htmlspecialchars($product['name'])); ?></span>
-        </div>
-
         <!-- Product Detail Grid -->
         <div class="product-detail-grid">
             <!-- Column 1: Images -->

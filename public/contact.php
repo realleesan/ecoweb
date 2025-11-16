@@ -500,26 +500,9 @@ include '../includes/header.php';
         max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
         margin: 0 auto;
         padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
+        padding-top: 20px;
     }
 
-    .contact-header {
-        text-align: center;
-        margin-bottom: 50px;
-    }
-
-    .contact-header h1 {
-        font-size: 36px;
-        font-weight: 700;
-        color: var(--primary);
-        margin-bottom: 15px;
-    }
-
-    .contact-header p {
-        font-size: 16px;
-        color: var(--dark);
-        max-width: <?php echo CONTAINER_MAX_WIDTH_XSMALL; ?>;
-        margin: 0 auto;
-    }
 
     .contact-grid {
         display: grid;
@@ -774,11 +757,15 @@ include '../includes/header.php';
 </style>
 
 <!-- Contact Page Content -->
+<?php
+$page_title = "Liên Hệ";
+include __DIR__ . '/../includes/components/page-header.php';
+?>
+
 <div class="contact-container">
-    <div class="contact-header">
-        <h1>Liên hệ với chúng tôi</h1>
-        <p>Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn. Hãy liên hệ với chúng tôi qua các kênh sau:</p>
-    </div>
+    <p style="text-align: center; color: var(--dark); font-size: 16px; margin-bottom: 30px; max-width: <?php echo CONTAINER_MAX_WIDTH_XSMALL; ?>; margin-left: auto; margin-right: auto;">
+        Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn. Hãy liên hệ với chúng tôi qua các kênh sau:
+    </p>
 
     <!-- Contact Form Section -->
     <div class="contact-form-section">

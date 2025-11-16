@@ -53,29 +53,9 @@ include '../includes/header.php';
         max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
         margin: 0 auto;
         padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
+        padding-top: 20px;
     }
 
-    .page-title {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 700;
-        font-size: 36px;
-        color: var(--primary);
-        margin-bottom: 30px;
-        text-align: center;
-        position: relative;
-        padding-bottom: 20px;
-    }
-
-    .page-title::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100px;
-        height: 3px;
-        background: var(--secondary);
-    }
 
     .filters-section {
         background-color: #f8f9fa;
@@ -328,10 +308,13 @@ include '../includes/header.php';
 </style>
 
 <!-- Main Content -->
-<main style="min-height: 60vh; padding: 60px 0; background-color: var(--light);">
+<main style="min-height: 60vh; padding: 0; background-color: var(--light);">
+    <?php
+    $page_title = "Sản Phẩm";
+    include __DIR__ . '/../includes/components/page-header.php';
+    ?>
+    
     <div class="products-container">
-        <h1 class="page-title">Sản Phẩm</h1>
-
         <!-- Filters Section -->
         <div class="filters-section">
             <div class="filter-group">

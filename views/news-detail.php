@@ -45,6 +45,7 @@ include '../includes/header.php';
         max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
         margin: 0 auto;
         padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
+        padding-top: 20px;
         min-height: 80vh;
     }
 
@@ -62,26 +63,6 @@ include '../includes/header.php';
         border-bottom: 1px solid #e0e0e0;
     }
 
-    .news-breadcrumb {
-        margin-bottom: 20px;
-        font-size: 14px;
-        color: var(--dark);
-    }
-
-    .news-breadcrumb a {
-        color: var(--secondary);
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
-
-    .news-breadcrumb a:hover {
-        color: var(--primary);
-    }
-
-    .news-breadcrumb span {
-        margin: 0 8px;
-        color: #999;
-    }
 
     .news-category {
         display: inline-block;
@@ -267,19 +248,23 @@ include '../includes/header.php';
 </style>
 
 
+<?php
+$page_title = htmlspecialchars($article['title']);
+$breadcrumbs = [
+    ['text' => 'Trang Chủ', 'url' => BASE_URL . '/index.php'],
+    ['text' => 'Tin Tức', 'url' => BASE_URL . '/public/news.php'],
+    ['text' => $article['title'], 'url' => '']
+];
+include __DIR__ . '/../includes/components/page-header.php';
+?>
+
 <div class="news-detail-container">
     <div class="news-detail-wrapper">
         <!-- Header -->
         <div class="news-detail-header">
-            <div class="news-breadcrumb">
-                    <a href="<?php echo BASE_URL; ?>/public/news.php">Tin tức</a>
-                <span>/</span>
-                <span><?php echo htmlspecialchars($article['title']); ?></span>
-            </div>
-
             <div class="news-category"><?php echo htmlspecialchars($article['category']); ?></div>
 
-            <h1 class="news-title"><?php echo htmlspecialchars($article['title']); ?></h1>
+            <h1 class="news-title" style="display: none;"><?php echo htmlspecialchars($article['title']); ?></h1>
 
             <div class="news-meta">
                 <div class="news-meta-item">

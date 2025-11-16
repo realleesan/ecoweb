@@ -56,24 +56,10 @@ include '../includes/header.php';
             max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
             margin: 0 auto;
             padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
+            padding-top: 20px;
             min-height: 80vh;
         }
 
-        .news-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .news-header h1 {
-            font-size: 36px;
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
-
-        .news-header p {
-            color: var(--dark);
-            font-size: 16px;
-        }
 
         .news-grid {
             display: grid;
@@ -223,18 +209,19 @@ include '../includes/header.php';
                 grid-template-columns: 1fr;
             }
 
-            .news-header h1 {
-                font-size: 28px;
-            }
         }
     </style>
 
     <!-- News Content -->
+    <?php
+    $page_title = "Tin Tức";
+    include __DIR__ . '/../includes/components/page-header.php';
+    ?>
+    
     <div class="news-container">
-        <div class="news-header">
-            <h1>Tin tức</h1>
-            <p>Cập nhật những thông tin mới nhất về môi trường và trồng cây gây rừng</p>
-        </div>
+        <p style="text-align: center; color: var(--dark); font-size: 16px; margin-bottom: 30px;">
+            Cập nhật những thông tin mới nhất về môi trường và trồng cây gây rừng
+        </p>
 
         <div class="news-grid">
             <?php if (empty($news)): ?>

@@ -82,29 +82,9 @@ include '../includes/header.php';
         max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
         margin: 0 auto;
         padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
+        padding-top: 20px;
     }
 
-    .page-title {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 700;
-        font-size: 36px;
-        color: var(--primary);
-        margin-bottom: 30px;
-        text-align: center;
-        position: relative;
-        padding-bottom: 20px;
-    }
-
-    .page-title::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100px;
-        height: 3px;
-        background: var(--secondary);
-    }
 
     .filters-section {
         background-color: #f8f9fa;
@@ -430,13 +410,6 @@ include '../includes/header.php';
             gap: <?php echo GRID_GAP_SMALL; ?>;
         }
 
-        .page-header h1 {
-            font-size: 28px;
-        }
-
-        .page-header p {
-            font-size: 16px;
-        }
     }
 
         .categories-page {
@@ -469,9 +442,12 @@ include '../includes/header.php';
 </style>
 
 <!-- Main Content -->
-<main style="min-height: 60vh; padding: 60px 0; background-color: var(--light);">
+<main style="min-height: 60vh; padding: 0; background-color: var(--light);">
     <div class="products-container">
-        <h1 class="page-title">Danh Mục Sản Phẩm</h1>
+        <?php
+        $page_title = "Danh Mục Sản Phẩm";
+        include __DIR__ . '/../includes/components/page-header.php';
+        ?>
         
         <!-- Filter Section -->
         <form method="GET" action="" id="filterForm">

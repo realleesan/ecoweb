@@ -51,9 +51,12 @@ include '../includes/header.php';
 ?>
 
 <!-- Gallery Section -->
-<main class="gallery-container" style="padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>; max-width: <?php echo CONTAINER_MAX_WIDTH; ?>; margin: 0 auto;">
-    <h1 style="text-align: center; margin-bottom: 30px; color: var(--dark);">Thư viện ảnh</h1>
-    
+<?php
+$page_title = "Thư Viện Ảnh";
+include __DIR__ . '/../includes/components/page-header.php';
+?>
+
+<main class="gallery-container" style="padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>; padding-top: 20px; max-width: <?php echo CONTAINER_MAX_WIDTH; ?>; margin: 0 auto;">
     <div class="gallery-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: <?php echo GRID_GAP_SMALL; ?>;">
         <?php if (empty($images)): ?>
             <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">

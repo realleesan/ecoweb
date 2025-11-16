@@ -4,15 +4,20 @@ include '../includes/header.php';
 ?>
 
 <!-- Main Content -->
-<main style="min-height: 60vh; padding: 60px 0; background-color: var(--light);">
-    <div style="max-width: <?php echo CONTAINER_MAX_WIDTH; ?>; margin: 0 auto; padding: 0 <?php echo CONTAINER_PADDING; ?>;">
+<main style="min-height: 60vh; padding: 0; background-color: var(--light);">
+    <?php
+    $page_title = "Giới Thiệu";
+    include __DIR__ . '/../includes/components/page-header.php';
+    ?>
+    
+    <div style="max-width: <?php echo CONTAINER_MAX_WIDTH; ?>; margin: 0 auto; padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>; padding-top: 20px;">
         
         <!-- Câu chuyện GrowHope -->
         <section style="margin-bottom: 60px;">
-            <h1 style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 700; font-size: 36px; color: var(--primary); margin-bottom: 30px; text-align: center; position: relative; padding-bottom: 20px;">
+            <h2 style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 700; font-size: 32px; color: var(--primary); margin-bottom: 30px; text-align: center; position: relative; padding-bottom: 20px;">
                 Câu chuyện <?php echo BRAND_NAME; ?>
                 <span style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 100px; height: 3px; background: var(--secondary);"></span>
-            </h1>
+            </h2>
             <div style="background-color: #f8f9fa; padding: 40px; border-radius: 10px; border-left: 5px solid var(--secondary);">
                 <p style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 400; font-size: 16px; line-height: 1.8; color: var(--dark); text-align: justify; margin: 0;">
                     Công ty Cổ phần GrowHope là doanh nghiệp tạo tác động xã hội. Chúng tôi mong muốn tìm ra một phương pháp mới để đồng hành, hỗ trợ những người nông dân – làm sao để họ có thể sống tốt bằng nghề của mình, trên chính mảnh đất quê hương mình. Đồng thời, hướng tới mục tiêu chung – một nền nông nghiệp sinh thái, vì sức khỏe người tiêu dùng và môi trường bền vững.

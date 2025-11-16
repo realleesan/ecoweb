@@ -92,29 +92,9 @@ include '../includes/header.php';
         max-width: <?php echo CONTAINER_MAX_WIDTH; ?>;
         margin: 0 auto;
         padding: <?php echo CONTAINER_PADDING_MEDIUM; ?>;
+        padding-top: 20px;
     }
 
-    .page-title {
-        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
-        font-weight: 700;
-        font-size: 36px;
-        color: var(--primary);
-        margin-bottom: 30px;
-        text-align: center;
-        position: relative;
-        padding-bottom: 20px;
-    }
-
-    .page-title::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100px;
-        height: 3px;
-        background: var(--secondary);
-    }
 
     .search-header {
         font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
@@ -574,10 +554,13 @@ include '../includes/header.php';
 </style>
 
 <!-- Main Content -->
-<main style="min-height: 60vh; padding: 60px 0; background-color: var(--light);">
+<main style="min-height: 60vh; padding: 0; background-color: var(--light);">
+    <?php
+    $page_title = "Kết Quả Tìm Kiếm";
+    include __DIR__ . '/../includes/components/page-header.php';
+    ?>
+    
     <div class="search-container">
-        <h1 class="page-title">Kết Quả Tìm Kiếm</h1>
-
         <?php if (!empty($searchQuery)): ?>
             <!-- Search Header -->
             <div class="search-header">

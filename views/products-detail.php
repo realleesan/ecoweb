@@ -712,10 +712,74 @@ function renderStars(float $rating): string
 
     // Add to cart
     function addToCart() {
-        const quantity = document.getElementById('quantity').value;
+        const quantity = parseInt(document.getElementById('quantity').value) || 1;
         const productId = <?php echo (int) $product['product_id']; ?>;
-        // In a real application, you would send this to the server
-        alert('Đã thêm ' + quantity + ' sản phẩm vào giỏ hàng!');
+        
+        // Check if user is logged in
+        fetch('<?php echo BASE_URL; ?>/api/get-cart-count.php')
+            .then(response => response.json())
+            .then(data => {
+                // If not logged in, redirect to login
+                if (!data.success && data.message) {
+                    if (confirm('Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng. Bạn có muốn đăng nhập không?')) {
+                        window.location.href = '<?php echo BASE_URL; ?>/auth/login.php';
+                    }
+                    return;
+                }
+                
+                // Add to cart
+                return fetch('<?php echo BASE_URL; ?>/api/add-to-cart.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        quantity: quantity
+                    })
+                });
+            })
+            .then(response => response ? response.json() : null)
+            .then(data => {
+                if (data && data.success) {
+                    alert(data.message || 'Đã thêm ' + quantity + ' sản phẩm vào giỏ hàng!');
+                    // Update cart count
+                    updateCartCount();
+                } else if (data && !data.success) {
+                    if (data.message && data.message.includes('đăng nhập')) {
+                        if (confirm('Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng. Bạn có muốn đăng nhập không?')) {
+                            window.location.href = '<?php echo BASE_URL; ?>/auth/login.php';
+                        }
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng');
+            });
+    }
+
+    function updateCartCount() {
+        fetch('<?php echo BASE_URL; ?>/api/get-cart-count.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const cartCountElement = document.getElementById('cart-count');
+                    if (cartCountElement) {
+                        cartCountElement.textContent = data.count;
+                        if (data.count > 0) {
+                            cartCountElement.style.display = 'flex';
+                        } else {
+                            cartCountElement.style.display = 'none';
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching cart count:', error);
+            });
     }
 
     // Toggle favorite

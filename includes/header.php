@@ -174,7 +174,7 @@ if ($is_root) {
             border-radius: 50%;
             width: 18px;
             height: 18px;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             font-size: 10px;
@@ -321,10 +321,10 @@ if ($is_root) {
                 <i class="fas fa-phone-alt"></i>
                 <span>Hotline: <?php echo CONTACT_HOTLINE; ?></span>
             </div>
-            <div class="cart-icon">
+            <a href="<?php echo $is_logged_in ? BASE_URL . '/auth/cart.php' : BASE_URL . '/auth/login.php'; ?>" class="cart-icon" style="text-decoration: none; color: inherit;">
                 <i class="fas fa-shopping-cart"></i>
-                <span>0</span>
-            </div>
+                <span id="cart-count">0</span>
+            </a>
             <a href="<?php echo $is_logged_in ? BASE_URL . '/auth/account.php' : BASE_URL . '/auth/login.php'; ?>" class="account" style="text-decoration: none; color: inherit;">
                 <i class="far fa-user"></i>
                 <span><?php echo $current_user_name; ?></span>
@@ -347,3 +347,27 @@ if ($is_root) {
             <li><a href="<?php echo $base_path; ?>contact.php" class="<?php echo ($current_page == 'contact.php') ? 'active' : ''; ?>">Liên hệ</a></li>
         </ul>
     </nav>
+
+<script>
+    // Update cart count on page load
+    <?php if ($is_logged_in): ?>
+    fetch('<?php echo BASE_URL; ?>/api/get-cart-count.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const cartCountElement = document.getElementById('cart-count');
+                if (cartCountElement) {
+                    cartCountElement.textContent = data.count;
+                    if (data.count > 0) {
+                        cartCountElement.style.display = 'flex';
+                    } else {
+                        cartCountElement.style.display = 'none';
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching cart count:', error);
+        });
+    <?php endif; ?>
+</script>

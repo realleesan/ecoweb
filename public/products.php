@@ -405,49 +405,73 @@ include '../includes/header.php';
         return category;
     }
 
-    // Cart management
-    function getCart() {
-        const cart = localStorage.getItem('cart');
-        return cart ? JSON.parse(cart) : [];
-    }
-
-    function saveCart(cart) {
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartCount();
-    }
-
-    function addToCart(productId, productName) {
-        const cart = getCart();
-        const existingItem = cart.find(item => item.id === productId);
-        
-        if (existingItem) {
-            existingItem.quantity += 1;
-        } else {
-            cart.push({
-                id: productId,
-                name: productName,
-                quantity: 1
-            });
-        }
-        
-        saveCart(cart);
-        showToast('Đã thêm sản phẩm vào giỏ hàng!');
-    }
-
-    // Wrapper function for onclick handler
+    // Add to cart function
     function handleAddToCart(productId, productName) {
-        addToCart(productId, productName);
+        // Check if user is logged in
+        fetch('<?php echo BASE_URL; ?>/api/get-cart-count.php')
+            .then(response => response.json())
+            .then(data => {
+                // If not logged in, redirect to login
+                if (!data.success && data.message) {
+                    if (confirm('Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng. Bạn có muốn đăng nhập không?')) {
+                        window.location.href = '<?php echo BASE_URL; ?>/auth/login.php';
+                    }
+                    return;
+                }
+                
+                // Add to cart
+                return fetch('<?php echo BASE_URL; ?>/api/add-to-cart.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        quantity: 1
+                    })
+                });
+            })
+            .then(response => response ? response.json() : null)
+            .then(data => {
+                if (data && data.success) {
+                    showToast(data.message || 'Đã thêm sản phẩm vào giỏ hàng!');
+                    // Update cart count
+                    updateCartCount();
+                } else if (data && !data.success) {
+                    if (data.message && data.message.includes('đăng nhập')) {
+                        if (confirm('Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng. Bạn có muốn đăng nhập không?')) {
+                            window.location.href = '<?php echo BASE_URL; ?>/auth/login.php';
+                        }
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng');
+            });
     }
 
     function updateCartCount() {
-        const cart = getCart();
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        const cartCountElement = document.querySelector('.cart-icon span');
-        if (cartCountElement) {
-            cartCountElement.textContent = totalItems;
-            // Always show the count badge
-            cartCountElement.style.display = 'flex';
-        }
+        fetch('<?php echo BASE_URL; ?>/api/get-cart-count.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const cartCountElement = document.getElementById('cart-count');
+                    if (cartCountElement) {
+                        cartCountElement.textContent = data.count;
+                        if (data.count > 0) {
+                            cartCountElement.style.display = 'flex';
+                        } else {
+                            cartCountElement.style.display = 'none';
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching cart count:', error);
+            });
     }
 
     function showToast(message) {
@@ -601,8 +625,15 @@ include '../includes/header.php';
         // Initial render
         renderProducts();
         
-        // Update cart count on page load
+        // Update cart count on page load (if logged in)
+        <?php 
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])): 
+        ?>
         updateCartCount();
+        <?php endif; ?>
     });
 </script>
 

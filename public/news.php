@@ -10,11 +10,45 @@ try {
 
 $news = [];
 $total_news = 0;
+$categories_list = [];
+$authors_list = [];
+
+// Lấy filter params
+$filter_category = isset($_GET['category']) ? trim($_GET['category']) : '';
+$filter_author = isset($_GET['author']) ? trim($_GET['author']) : '';
 
 if ($pdo) {
     try {
+        // Lấy danh sách categories và authors
+        $categoriesStmt = $pdo->query('SELECT DISTINCT category FROM news WHERE category IS NOT NULL AND category != "" ORDER BY category ASC');
+        $categories_list = $categoriesStmt->fetchAll(PDO::FETCH_COLUMN);
+        
+        $authorsStmt = $pdo->query('SELECT DISTINCT author FROM news WHERE author IS NOT NULL AND author != "" ORDER BY author ASC');
+        $authors_list = $authorsStmt->fetchAll(PDO::FETCH_COLUMN);
+        
+        // Xây dựng query với filter
+        $where_conditions = [];
+        $query_params = [];
+        
+        if (!empty($filter_category)) {
+            $where_conditions[] = 'category = :category';
+            $query_params[':category'] = $filter_category;
+        }
+        
+        if (!empty($filter_author)) {
+            $where_conditions[] = 'author = :author';
+            $query_params[':author'] = $filter_author;
+        }
+        
+        $where_sql = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
+        
         // Đếm tổng số tin tức
-        $countStmt = $pdo->query('SELECT COUNT(*) FROM news');
+        $count_sql = "SELECT COUNT(*) FROM news $where_sql";
+        $countStmt = $pdo->prepare($count_sql);
+        foreach ($query_params as $key => $value) {
+            $countStmt->bindValue($key, $value);
+        }
+        $countStmt->execute();
         $total_news = (int) $countStmt->fetchColumn();
 
         // Phân trang
@@ -22,11 +56,16 @@ if ($pdo) {
         $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
         $offset = ($page - 1) * $items_per_page;
 
-        // Lấy tin tức với phân trang
-        $newsStmt = $pdo->prepare('SELECT news_id, title, slug, publish_date, author, category, excerpt, description 
-                                   FROM news 
-                                   ORDER BY publish_date DESC, created_at DESC 
-                                   LIMIT :limit OFFSET :offset');
+        // Lấy tin tức với phân trang và filter
+        $news_sql = "SELECT news_id, title, slug, publish_date, author, category, excerpt, description 
+                     FROM news 
+                     $where_sql
+                     ORDER BY publish_date DESC, created_at DESC 
+                     LIMIT :limit OFFSET :offset";
+        $newsStmt = $pdo->prepare($news_sql);
+        foreach ($query_params as $key => $value) {
+            $newsStmt->bindValue($key, $value);
+        }
         $newsStmt->bindValue(':limit', $items_per_page, PDO::PARAM_INT);
         $newsStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $newsStmt->execute();
@@ -247,6 +286,47 @@ include '../includes/header.php';
     ?>
     
     <div class="news-container">
+        <!-- Filter Section -->
+        <?php
+        // Chuẩn bị filter fields cho news
+        $category_options = [['value' => '', 'label' => 'Tất cả']];
+        foreach ($categories_list as $cat) {
+            $category_options[] = [
+                'value' => $cat,
+                'label' => $cat
+            ];
+        }
+        
+        $author_options = [['value' => '', 'label' => 'Tất cả']];
+        foreach ($authors_list as $author) {
+            $author_options[] = [
+                'value' => $author,
+                'label' => $author
+            ];
+        }
+        
+        $filter_fields = [
+            [
+                'type' => 'select',
+                'name' => 'category',
+                'label' => 'Danh mục',
+                'options' => $category_options,
+                'value' => $filter_category
+            ],
+            [
+                'type' => 'select',
+                'name' => 'author',
+                'label' => 'Tác giả',
+                'options' => $author_options,
+                'value' => $filter_author
+            ]
+        ];
+        
+        $type = 'news';
+        $preserve_params = ['page'];
+        include __DIR__ . '/../includes/components/filter.php';
+        ?>
+        
         <!-- News Info -->
         <div class="news-info">
             Hiển thị <span id="display-count"><?php echo count($news); ?></span> trên tổng số <span id="total-count"><?php echo $total_news; ?></span> tin tức
@@ -297,9 +377,14 @@ include '../includes/header.php';
 
         <!-- Pagination -->
         <?php
+        // Giữ lại filter params trong pagination
+        $pagination_params = [];
+        if (!empty($filter_category)) $pagination_params['category'] = $filter_category;
+        if (!empty($filter_author)) $pagination_params['author'] = $filter_author;
+        $base_url = 'news.php?' . (!empty($pagination_params) ? http_build_query($pagination_params) . '&' : '');
+        
         $current_page = $page;
         $total_pages = $total_pages;
-        $base_url = 'news.php?';
         include __DIR__ . '/../includes/components/pagination.php';
         ?>
     </div>

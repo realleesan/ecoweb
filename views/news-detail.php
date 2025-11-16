@@ -343,5 +343,16 @@ include __DIR__ . '/../includes/components/page-header.php';
     </div>
 </div>
 
+<!-- Related News Section -->
+<div style="background-color: var(--light); padding: 40px 0;">
+    <?php
+    $type = 'news';
+    $current_id = $news_id;
+    $category = $article['category'];
+    $tags = $article_tags;
+    include __DIR__ . '/../includes/components/related-section.php';
+    ?>
+</div>
+
 <?php include '../includes/footer.php'; ?>
 

@@ -57,45 +57,6 @@ include '../includes/header.php';
     }
 
 
-    .filters-section {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 30px;
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-
-    .filter-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .filter-group label {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 500;
-        color: var(--dark);
-        font-size: 14px;
-    }
-
-    .filter-group select {
-        padding: 8px 15px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-family: 'Poppins', sans-serif;
-        font-size: 14px;
-        color: var(--dark);
-        background-color: var(--white);
-        cursor: pointer;
-    }
-
-    .filter-group select:focus {
-        outline: none;
-        border-color: var(--primary);
-    }
 
     .products-info {
         font-family: 'Poppins', sans-serif;
@@ -354,27 +315,40 @@ include '../includes/header.php';
     
     <div class="products-container">
         <!-- Filters Section -->
-        <div class="filters-section">
-            <div class="filter-group">
-                <label for="category-filter">Danh mục:</label>
-                <select id="category-filter" onchange="applyFilters()">
-                    <option value="">Tất cả</option>
-                    <?php foreach ($categories as $category): ?>
-                        <option value="<?php echo htmlspecialchars($category['slug']); ?>">
-                            <?php echo htmlspecialchars($category['category_name']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="price-sort">Sắp xếp theo giá:</label>
-                <select id="price-sort" onchange="applyFilters()">
-                    <option value="">Mặc định</option>
-                    <option value="low-to-high">Từ thấp đến cao</option>
-                    <option value="high-to-low">Từ cao đến thấp</option>
-                </select>
-            </div>
-        </div>
+        <?php
+        // Chuẩn bị filter fields cho products
+        $category_options = [['value' => '', 'label' => 'Tất cả']];
+        foreach ($categories as $category) {
+            $category_options[] = [
+                'value' => $category['slug'],
+                'label' => $category['category_name']
+            ];
+        }
+        
+        $filter_fields = [
+            [
+                'type' => 'select',
+                'name' => 'category',
+                'label' => 'Danh mục',
+                'options' => $category_options,
+                'value' => isset($_GET['category']) ? $_GET['category'] : ''
+            ],
+            [
+                'type' => 'select',
+                'name' => 'price_sort',
+                'label' => 'Sắp xếp theo giá',
+                'options' => [
+                    ['value' => '', 'label' => 'Mặc định'],
+                    ['value' => 'low-to-high', 'label' => 'Từ thấp đến cao'],
+                    ['value' => 'high-to-low', 'label' => 'Từ cao đến thấp']
+                ],
+                'value' => isset($_GET['price_sort']) ? $_GET['price_sort'] : ''
+            ]
+        ];
+        
+        $type = 'products';
+        include __DIR__ . '/../includes/components/filter.php';
+        ?>
 
         <!-- Products Info -->
         <div class="products-info" id="products-info">
@@ -632,10 +606,12 @@ include '../includes/header.php';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Apply filters
+    // Apply filters từ URL params
     function applyFilters() {
-        const categoryFilter = document.getElementById('category-filter').value;
-        const priceSort = document.getElementById('price-sort').value;
+        // Lấy từ URL params hoặc từ form
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryFilter = urlParams.get('category') || '';
+        const priceSort = urlParams.get('price_sort') || '';
 
         // Filter by category
         filteredProducts = products.filter(product => {
@@ -659,27 +635,45 @@ include '../includes/header.php';
 
     // Search functionality (integrate with header search bar)
     document.addEventListener('DOMContentLoaded', function() {
+        // Apply filters từ URL params khi trang load
+        applyFilters();
+        
         const searchInput = document.querySelector('.search-bar input');
         if (searchInput) {
             searchInput.addEventListener('input', function(e) {
                 const searchTerm = e.target.value.toLowerCase().trim();
                 
                 if (searchTerm === '') {
-                    filteredProducts = [...products];
+                    // Nếu không có search term, áp dụng lại filters từ URL
+                    applyFilters();
                 } else {
+                    // Lấy filtered products hiện tại và filter thêm theo search
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const categoryFilter = urlParams.get('category') || '';
+                    const priceSort = urlParams.get('price_sort') || '';
+                    
                     filteredProducts = products.filter(product => {
+                        // Filter by category
+                        if (categoryFilter && product.category !== categoryFilter) {
+                            return false;
+                        }
+                        // Filter by search term
                         return product.name.toLowerCase().includes(searchTerm) ||
                                product.code.toLowerCase().includes(searchTerm);
                     });
+                    
+                    // Sort by price
+                    if (priceSort === 'low-to-high') {
+                        filteredProducts.sort((a, b) => a.price - b.price);
+                    } else if (priceSort === 'high-to-low') {
+                        filteredProducts.sort((a, b) => b.price - a.price);
+                    }
                 }
 
                 currentPage = 1;
                 renderProducts();
             });
         }
-
-        // Initial render
-        renderProducts();
         
         // Update cart count on page load (if logged in)
         <?php 

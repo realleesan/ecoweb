@@ -86,47 +86,6 @@ include '../includes/header.php';
     }
 
 
-    .filters-section {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 30px;
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-
-    .filter-group {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .filter-group label {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 500;
-        color: var(--dark);
-        font-size: 14px;
-    }
-
-    .filter-group select, 
-    .filter-group input[type="text"] {
-        padding: 8px 15px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-family: 'Poppins', sans-serif;
-        font-size: 14px;
-        color: var(--dark);
-        background-color: var(--white);
-        cursor: pointer;
-    }
-
-    .filter-group select:focus,
-    .filter-group input[type="text"]:focus {
-        outline: none;
-        border-color: var(--primary);
-    }
 
     .products-info {
         font-family: 'Poppins', sans-serif;
@@ -301,31 +260,6 @@ include '../includes/header.php';
         box-shadow: 0 0 0 3px rgba(60, 96, 60, 0.1);
     }
 
-    .filter-btn {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 500;
-        font-size: 14px;
-        padding: 10px 25px;
-        background: var(--primary);
-        color: var(--white);
-        border: none;
-        border-radius: 25px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .filter-btn:hover {
-        background: var(--secondary);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(210, 100, 38, 0.3);
-    }
-
-    .filter-btn i {
-        font-size: 14px;
-    }
 
     .results-count {
         font-family: 'Poppins', sans-serif;
@@ -346,20 +280,6 @@ include '../includes/header.php';
             font-size: 36px;
         }
 
-        .filters-section {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .filter-group {
-            width: 100%;
-            justify-content: space-between;
-        }
-
-        .search-input {
-            flex: 1;
-            min-width: 200px;
-        }
     }
 
     @media (max-width: <?php echo BREAKPOINT_SM; ?>) {
@@ -374,24 +294,6 @@ include '../includes/header.php';
             padding: 40px 3%;
         }
 
-        .filters-section {
-            padding: 20px;
-        }
-
-        .filter-group {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .search-input {
-            width: 100%;
-            min-width: 100%;
-        }
-
-        .filter-btn {
-            width: 100%;
-            justify-content: center;
-        }
 
         .results-count {
             text-align: center;
@@ -408,34 +310,33 @@ include '../includes/header.php';
         ?>
         
         <!-- Filter Section -->
-        <form method="GET" action="" id="filterForm">
-            <div class="filters-section">
-                <div class="filter-group">
-                    <label for="search">Tìm kiếm:</label>
-                    <input type="text" 
-                           id="search" 
-                           name="search" 
-                           placeholder="Tên danh mục..." 
-                           value="<?php echo htmlspecialchars($search); ?>"
-                           onkeypress="if(event.key === 'Enter') { this.form.submit(); }">
-                </div>
-                
-                <div class="filter-group">
-                    <label for="sort">Sắp xếp:</label>
-                    <select id="sort" name="sort" onchange="this.form.submit()">
-                        <option value="name_asc" <?php echo $sort == 'name_asc' ? 'selected' : ''; ?>>Tên A-Z</option>
-                        <option value="name_desc" <?php echo $sort == 'name_desc' ? 'selected' : ''; ?>>Tên Z-A</option>
-                        <option value="count_desc" <?php echo $sort == 'count_desc' ? 'selected' : ''; ?>>Nhiều sản phẩm nhất</option>
-                        <option value="count_asc" <?php echo $sort == 'count_asc' ? 'selected' : ''; ?>>Ít sản phẩm nhất</option>
-                    </select>
-                </div>
-                
-                <button type="submit" class="filter-btn">
-                    <i class="fas fa-filter"></i>
-                    Lọc
-                </button>
-            </div>
-        </form>
+        <?php
+        $filter_fields = [
+            [
+                'type' => 'text',
+                'name' => 'search',
+                'label' => 'Tìm kiếm',
+                'placeholder' => 'Tên danh mục...',
+                'value' => $search
+            ],
+            [
+                'type' => 'select',
+                'name' => 'sort',
+                'label' => 'Sắp xếp',
+                'options' => [
+                    ['value' => 'name_asc', 'label' => 'Tên A-Z'],
+                    ['value' => 'name_desc', 'label' => 'Tên Z-A'],
+                    ['value' => 'count_desc', 'label' => 'Nhiều sản phẩm nhất'],
+                    ['value' => 'count_asc', 'label' => 'Ít sản phẩm nhất']
+                ],
+                'value' => $sort
+            ]
+        ];
+        
+        $type = 'categories';
+        $preserve_params = ['page'];
+        include __DIR__ . '/../includes/components/filter.php';
+        ?>
         
         <div class="products-info">
             Tìm thấy: <?php echo $total_categories; ?> danh mục

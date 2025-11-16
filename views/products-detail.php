@@ -659,6 +659,15 @@ function renderStars(float $rating): string
             </div>
         </div>
     </div>
+
+    <!-- Related Products Section -->
+    <?php
+    $type = 'product';
+    $current_id = $product_id;
+    $category = $product['category_id'];
+    $tags = $product_tags;
+    include __DIR__ . '/../includes/components/related-section.php';
+    ?>
 </main>
 
 <script>

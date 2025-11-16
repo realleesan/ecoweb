@@ -1,6 +1,7 @@
 <?php
 require_once '../includes/config.php';
 require_once '../includes/database.php';
+require_once '../auth/auth.php';
 
 try {
     $pdo = getPDO();
@@ -32,6 +33,21 @@ $tagStmt = $pdo->prepare('SELECT tag FROM product_tags WHERE product_id = :id OR
 $tagStmt->bindValue(':id', $product_id, PDO::PARAM_INT);
 $tagStmt->execute();
 $product_tags = $tagStmt->fetchAll(PDO::FETCH_COLUMN);
+
+// Check if product is in wishlist (if user is logged in)
+$isFavorite = false;
+if (isLoggedIn()) {
+    try {
+        $wishlistStmt = $pdo->prepare('SELECT wishlist_id FROM wishlist WHERE user_id = :user_id AND product_id = :product_id');
+        $wishlistStmt->execute([
+            'user_id' => $_SESSION['user_id'],
+            'product_id' => $product_id
+        ]);
+        $isFavorite = $wishlistStmt->fetch() !== false;
+    } catch (Exception $e) {
+        $isFavorite = false;
+    }
+}
 
 include '../includes/header.php';
 ?>
@@ -607,8 +623,8 @@ function renderStars(float $rating): string
                         <i class="fas fa-shopping-cart"></i>
                         THÊM VÀO GIỎ HÀNG
                     </button>
-                    <button class="favorite-btn" id="favorite-btn" onclick="toggleFavorite()">
-                        <i class="far fa-heart"></i>
+                    <button class="favorite-btn <?php echo $isFavorite ? 'active' : ''; ?>" id="favorite-btn" onclick="toggleFavorite()">
+                        <i class="<?php echo $isFavorite ? 'fas' : 'far'; ?> fa-heart"></i>
                     </button>
                 </div>
 
@@ -786,15 +802,52 @@ function renderStars(float $rating): string
     function toggleFavorite() {
         const btn = document.getElementById('favorite-btn');
         const icon = btn.querySelector('i');
-        if (btn.classList.contains('active')) {
-            btn.classList.remove('active');
-            icon.classList.remove('fas');
-            icon.classList.add('far');
-        } else {
-            btn.classList.add('active');
-            icon.classList.remove('far');
-            icon.classList.add('fas');
+        const productId = <?php echo (int) $product['product_id']; ?>;
+        
+        // Check if user is logged in
+        <?php if (!isLoggedIn()): ?>
+        if (confirm('Bạn cần đăng nhập để thêm sản phẩm vào yêu thích. Bạn có muốn đăng nhập không?')) {
+            window.location.href = '<?php echo BASE_URL; ?>/auth/login.php';
         }
+        return;
+        <?php endif; ?>
+        
+        // Toggle wishlist
+        fetch('<?php echo BASE_URL; ?>/api/wishlist-toggle.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_id: productId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.is_favorite) {
+                    btn.classList.add('active');
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                } else {
+                    btn.classList.remove('active');
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                }
+            } else {
+                if (data.message && data.message.includes('đăng nhập')) {
+                    if (confirm('Bạn cần đăng nhập để thêm sản phẩm vào yêu thích. Bạn có muốn đăng nhập không?')) {
+                        window.location.href = '<?php echo BASE_URL; ?>/auth/login.php';
+                    }
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi cập nhật yêu thích');
+        });
     }
 
     // Switch tabs

@@ -168,6 +168,44 @@ function changePassword($userId, $currentPassword, $newPassword) {
 }
 
 /**
+ * Update user profile
+ */
+function updateUserProfile($userId, $fullName, $phone) {
+    try {
+        $pdo = getPDO();
+        
+        // Check if user exists
+        $stmt = $pdo->prepare('SELECT user_id FROM users WHERE user_id = :user_id AND is_active = 1');
+        $stmt->execute(['user_id' => $userId]);
+        $user = $stmt->fetch();
+        
+        if (!$user) {
+            return ['success' => false, 'message' => 'Người dùng không tồn tại hoặc đã bị khóa'];
+        }
+        
+        // Validate phone if provided
+        if (!empty($phone) && !preg_match('/^[0-9]{10,11}$/', $phone)) {
+            return ['success' => false, 'message' => 'Số điện thoại không hợp lệ'];
+        }
+        
+        // Update user profile
+        $stmt = $pdo->prepare('UPDATE users SET full_name = :full_name, phone = :phone WHERE user_id = :user_id');
+        $stmt->execute([
+            'full_name' => trim($fullName),
+            'phone' => trim($phone),
+            'user_id' => $userId
+        ]);
+        
+        // Update session
+        $_SESSION['full_name'] = trim($fullName);
+        
+        return ['success' => true, 'message' => 'Cập nhật thông tin thành công'];
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()];
+    }
+}
+
+/**
  * Logout user
  */
 function logoutUser() {

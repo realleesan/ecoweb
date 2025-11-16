@@ -164,8 +164,213 @@ include '../includes/header.php';
         margin-top: 20px;
     }
 
+    .btn-edit {
+        cursor: pointer;
+    }
+
     .btn-edit:hover {
         background-color: #2d4a2d;
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .modal-content {
+        background-color: var(--white);
+        border-radius: 10px;
+        padding: 40px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+        animation: slideDown 0.3s ease;
+        position: relative;
+    }
+
+    @keyframes slideDown {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--light);
+    }
+
+    .modal-header h2 {
+        font-size: 24px;
+        color: var(--primary);
+        margin-bottom: 5px;
+    }
+
+    .modal-header p {
+        color: var(--dark);
+        font-size: 14px;
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 28px;
+        font-weight: bold;
+        color: #999;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        background: none;
+        border: none;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .close-modal:hover {
+        color: var(--dark);
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: var(--dark);
+        font-size: 15px;
+        margin-bottom: 8px;
+    }
+
+    .form-group label i {
+        margin-right: 8px;
+        color: var(--primary);
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 15px;
+        color: var(--dark);
+        transition: border-color 0.3s ease;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .form-group input::placeholder {
+        color: #999;
+    }
+
+    .form-group .help-text {
+        font-size: 12px;
+        color: #999;
+        margin-top: 5px;
+    }
+
+    .alert {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        font-size: 14px;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
+    }
+
+    .alert-error {
+        background-color: #fee;
+        color: #c33;
+        border: 1px solid #fcc;
+    }
+
+    .alert-success {
+        background-color: #efe;
+        color: #3c3;
+        border: 1px solid #cfc;
+    }
+
+    .alert i {
+        margin-right: 8px;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .btn-save {
+        flex: 1;
+        padding: 12px 30px;
+        background-color: var(--primary);
+        color: var(--white);
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 15px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
+    }
+
+    .btn-save:hover {
+        background-color: #2d4a2d;
+    }
+
+    .btn-cancel {
+        padding: 12px 30px;
+        background-color: #6c757d;
+        color: var(--white);
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 15px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
+    }
+
+    .btn-cancel:hover {
+        background-color: #5a6268;
     }
 
     @media (max-width: <?php echo BREAKPOINT_MD; ?>) {
@@ -288,12 +493,138 @@ include '../includes/header.php';
                 </div>
             </div>
 
-            <a href="#" class="btn-edit">
+            <button type="button" class="btn-edit" onclick="openEditModal()">
                 <i class="fas fa-edit"></i> Chỉnh sửa thông tin
-            </a>
+            </button>
         </div>
     </div>
 </div>
+
+<!-- Edit Profile Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <button class="close-modal" onclick="closeEditModal()">&times;</button>
+        <div class="modal-header">
+            <h2>Chỉnh sửa thông tin</h2>
+            <p>Cập nhật thông tin cá nhân của bạn</p>
+        </div>
+
+        <div id="modalAlert"></div>
+
+        <form id="editProfileForm">
+            <div class="form-group">
+                <label for="edit_full_name">
+                    <i class="fas fa-id-card"></i> Họ và tên <span style="color: #dc3545;">*</span>
+                </label>
+                <input type="text" 
+                       id="edit_full_name" 
+                       name="full_name" 
+                       placeholder="Nhập họ và tên"
+                       value="<?php echo htmlspecialchars($user['full_name'] ?? ''); ?>"
+                       required>
+                <div class="help-text">Tên đăng nhập và email không thể thay đổi</div>
+            </div>
+
+            <div class="form-group">
+                <label for="edit_phone">
+                    <i class="fas fa-phone"></i> Số điện thoại
+                </label>
+                <input type="tel" 
+                       id="edit_phone" 
+                       name="phone" 
+                       placeholder="Nhập số điện thoại (10-11 số)"
+                       value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>"
+                       pattern="[0-9]{10,11}"
+                       maxlength="11">
+                <div class="help-text">Ví dụ: 0987654321</div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save"></i> Lưu thay đổi
+                </button>
+                <button type="button" class="btn-cancel" onclick="closeEditModal()">
+                    <i class="fas fa-times"></i> Hủy
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditModal() {
+        const modal = document.getElementById('editModal');
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeEditModal() {
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('show');
+        document.body.style.overflow = 'auto';
+        // Clear alert
+        document.getElementById('modalAlert').innerHTML = '';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('editModal');
+        if (event.target == modal) {
+            closeEditModal();
+        }
+    }
+
+    // Handle form submission
+    document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const fullName = document.getElementById('edit_full_name').value.trim();
+        const phone = document.getElementById('edit_phone').value.trim();
+        const alertDiv = document.getElementById('modalAlert');
+        
+        // Clear previous alerts
+        alertDiv.innerHTML = '';
+        
+        // Validate
+        if (!fullName) {
+            alertDiv.innerHTML = '<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Vui lòng nhập họ và tên</div>';
+            return;
+        }
+        
+        if (phone && !/^[0-9]{10,11}$/.test(phone)) {
+            alertDiv.innerHTML = '<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Số điện thoại không hợp lệ</div>';
+            return;
+        }
+        
+        // Submit form
+        fetch('<?php echo BASE_URL; ?>/api/update-profile.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                full_name: fullName,
+                phone: phone
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alertDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle"></i> ' + data.message + '</div>';
+                // Reload page after 1 second
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                alertDiv.innerHTML = '<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> ' + data.message + '</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alertDiv.innerHTML = '<div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> Có lỗi xảy ra khi cập nhật thông tin</div>';
+        });
+    });
+</script>
 
 <?php include '../includes/footer.php'; ?>
 

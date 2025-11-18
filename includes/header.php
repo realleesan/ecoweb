@@ -1,13 +1,16 @@
-<?php 
+<?php
 require_once __DIR__ . '/config.php';
+
 
 // Check if user is logged in
 $is_logged_in = false;
 $current_user_name = 'Tài khoản';
 
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 
 // Verify session is valid
 if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
@@ -28,9 +31,11 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
     }
 }
 
+
 // Get current page and set active states
 $current_page = basename($_SERVER['PHP_SELF']);
 $is_home = ($current_page == 'index.php' || $current_page == '');
+
 
 // Determine current directory from script path
 $script_path = $_SERVER['PHP_SELF'];
@@ -39,6 +44,7 @@ $is_auth = (strpos($script_path, '/auth/') !== false);
 $is_views = (strpos($script_path, '/views/') !== false);
 $is_admin = (strpos($script_path, '/admin/') !== false);
 $is_root = !$is_public && !$is_auth && !$is_views && !$is_admin;
+
 
 // Set paths based on current directory
 if ($is_root) {
@@ -83,6 +89,7 @@ if ($is_root) {
             --bg-green: <?php echo COLOR_BG_GREEN; ?>;
         }
 
+
         * {
             margin: 0;
             padding: 0;
@@ -90,9 +97,11 @@ if ($is_root) {
             font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         }
 
+
         h1, h2, h3, h4, h5, h6, .bold {
             font-weight: 600;
         }
+
 
         /* Top Bar Styles */
         .top-bar {
@@ -105,6 +114,7 @@ if ($is_root) {
             gap: 20px;
         }
 
+
         .logo {
             font-size: 24px;
             font-weight: bold;
@@ -115,10 +125,12 @@ if ($is_root) {
             flex-shrink: 0;
         }
 
+
         .logo img {
             height: 40px;
             margin-right: 10px;
         }
+
 
         .search-bar {
             flex-grow: 1;
@@ -126,6 +138,7 @@ if ($is_root) {
             margin-left: 20px;
             position: relative;
         }
+
 
         .search-bar input {
             width: 100%;
@@ -136,6 +149,7 @@ if ($is_root) {
             padding-right: 40px;
         }
 
+
         .search-bar i {
             position: absolute;
             right: 15px;
@@ -144,12 +158,14 @@ if ($is_root) {
             color: var(--dark);
         }
 
+
         .contact-info {
             display: flex;
             align-items: center;
             gap: 15px;
             flex-shrink: 0;
         }
+
 
         .hotline, .account, .cart-icon {
             display: flex;
@@ -159,11 +175,13 @@ if ($is_root) {
             padding: 5px 0;
         }
 
+
         .cart-icon {
             position: relative;
             cursor: pointer;
             font-size: 20px;
         }
+
 
         .cart-icon span {
             position: absolute;
@@ -181,9 +199,11 @@ if ($is_root) {
             font-weight: bold;
         }
 
+
         .hotline i {
             color: var(--secondary);
         }
+
 
         .account {
             cursor: pointer;
@@ -192,13 +212,25 @@ if ($is_root) {
             transition: opacity 0.3s ease;
         }
 
+
         .account:hover {
             opacity: 0.8;
         }
 
+
         .account i {
             font-size: 20px;
         }
+
+
+        /* Admin dropdown */
+        .admin-account { position: relative; }
+        .admin-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: var(--white); border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); min-width: 220px; display: none; overflow: hidden; z-index: 1000; }
+        .admin-account:hover .admin-dropdown { display: block; }
+        .admin-dropdown a { display: flex; align-items: center; gap: 10px; padding: 12px 14px; text-decoration: none; color: var(--dark); transition: background 0.25s ease; }
+        .admin-dropdown a:hover { background: var(--light); }
+        .admin-dropdown .divider { height: 1px; background: #eee; margin: 0; }
+
 
         .land-management-btn {
             display: inline-flex;
@@ -216,12 +248,14 @@ if ($is_root) {
             margin-right: 15px;
         }
 
+
         .land-management-btn:hover {
             background-color: var(--secondary);
             color: var(--white);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
+
 
         /* Navigation Menu */
         .main-menu {
@@ -230,6 +264,7 @@ if ($is_root) {
             display: flex;
             justify-content: center;
         }
+
 
         .menu-list {
             list-style: none;
@@ -241,11 +276,13 @@ if ($is_root) {
             justify-content: space-around;
         }
 
+
         .menu-list li {
             position: relative;
             flex: 1;
             text-align: center;
         }
+
 
         .menu-list li a {
             color: var(--white);
@@ -258,10 +295,12 @@ if ($is_root) {
             font-size: 15px;
         }
 
+
         .menu-list li a:hover,
         .menu-list li a.active {
             background-color: var(--secondary);
         }
+
 
         /* Responsive */
         @media (max-width: <?php echo BREAKPOINT_LG; ?>) {
@@ -271,22 +310,26 @@ if ($is_root) {
                 padding: 10px;
             }
 
+
             .search-bar {
                 width: 100%;
                 max-width: 100%;
                 margin: 0;
             }
 
+
             .land-management-btn {
                 width: 100%;
                 margin: 10px 0;
             }
+
 
             .contact-info {
                 width: 100%;
                 justify-content: space-between;
             }
         }
+
 
         @media (max-width: <?php echo BREAKPOINT_SM; ?>) {
             .menu-list {
@@ -302,20 +345,20 @@ if ($is_root) {
         <a href="<?php echo $index_link; ?>" class="logo">
             <span style="font-size: 28px; font-weight: 700;"><?php echo BRAND_NAME; ?></span>
         </a>
-        
+       
         <form class="search-bar" method="GET" action="<?php echo $base_path; ?>search.php">
             <input type="text" name="q" placeholder="Tìm kiếm sản phẩm..." value="<?php echo isset($_GET['q']) ? htmlspecialchars($_GET['q']) : ''; ?>">
             <button type="submit" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0;">
                 <i class="fas fa-search" style="color: var(--dark);"></i>
             </button>
         </form>
-        
+       
         <div style="flex: 1;"></div>
-        
+       
         <a href="#" class="land-management-btn">
             Quản lý đất đai
         </a>
-        
+       
         <div class="contact-info">
             <div class="hotline">
                 <i class="fas fa-phone-alt"></i>
@@ -325,12 +368,27 @@ if ($is_root) {
                 <i class="fas fa-shopping-cart"></i>
                 <span id="cart-count">0</span>
             </a>
-            <a href="<?php echo $is_logged_in ? BASE_URL . '/auth/account.php' : BASE_URL . '/auth/login.php'; ?>" class="account" style="text-decoration: none; color: inherit;">
-                <i class="far fa-user"></i>
-                <span><?php echo $current_user_name; ?></span>
-            </a>
+            <?php if ($is_logged_in && isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                <div class="admin-account">
+                    <a href="<?php echo BASE_URL; ?>/admin/index.php" class="account" style="text-decoration: none; color: inherit;">
+                        <i class="far fa-user"></i>
+                        <span>Quản Trị Viên</span>
+                    </a>
+                    <div class="admin-dropdown">
+                        <a href="<?php echo BASE_URL; ?>/auth/account.php"><i class="fas fa-user"></i> <span>Tài khoản (User)</span></a>
+                        <div class="divider"></div>
+                        <a href="<?php echo BASE_URL; ?>/admin/index.php"><i class="fas fa-tachometer-alt"></i> <span>Dashboard (Admin)</span></a>
+                    </div>
+                </div>
+            <?php else: ?>
+                <a href="<?php echo $is_logged_in ? BASE_URL . '/auth/account.php' : BASE_URL . '/auth/login.php'; ?>" class="account" style="text-decoration: none; color: inherit;">
+                    <i class="far fa-user"></i>
+                    <span><?php echo $current_user_name; ?></span>
+                </a>
+            <?php endif; ?>
         </div>
     </div>
+
 
     <!-- Main Navigation -->
     <nav class="main-menu">
@@ -347,6 +405,7 @@ if ($is_root) {
             <li><a href="<?php echo $base_path; ?>contact.php" class="<?php echo ($current_page == 'contact.php') ? 'active' : ''; ?>">Liên hệ</a></li>
         </ul>
     </nav>
+
 
 <script>
     // Update cart count on page load
@@ -371,3 +430,4 @@ if ($is_root) {
         });
     <?php endif; ?>
 </script>
+

@@ -2,32 +2,43 @@
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/auth.php';
 
+
 // Redirect if already logged in
-if (isLoggedIn()) {
+if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin' && isset($_SESSION['user_id'])) {
+    header('Location: ' . BASE_URL . '/admin/index.php');
+    exit;
+} elseif (isLoggedIn()) {
     header('Location: ' . BASE_URL . '/index.php');
     exit;
 }
 
+
 $error = '';
 $success = '';
+
 
 // Check if redirected from registration
 if (isset($_GET['registered']) && $_GET['registered'] == '1') {
     $success = 'Đăng ký thành công! Vui lòng đăng nhập.';
 }
 
+
 // Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usernameOrEmail = trim($_POST['username_or_email'] ?? '');
     $password = $_POST['password'] ?? '';
-    
+   
     if (empty($usernameOrEmail) || empty($password)) {
         $error = 'Vui lòng điền đầy đủ thông tin';
     } else {
         $result = loginUser($usernameOrEmail, $password);
         if ($result['success']) {
-            // Redirect immediately on success
-            header('Location: ' . BASE_URL . '/index.php');
+            // Redirect based on role
+            if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+                header('Location: ' . BASE_URL . '/admin/index.php');
+            } else {
+                header('Location: ' . BASE_URL . '/index.php');
+            }
             exit;
         } else {
             $error = $result['message'];
@@ -35,8 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+
 include '../includes/header.php';
 ?>
+
 
 <style>
     body {
@@ -46,6 +59,7 @@ include '../includes/header.php';
         flex-direction: column;
     }
 
+
     main {
         flex: 1;
         display: flex;
@@ -53,6 +67,7 @@ include '../includes/header.php';
         justify-content: center;
         padding: 40px 20px;
     }
+
 
     .auth-container {
         max-width: <?php echo CONTAINER_MAX_WIDTH_XSMALL; ?>;
@@ -63,12 +78,14 @@ include '../includes/header.php';
         overflow: hidden;
     }
 
+
     .auth-header {
         background: linear-gradient(135deg, var(--primary), var(--secondary));
         padding: 40px;
         text-align: center;
         color: var(--white);
     }
+
 
     .auth-header h1 {
         font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
@@ -77,6 +94,7 @@ include '../includes/header.php';
         margin-bottom: 10px;
     }
 
+
     .auth-header p {
         font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 400;
@@ -84,13 +102,16 @@ include '../includes/header.php';
         opacity: 0.9;
     }
 
+
     .auth-body {
         padding: 40px;
     }
 
+
     .form-group {
         margin-bottom: 25px;
     }
+
 
     .form-group label {
         display: block;
@@ -100,6 +121,7 @@ include '../includes/header.php';
         color: var(--dark);
         margin-bottom: 8px;
     }
+
 
     .form-group input {
         width: 100%;
@@ -112,18 +134,22 @@ include '../includes/header.php';
         transition: border-color 0.3s ease;
     }
 
+
     .form-group input:focus {
         outline: none;
         border-color: var(--primary);
     }
 
+
     .form-group input::placeholder {
         color: #999;
     }
 
+
     .input-icon {
         position: relative;
     }
+
 
     .input-icon i {
         position: absolute;
@@ -134,14 +160,17 @@ include '../includes/header.php';
         opacity: 0.5;
     }
 
+
     .input-icon input {
         padding-left: 45px;
     }
+
 
     .forgot-password {
         text-align: right;
         margin-bottom: 25px;
     }
+
 
     .forgot-password a {
         font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
@@ -152,16 +181,19 @@ include '../includes/header.php';
         transition: color 0.3s ease;
     }
 
+
     .forgot-password a:hover {
         color: var(--secondary);
         text-decoration: underline;
     }
+
 
     .btn-group {
         display: flex;
         gap: 15px;
         align-items: center;
     }
+
 
     .btn-primary {
         flex: 1;
@@ -177,9 +209,11 @@ include '../includes/header.php';
         transition: background-color 0.3s ease;
     }
 
+
     .btn-primary:hover {
         background-color: #2d4a2d;
     }
+
 
     .btn-link {
         padding: 14px 20px;
@@ -196,10 +230,12 @@ include '../includes/header.php';
         white-space: nowrap;
     }
 
+
     .btn-link:hover {
         background-color: var(--primary);
         color: var(--white);
     }
+
 
     .auth-footer {
         text-align: center;
@@ -207,6 +243,7 @@ include '../includes/header.php';
         padding-top: 30px;
         border-top: 1px solid #e0e0e0;
     }
+
 
     .auth-footer p {
         font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
@@ -216,6 +253,7 @@ include '../includes/header.php';
         margin-bottom: 10px;
     }
 
+
     .auth-footer a {
         color: var(--primary);
         text-decoration: none;
@@ -223,10 +261,12 @@ include '../includes/header.php';
         transition: color 0.3s ease;
     }
 
+
     .auth-footer a:hover {
         color: var(--secondary);
         text-decoration: underline;
     }
+
 
     .alert {
         padding: 15px;
@@ -236,11 +276,13 @@ include '../includes/header.php';
         font-size: 14px;
     }
 
+
     .alert-error {
         background-color: #fee;
         color: #c33;
         border: 1px solid #fcc;
     }
+
 
     .alert-success {
         background-color: #efe;
@@ -248,26 +290,32 @@ include '../includes/header.php';
         border: 1px solid #cfc;
     }
 
+
     @media (max-width: <?php echo BREAKPOINT_SM; ?>) {
         main {
             padding: 20px 10px;
         }
 
+
         .auth-container {
             max-width: 100%;
         }
+
 
         .auth-header {
             padding: 30px 20px;
         }
 
+
         .auth-body {
             padding: 30px 20px;
         }
 
+
         .btn-group {
             flex-direction: column;
         }
+
 
         .btn-primary,
         .btn-link {
@@ -276,12 +324,14 @@ include '../includes/header.php';
     }
 </style>
 
+
 <main>
     <div class="auth-container">
         <div class="auth-header">
             <h1>Đăng Nhập</h1>
             <p>Chào mừng bạn trở lại!</p>
         </div>
+
 
         <div class="auth-body">
             <?php if ($error): ?>
@@ -290,37 +340,41 @@ include '../includes/header.php';
                 </div>
             <?php endif; ?>
 
+
             <?php if ($success): ?>
                 <div class="alert alert-success">
                     <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($success); ?>
                 </div>
             <?php endif; ?>
 
+
             <form method="POST" action="">
                 <div class="form-group">
                     <label for="username_or_email">Tên đăng nhập hoặc Email</label>
                     <div class="input-icon">
                         <i class="fas fa-user"></i>
-                        <input type="text" 
-                               id="username_or_email" 
-                               name="username_or_email" 
+                        <input type="text"
+                               id="username_or_email"
+                               name="username_or_email"
                                placeholder="Nhập tên đăng nhập hoặc email"
                                value="<?php echo isset($_POST['username_or_email']) ? htmlspecialchars($_POST['username_or_email']) : ''; ?>"
                                required>
                     </div>
                 </div>
 
+
                 <div class="form-group">
                     <label for="password">Mật khẩu</label>
                     <div class="input-icon">
                         <i class="fas fa-lock"></i>
-                        <input type="password" 
-                               id="password" 
-                               name="password" 
+                        <input type="password"
+                               id="password"
+                               name="password"
                                placeholder="Nhập mật khẩu"
                                required>
                     </div>
                 </div>
+
 
                 <div class="btn-group">
                     <button type="submit" class="btn-primary">
@@ -330,6 +384,7 @@ include '../includes/header.php';
                 </div>
             </form>
 
+
             <div class="auth-footer">
                 <p>Chưa có tài khoản? <a href="<?php echo BASE_URL; ?>/auth/register.php">Đăng ký ngay</a></p>
             </div>
@@ -337,5 +392,10 @@ include '../includes/header.php';
     </div>
 </main>
 
+
 <?php include '../includes/footer.php'; ?>
+
+
+
+
 

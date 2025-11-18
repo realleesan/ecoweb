@@ -49,6 +49,64 @@ if (isLoggedIn()) {
     }
 }
 
+$reviews_count_approved = 0;
+$rating_avg = 0.0;
+$approved_reviews = [];
+$reviewError = '';
+$reviewSuccess = '';
+$currentUser = getCurrentUser();
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
+    if (!isLoggedIn()) {
+        $reviewError = 'Bạn cần đăng nhập để viết đánh giá.';
+    } else {
+        $rating = (int)($_POST['rating'] ?? 0);
+        $title = trim($_POST['title'] ?? '');
+        $content = trim($_POST['content'] ?? '');
+        if ($rating < 1 || $rating > 5) {
+            $reviewError = 'Vui lòng chọn số sao từ 1 đến 5.';
+        } elseif ($title === '') {
+            $reviewError = 'Vui lòng nhập tiêu đề.';
+        } elseif ($content === '') {
+            $reviewError = 'Vui lòng nhập nội dung đánh giá.';
+        } else {
+            try {
+                $stmt = $pdo->prepare('INSERT INTO product_reviews (product_id, user_id, user_name, user_email, rating, title, content, status) VALUES (:product_id, :user_id, :user_name, :user_email, :rating, :title, :content, :status)');
+                $stmt->execute([
+                    ':product_id' => $product_id,
+                    ':user_id' => $_SESSION['user_id'],
+                    ':user_name' => $currentUser['full_name'] ?? ($_SESSION['username'] ?? ''),
+                    ':user_email' => $currentUser['email'] ?? ($_SESSION['email'] ?? ''),
+                    ':rating' => $rating,
+                    ':title' => $title,
+                    ':content' => $content,
+                    ':status' => 'Pending'
+                ]);
+                $reviewSuccess = 'Đánh giá đã được gửi và đang chờ phê duyệt.';
+            } catch (Exception $e) {
+                $reviewError = 'Không thể gửi đánh giá. Vui lòng thử lại sau.';
+            }
+        }
+    }
+}
+
+try {
+    $statsStmt = $pdo->prepare('SELECT COUNT(*) AS cnt, AVG(rating) AS avg_rating FROM product_reviews WHERE product_id = :id AND status = "Approved"');
+    $statsStmt->execute([':id' => $product_id]);
+    $stats = $statsStmt->fetch();
+    if ($stats) {
+        $reviews_count_approved = (int)($stats['cnt'] ?? 0);
+        $rating_avg = (float)($stats['avg_rating'] ?? 0);
+    }
+    $reviewsStmt = $pdo->prepare('SELECT user_name, rating, title, content, created_at FROM product_reviews WHERE product_id = :id AND status = "Approved" ORDER BY created_at DESC');
+    $reviewsStmt->execute([':id' => $product_id]);
+    $approved_reviews = $reviewsStmt->fetchAll();
+} catch (Exception $e) {
+    $reviews_count_approved = 0;
+    $rating_avg = 0.0;
+    $approved_reviews = [];
+}
+
 include '../includes/header.php';
 ?>
 
@@ -451,6 +509,29 @@ include '../includes/header.php';
         margin-bottom: 15px;
     }
 
+    /* Reviews */
+    .reviews-summary { margin-bottom: 15px; }
+    .reviews-list { display: grid; gap: 15px; }
+    .review-card { background-color: var(--white); border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .review-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .review-meta { color:#777; font-size: 13px; margin-bottom:10px; }
+    .review-content { color: var(--dark); }
+    .review-form { margin-top: 20px; background-color: var(--white); border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; }
+    .review-form .form-group { margin-bottom: 12px; }
+    .review-form label { display:block; font-weight:600; margin-bottom:6px; }
+    .review-form input[type="text"], .review-form input[type="email"], .review-form textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-size: 14px; color: var(--dark); outline: none; }
+    .review-form textarea { resize: vertical; }
+    .review-form .readonly-info input { background-color: #f7f7f7; }
+    .submit-review-btn { padding: 12px 20px; background-color: var(--secondary); color: var(--white); border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background-color 0.3s ease; }
+    .submit-review-btn:hover { background-color: #a94f1d; }
+    .rating-input { display:inline-flex; align-items:center; gap: 8px; margin-bottom: 12px; direction: rtl; }
+    .rating-input input { display:none; }
+    .rating-input label { font-size: 24px; color: #ddd; cursor: pointer; }
+    .rating-input label:hover, .rating-input label:hover ~ label { color: #D26426; }
+    .rating-input input:checked ~ label { color: #D26426; }
+    .alert-error { background-color: #fee; color: #c33; border: 1px solid #fcc; padding: 10px 12px; border-radius: 6px; margin-bottom: 12px; }
+    .alert-success { background-color: #efe; color: #3c3; border: 1px solid #cfc; padding: 10px 12px; border-radius: 6px; margin-bottom: 12px; }
+
     /* Responsive */
     @media (max-width: <?php echo BREAKPOINT_LG; ?>) {
         .product-detail-grid {
@@ -513,7 +594,7 @@ function renderStars(float $rating): string
 ?>
 
 <!-- Main Content -->
-<main style="min-height: 60vh; padding: <?php echo CONTAINER_PADDING_LARGE; ?> 0; background-color: var(--white);">
+<main style="min-height: 60vh; padding: <?php echo CONTAINER_PADDING_LARGE; ?> 0; background-color: var(--light);">
     <?php
     $page_title = htmlspecialchars($product['name']);
     $breadcrumbs = [
@@ -564,7 +645,7 @@ function renderStars(float $rating): string
                     <div class="stars">
                         <?php echo renderStars((float) $product['rating']); ?>
                     </div>
-                    <span class="rating-count"><?php echo (int) $product['reviews_count']; ?> đánh giá</span>
+                    <span class="rating-count"><?php echo (int) $reviews_count_approved; ?> đánh giá</span>
                 </div>
 
                 <!-- Price -->
@@ -636,7 +717,7 @@ function renderStars(float $rating): string
             <div class="tabs-header">
                 <button class="tab-button active" onclick="switchTab('description')">Mô tả sản phẩm</button>
                 <button class="tab-button" onclick="switchTab('specifications')">Thông số kỹ thuật</button>
-                <button class="tab-button" onclick="switchTab('reviews')">Đánh giá (<?php echo (int) $product['reviews_count']; ?>)</button>
+                <button class="tab-button" onclick="switchTab('reviews')">Đánh giá (<?php echo (int) $reviews_count_approved; ?>)</button>
             </div>
 
             <div id="tab-description" class="tab-content active">
@@ -653,9 +734,68 @@ function renderStars(float $rating): string
             </div>
 
             <div id="tab-reviews" class="tab-content">
-                <p>Hiện tại có <?php echo (int) $product['reviews_count']; ?> đánh giá cho sản phẩm này.</p>
-                <p>Đánh giá trung bình: <?php echo number_format((float) $product['rating'], 1); ?>/5.0</p>
-                <p style="margin-top: 20px; color: #999; font-style: italic;">Chức năng đánh giá chi tiết sẽ được cập nhật sau.</p>
+                <div class="reviews-summary">
+                    <p>Hiện tại có <?php echo (int) $reviews_count_approved; ?> đánh giá đã duyệt cho sản phẩm này.</p>
+                    <p>Đánh giá trung bình: <?php echo number_format((float) $rating_avg, 1); ?>/5.0</p>
+                </div>
+
+                <?php if (!empty($reviewSuccess)): ?>
+                    <div class="alert-success"><?php echo htmlspecialchars($reviewSuccess); ?></div>
+                <?php endif; ?>
+                <?php if (!empty($reviewError)): ?>
+                    <div class="alert-error"><?php echo htmlspecialchars($reviewError); ?></div>
+                <?php endif; ?>
+
+                <div class="reviews-list">
+                    <?php if (!empty($approved_reviews)): ?>
+                        <?php foreach ($approved_reviews as $rev): ?>
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <strong><?php echo htmlspecialchars($rev['title']); ?></strong>
+                                    <div class="stars"><?php echo renderStars((float) $rev['rating']); ?></div>
+                                </div>
+                                <div class="review-meta">
+                                    <?php echo htmlspecialchars($rev['user_name']); ?> • <?php echo date(DATETIME_FORMAT, strtotime($rev['created_at'])); ?>
+                                </div>
+                                <div class="review-content">
+                                    <?php echo nl2br(htmlspecialchars($rev['content'])); ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>Chưa có đánh giá nào được duyệt.</p>
+                    <?php endif; ?>
+                </div>
+
+                <?php if (isLoggedIn()): ?>
+                    <form method="post" class="review-form">
+                        <input type="hidden" name="submit_review" value="1">
+                        <div class="form-group">
+                            <label class="label">Chọn số sao</label>
+                            <div class="rating-input">
+                                <?php for ($i = 5; $i >= 1; $i--): ?>
+                                    <input type="radio" id="star-<?php echo $i; ?>" name="rating" value="<?php echo $i; ?>" required>
+                                    <label for="star-<?php echo $i; ?>">★</label>
+                                <?php endfor; ?>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="title">Tiêu đề</label>
+                            <input type="text" id="title" name="title" placeholder="Nhập tiêu đề đánh giá" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="content">Nội dung đánh giá</label>
+                            <textarea id="content" name="content" rows="5" placeholder="Nhập nội dung đánh giá" required></textarea>
+                        </div>
+                        <div class="form-group readonly-info">
+                            <input type="text" value="<?php echo htmlspecialchars(($currentUser['full_name'] ?? $current_user_name)); ?>" readonly>
+                            <input type="email" value="<?php echo htmlspecialchars(($currentUser['email'] ?? ($_SESSION['email'] ?? ''))); ?>" readonly>
+                        </div>
+                        <button type="submit" class="submit-review-btn">GỬI ĐÁNH GIÁ</button>
+                    </form>
+                <?php else: ?>
+                    <div class="alert-error">Bạn cần đăng nhập để viết đánh giá.</div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

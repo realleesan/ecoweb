@@ -31,106 +31,329 @@ include '../includes/header.php';
                 Tầm nhìn & Sứ mệnh
                 <span style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 100px; height: 3px; background: var(--secondary);"></span>
             </h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: <?php echo GRID_GAP; ?>;">
-                <div style="background: linear-gradient(135deg, var(--primary) 0%, #4a7a4a 100%); padding: 35px; border-radius: 10px; color: var(--white); box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                    <h3 style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 700; font-size: 24px; color: var(--white); margin-bottom: 20px; display: flex; align-items: center;">
-                        <i class="fas fa-eye" style="margin-right: 10px; color: var(--secondary);"></i>
-                        Tầm nhìn
-                    </h3>
-                    <p style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 400; font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.95); margin: 0;">
-                        Công ty Cổ phần Nông nghiệp Sinh thái GrowHope, là xây dựng, phát triển và nhân rộng mô hình Làng du lịch đặc sản sinh thái – nơi đồng hành cùng bà con nông dân làm ra nông sản ngon, lành mạnh và đáng tin cậy – nơi đồng hành cùng người tiêu dùng, cam kết chất lượng và sự minh bạch của nông sản – nơi đất, nước, môi trường, hệ sinh thái được trả lại sự trong sạch, cân bằng vốn có.
-                    </p>
+            
+            <style>
+                .flip-card-container {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: <?php echo GRID_GAP; ?>;
+                    perspective: 1000px;
+                }
+                
+                .flip-card {
+                    height: 300px;
+                    perspective: 1000px;
+                    cursor: pointer;
+                }
+                
+                .flip-card-inner {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                    text-align: center;
+                    transition: transform 0.8s;
+                    transform-style: preserve-3d;
+                }
+                
+                .flip-card:hover .flip-card-inner {
+                    transform: rotateY(180deg);
+                }
+                
+                .flip-card-front, .flip-card-back {
+                    position: absolute;
+                    width: 100%;
+                    height: 100%;
+                    -webkit-backface-visibility: hidden;
+                    backface-visibility: hidden;
+                    border-radius: 10px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 35px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                }
+                
+                .flip-card-front {
+                    background: linear-gradient(135deg, var(--primary) 0%, #4a7a4a 100%);
+                    color: var(--white);
+                }
+                
+                .flip-card-back {
+                    background: linear-gradient(135deg, var(--primary) 0%, #4a7a4a 100%);
+                    color: var(--white);
+                    transform: rotateY(180deg);
+                }
+                
+                .flip-card-front h3, .flip-card-back h3 {
+                    font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
+                    font-weight: 700;
+                    font-size: 24px;
+                    color: var(--white);
+                    margin-bottom: 20px;
+                    display: flex;
+                    align-items: center;
+                }
+                
+                .flip-card-front p, .flip-card-back p {
+                    font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
+                    font-weight: 400;
+                    font-size: 15px;
+                    line-height: 1.8;
+                    color: rgba(255,255,255,0.95);
+                    margin: 0;
+                }
+                
+                .flip-card-front .icon {
+                    margin-right: 10px;
+                    color: var(--secondary);
+                    font-size: 28px;
+                }
+                
+                .flip-card-back .icon {
+                    margin-right: 10px;
+                    color: var(--secondary);
+                    font-size: 28px;
+                }
+                
+                /* Card thứ hai - Sứ mệnh */
+                .flip-card.mission .flip-card-front,
+                .flip-card.mission .flip-card-back {
+                    background: linear-gradient(135deg, var(--dark) 0%, #8a5a4a 100%);
+                }
+            </style>
+            
+            <div class="flip-card-container">
+                <!-- Tầm nhìn -->
+                <div class="flip-card">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <h3>
+                                <i class="fas fa-eye icon"></i>
+                                Tầm nhìn
+                            </h3>
+                            <p>Nhấp chuột để xem chi tiết</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <h3>
+                                <i class="fas fa-eye icon"></i>
+                                Tầm nhìn
+                            </h3>
+                            <p>
+                                Công ty Cổ phần Nông nghiệp Sinh thái GrowHope, là xây dựng, phát triển và nhân rộng mô hình Làng du lịch đặc sản sinh thái – nơi đồng hành cùng bà con nông dân làm ra nông sản ngon, lành mạnh và đáng tin cậy – nơi đồng hành cùng người tiêu dùng, cam kết chất lượng và sự minh bạch của nông sản – nơi đất, nước, môi trường, hệ sinh thái được trả lại sự trong sạch, cân bằng vốn có.
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <div style="background: linear-gradient(135deg, var(--dark) 0%, #8a5a4a 100%); padding: 35px; border-radius: 10px; color: var(--white); box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                    <h3 style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 700; font-size: 24px; color: var(--white); margin-bottom: 20px; display: flex; align-items: center;">
-                        <i class="fas fa-bullseye" style="margin-right: 10px; color: var(--secondary);"></i>
-                        Sứ mệnh
-                    </h3>
-                    <p style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 400; font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.95); margin: 0;">
-                        Gìn giữ, bảo tồn hương vị nguyên bản của nông sản đặc sản quê hương – trên con đường chinh phục thị trường quốc tế cũng như hướng tới mục tiêu – một đất nước của nền Nông nghiệp Sinh thái.
-                    </p>
+                
+                <!-- Sứ mệnh -->
+                <div class="flip-card mission">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <h3>
+                                <i class="fas fa-bullseye icon"></i>
+                                Sứ mệnh
+                            </h3>
+                            <p>Nhấp chuột để xem chi tiết</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <h3>
+                                <i class="fas fa-bullseye icon"></i>
+                                Sứ mệnh
+                            </h3>
+                            <p>
+                                Gìn giữ, bảo tồn hương vị nguyên bản của nông sản đặc sản quê hương – trên con đường chinh phục thị trường quốc tế cũng như hướng tới mục tiêu – một đất nước của nền Nông nghiệp Sinh thái.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Giá trị cốt lõi -->
+        <!-- Đội ngũ chúng tôi -->
         <section style="margin-bottom: 60px;">
             <h2 style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 700; font-size: 32px; color: var(--primary); margin-bottom: 30px; text-align: center; position: relative; padding-bottom: 20px;">
-                Giá trị cốt lõi
+                Đội ngũ chúng tôi
                 <span style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 100px; height: 3px; background: var(--secondary);"></span>
             </h2>
             
-            <!-- Mục tiêu chính -->
-            <div style="background: linear-gradient(135deg, var(--secondary) 0%, #e87a3a 100%); padding: 30px; border-radius: 10px; margin-bottom: 30px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-                <p style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 400; font-size: 18px; line-height: 1.8; color: var(--white); margin: 0;">
-                    Trở thành thương hiệu đẳng cấp quốc tế trong ngành thực phẩm và đồ uống, nơi mọi người đặt trọn niềm tin vào các sản phẩm dinh dưỡng và sức khỏe.
-                </p>
-            </div>
+            <style>
+                .team-container {
+                    display: grid;
+                    grid-template-columns: repeat(3, minmax(260px, 1fr));
+                    gap: 30px;
+                    justify-items: stretch;
+                    align-items: stretch;
+                }
 
-            <!-- Các giá trị -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: <?php echo GRID_GAP_SMALL; ?>;">
-                <div style="background-color: var(--white); padding: 30px; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 3px 10px rgba(0,0,0,0.1); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 5px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 10px rgba(0,0,0,0.1)'">
-                    <div style="width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-                        <i class="fas fa-shield-alt" style="font-size: 28px; color: var(--white);"></i>
+                .team-container .team-member-card { width: 100%; }
+
+                .team-container .team-member-card:nth-child(4) { grid-column: 1; grid-row: 2; }
+                .team-container .team-member-card:nth-child(5) { grid-column: 3; grid-row: 2; }
+
+                @media (max-width: 992px) {
+                    .team-container { grid-template-columns: repeat(2, minmax(260px, 1fr)); }
+                    .team-container .team-member-card:nth-child(4),
+                    .team-container .team-member-card:nth-child(5) { grid-column: auto; grid-row: auto; }
+                }
+                @media (max-width: 600px) {
+                    .team-container { grid-template-columns: 1fr; }
+                }
+
+                .team-member-card {
+                    height: 300px;
+                    position: relative;
+                    perspective: 1000px;
+                    cursor: pointer;
+                }
+
+                .team-member-card-inner {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                    text-align: center;
+                    transition: transform 0.8s;
+                    transform-style: preserve-3d;
+                }
+
+                .team-member-card:hover .team-member-card-inner {
+                    transform: rotateY(180deg);
+                }
+
+                .team-member-card-front, .team-member-card-back {
+                    position: absolute;
+                    top: 0; left: 0;
+                    width: 100%;
+                    height: 100%;
+                    -webkit-backface-visibility: hidden;
+                    backface-visibility: hidden;
+                    border-radius: 15px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 30px;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+                    box-sizing: border-box;
+                }
+
+                .team-member-card-front {
+                    background: var(--white);
+                    border: 1px solid rgba(0,0,0,0.08);
+                    color: var(--dark);
+                }
+
+                .team-member-card-back {
+                    background: var(--white);
+                    border: 1px solid rgba(0,0,0,0.08);
+                    color: var(--dark);
+                    transform: rotateY(180deg);
+                }
+
+                .member-name {
+                    font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
+                    font-weight: 700;
+                    font-size: 22px;
+                    color: var(--primary);
+                    margin: 0;
+                }
+
+                .member-role {
+                    font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
+                    font-weight: 500;
+                    font-size: 18px;
+                    color: var(--secondary);
+                    margin: 0;
+                    text-align: center;
+                }
+
+                .member-photo {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 12px;
+                    background: #f5f7f9;
+                    border: 1px dashed rgba(0,0,0,0.12);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: var(--secondary);
+                    font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
+                    font-size: 14px;
+                }
+                .member-photo img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    border-radius: 12px;
+                    display: block;
+                }
+            </style>
+            
+            <div class="team-container">
+                <!-- Thành viên 1 -->
+                <div class="team-member-card">
+                    <div class="team-member-card-inner">
+                        <div class="team-member-card-front">
+                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/team/z4708494459517_30bf1861f051d56d18ff449be58a5f36.jpg" alt="Trần Thị B"></div>
+                        </div>
+                        <div class="team-member-card-back">
+                            <h3 class="member-name">Nguyễn Văn Hoàng Nam</h3>
+                            <p class="member-role"> Bố leader </p>
+                        </div>
                     </div>
-                    <h3 style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 700; font-size: 20px; color: var(--primary); margin-bottom: 15px; text-align: center;">
-                        Thanh liêm
-                    </h3>
-                    <p style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 400; font-size: 15px; line-height: 1.7; color: var(--dark); text-align: center; margin: 0;">
-                        Chính trực và minh bạch trong các hành động và giao dịch.
-                    </p>
                 </div>
 
-                <div style="background-color: var(--white); padding: 30px; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 3px 10px rgba(0,0,0,0.1); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 5px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 10px rgba(0,0,0,0.1)'">
-                    <div style="width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-                        <i class="fas fa-handshake" style="font-size: 28px; color: var(--white);"></i>
+                <!-- Thành viên 2 -->
+                <div class="team-member-card">
+                    <div class="team-member-card-inner">
+                        <div class="team-member-card-front">
+                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/team/z4708494459517_30bf1861f051d56d18ff449be58a5f36.jpg" alt="Nguyễn Văn A"></div>
+                        </div>
+                        <div class="team-member-card-back">
+                            <h3 class="member-name">Lê Vũ Bảo Nhật</h3>
+                            <p class="member-role">Leader dự án</p>
+                        </div>
                     </div>
-                    <h3 style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 700; font-size: 20px; color: var(--primary); margin-bottom: 15px; text-align: center;">
-                        Kính trọng
-                    </h3>
-                    <p style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 400; font-size: 15px; line-height: 1.7; color: var(--dark); text-align: center; margin: 0;">
-                        Có tự trọng, tôn trọng đồng nghiệp. Tôn trọng Công ty và các đối tác. Để hợp tác với sự tôn trọng.
-                    </p>
                 </div>
 
-                <div style="background-color: var(--white); padding: 30px; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 3px 10px rgba(0,0,0,0.1); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 5px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 10px rgba(0,0,0,0.1)'">
-                    <div style="width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-                        <i class="fas fa-balance-scale" style="font-size: 28px; color: var(--white);"></i>
+                <!-- Thành viên 3 -->
+                <div class="team-member-card">
+                    <div class="team-member-card-inner">
+                        <div class="team-member-card-front">
+                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/team/z4708494459517_30bf1861f051d56d18ff449be58a5f36.jpg" alt="Lê Văn C"></div>
+                        </div>
+                        <div class="team-member-card-back">
+                            <h3 class="member-name">Nguyễn Thị Nhung</h3>
+                            <p class="member-role"> Vợ leader </p>
+                        </div>
                     </div>
-                    <h3 style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 700; font-size: 20px; color: var(--primary); margin-bottom: 15px; text-align: center;">
-                        Công bằng
-                    </h3>
-                    <p style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 400; font-size: 15px; line-height: 1.7; color: var(--dark); text-align: center; margin: 0;">
-                        Công bằng với nhân viên, khách hàng, nhà cung cấp và các bên khác.
-                    </p>
                 </div>
 
-                <div style="background-color: var(--white); padding: 30px; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 3px 10px rgba(0,0,0,0.1); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 5px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 10px rgba(0,0,0,0.1)'">
-                    <div style="width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-                        <i class="fas fa-heart" style="font-size: 28px; color: var(--white);"></i>
+                <!-- Thành viên 4 -->
+                <div class="team-member-card">
+                    <div class="team-member-card-inner">
+                        <div class="team-member-card-front">
+                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/team/z4708494459517_30bf1861f051d56d18ff449be58a5f36.jpg" alt="Phạm Thị D"></div>
+                        </div>
+                        <div class="team-member-card-back">
+                            <h3 class="member-name">Trần Phương Thư</h3>
+                            <p class="member-role">Coder/Designer/Powerpoint producer</p>
+                        </div>
                     </div>
-                    <h3 style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 700; font-size: 20px; color: var(--primary); margin-bottom: 15px; text-align: center;">
-                        Đạo đức
-                    </h3>
-                    <p style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 400; font-size: 15px; line-height: 1.7; color: var(--dark); text-align: center; margin: 0;">
-                        Tôn trọng các tiêu chuẩn đạo đức đã được thiết lập và hành động phù hợp.
-                    </p>
                 </div>
-
-                <div style="background-color: var(--white); padding: 30px; border-radius: 10px; border: 2px solid var(--primary); box-shadow: 0 3px 10px rgba(0,0,0,0.1); transition: transform 0.3s ease, box-shadow 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 5px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 10px rgba(0,0,0,0.1)'">
-                    <div style="width: 60px; height: 60px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-                        <i class="fas fa-check-circle" style="font-size: 28px; color: var(--white);"></i>
+                <div class="team-member-card">
+                    <div class="team-member-card-inner">
+                        <div class="team-member-card-front">
+                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/team/z7238813993706_ea0016173c9a864e4622267f2a37779a.jpg" alt="Ngô Văn E"></div>
+                        </div>
+                        <div class="team-member-card-back">
+                            <h3 class="member-name">Trần Thị Thùy Trang</h3>
+                            <p class="member-role"> Coder/ Designer </p>
+                        </div>
                     </div>
-                    <h3 style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 700; font-size: 20px; color: var(--primary); margin-bottom: 15px; text-align: center;">
-                        Tuân thủ
-                    </h3>
-                    <p style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 400; font-size: 15px; line-height: 1.7; color: var(--dark); text-align: center; margin: 0;">
-                        Công bằng với nhân viên, khách hàng, nhà cung cấp và các bên khác.
-                    </p>
                 </div>
             </div>
         </section>
-
     </div>
 </main>
 

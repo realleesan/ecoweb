@@ -48,9 +48,10 @@ define('COLOR_BG_GREEN', '#9FBD48');
 // ============================================
 // DESIGN SYSTEM - TYPOGRAPHY
 // ============================================
-define('FONT_FAMILY', 'Poppins');
-define('FONT_WEIGHTS', '300,400,500,600,700');
-define('FONT_GOOGLE_URL', 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+// Nunito - Font gần gũi, dễ đọc, phù hợp với đề tài thiên nhiên và môi trường
+define('FONT_FAMILY', 'Nunito');
+define('FONT_WEIGHTS', '300,400,500,600,700,800');
+define('FONT_GOOGLE_URL', 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&display=swap');
 
 // ============================================
 // LAYOUT CONFIGURATION
@@ -84,6 +85,9 @@ define('PAGINATION_GALLERY_PER_PAGE', 16);
 // ============================================
 // PATHS & URLs
 // ============================================
+// Ngrok URL - Cập nhật URL ngrok của bạn tại đây
+define('NGROK_URL', 'https://paradelike-inge-unlitigating.ngrok-free.dev');
+
 define('BASE_URL', '/ecoweb');
 define('BASE_PATH', dirname(__DIR__));
 define('PUBLIC_PATH', BASE_PATH . '/public');

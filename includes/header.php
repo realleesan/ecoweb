@@ -428,9 +428,18 @@ if ($is_root) {
        
         <div style="flex: 1;"></div>
        
-        <a href="<?php echo BASE_URL; ?>/auth/login.php?next=<?php echo rawurlencode(BASE_URL . '/auth/lands.php'); ?>" class="land-management-btn">
-            Quản lý đất đai
-        </a>
+        <?php if ($is_logged_in): ?>
+            <a href="<?php echo BASE_URL; ?>/auth/my-trees.php" class="land-management-btn" style="margin-right: 10px;">
+                <i class="fas fa-tree"></i> Cây của tôi
+            </a>
+            <a href="<?php echo BASE_URL; ?>/auth/lands.php" class="land-management-btn">
+                <i class="fas fa-landmark"></i> Quản lý đất đai
+            </a>
+        <?php else: ?>
+            <a href="<?php echo BASE_URL; ?>/auth/login.php?next=<?php echo rawurlencode(BASE_URL . '/auth/lands.php'); ?>" class="land-management-btn">
+                Quản lý đất đai
+            </a>
+        <?php endif; ?>
        
         <div class="contact-info">
             <div class="hotline">

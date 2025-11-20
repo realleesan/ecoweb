@@ -154,7 +154,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
             </a>
         </li>
         <li>
-            <a href="#" class="<?php echo ($current_page == 'land-management.php') ? 'active' : ''; ?>">
+            <a href="<?php echo BASE_URL; ?>/auth/my-trees.php" class="<?php echo ($current_page == 'my-trees.php') ? 'active' : ''; ?>">
+                <i class="fas fa-tree"></i>
+                <span>Cây của tôi</span>
+            </a>
+        </li>
+        <li>
+            <a href="<?php echo BASE_URL; ?>/auth/lands.php" class="<?php echo ($current_page == 'lands.php') ? 'active' : ''; ?>">
                 <i class="fas fa-landmark"></i>
                 <span>Quản lý đất đai</span>
             </a>

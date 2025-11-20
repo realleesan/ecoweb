@@ -2,9 +2,16 @@
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/database.php';
 require_once __DIR__ . '/../includes/coupon.php';
+require_once __DIR__ . '/../includes/sepay_config.php';
 require_once __DIR__ . '/../auth/auth.php';
 
 header('Content-Type: application/json; charset=utf-8');
+
+// Kiểm tra đăng nhập
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'message' => 'Vui lòng đăng nhập để đặt hàng']);
+    exit;
+}
 
 function safeRollback(PDO $pdo): void
 {
@@ -138,17 +145,20 @@ try {
         }
     }
 
+    // Commit transaction - Đơn hàng đã được tạo thành công
     $pdo->commit();
+
+    // Trả về thông tin đơn hàng để chuyển đến trang thanh toán
     echo json_encode([
         'success' => true,
         'order_code' => $orderCode,
-        'discount_amount' => $discountAmount,
-        'final_amount' => $finalAmount,
-        'coupon_code_applied' => $couponRow ? $couponRow['coupon_code'] : null,
+        'amount' => $finalAmount,
+        'redirect_url' => BASE_URL . '/payment/payment.php?order_code=' . urlencode($orderCode)
     ]);
+
 } catch (Exception $e) {
-    if ($pdo) {
-        safeRollback($pdo);
+    if ($pdo && $pdo->inTransaction()) {
+        $pdo->rollBack();
     }
     echo json_encode([
         'success' => false,

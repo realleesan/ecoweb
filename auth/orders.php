@@ -29,6 +29,7 @@ include '../includes/header.php';
     .status { padding:6px 10px; border-radius: 20px; font-size: 12px; font-weight:600; }
     .st-pending { background:#fff5f0; color:#a64b2a; border:1px solid #ffd8c2; }
     .st-paid { background:#e9f7ef; color:#2e7d32; border:1px solid #c8e6c9; }
+    .st-planted { background:#d4edda; color:#155724; border:1px solid #c3e6cb; }
     .st-cancelled { background:#fee; color:#c33; border:1px solid #fcc; }
     .order-actions { display:flex; gap:8px; }
     .btn { padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:600; text-decoration:none; display:inline-block; }
@@ -67,14 +68,31 @@ include '../includes/header.php';
                         <div class="order-row" style="margin-top:10px;">
                             <?php
                                 $status = $o['status'];
-                                $stClass = ($status==='paid')?'st-paid':(($status==='cancelled')?'st-cancelled':'st-pending');
-                                $stLabel = ($status==='paid')?'Đã thanh toán':(($status==='cancelled')?'Đã hủy':'Đang chờ thanh toán');
+                                if ($status === 'planted') {
+                                    $stClass = 'st-planted';
+                                    $stLabel = '🌳 Đã trồng cây';
+                                } elseif ($status === 'paid') {
+                                    $stClass = 'st-paid';
+                                    $stLabel = '✓ Đã thanh toán';
+                                } elseif ($status === 'cancelled') {
+                                    $stClass = 'st-cancelled';
+                                    $stLabel = 'Đã hủy';
+                                } else {
+                                    $stClass = 'st-pending';
+                                    $stLabel = 'Đang chờ thanh toán';
+                                }
                             ?>
                             <span class="status <?php echo $stClass; ?>"><?php echo $stLabel; ?></span>
                             <div class="order-actions">
-                                <a href="<?php echo BASE_URL; ?>/payment/payment.php?order_code=<?php echo urlencode($o['order_code']); ?>" class="btn btn-secondary">Chi tiết</a>
-                                <?php if ($status==='pending'): ?>
+                                <?php if ($status === 'planted'): ?>
+                                    <a href="<?php echo BASE_URL; ?>/auth/my-trees.php" class="btn btn-primary">Xem cây đã trồng</a>
+                                <?php elseif ($status === 'paid'): ?>
+                                    <a href="<?php echo BASE_URL; ?>/payment/map.php?order_code=<?php echo urlencode($o['order_code']); ?>" class="btn btn-primary">Trồng cây ngay</a>
+                                <?php elseif ($status === 'pending'): ?>
+                                    <a href="<?php echo BASE_URL; ?>/payment/payment.php?order_code=<?php echo urlencode($o['order_code']); ?>" class="btn btn-secondary">Chi tiết</a>
                                     <a href="<?php echo BASE_URL; ?>/payment/payment.php?order_code=<?php echo urlencode($o['order_code']); ?>" class="btn btn-primary">Thanh toán ngay</a>
+                                <?php else: ?>
+                                    <a href="<?php echo BASE_URL; ?>/payment/payment.php?order_code=<?php echo urlencode($o['order_code']); ?>" class="btn btn-secondary">Chi tiết</a>
                                 <?php endif; ?>
                             </div>
                         </div>

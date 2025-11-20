@@ -181,20 +181,83 @@ function applyCoupon() {
 function placeOrder(){
     const addr = document.querySelector('input[name="shipping_address_id"]:checked');
     if (!addr) { alert('Vui lòng chọn địa chỉ giao hàng.'); return; }
+    
     const payload = {
         shipping_address_id: parseInt(addr.value),
         payment_method: 'bank_transfer',
-        coupon_code: appliedCoupon ? appliedCoupon : document.getElementById('coupon_code').value.trim(),
+        // Logic lấy mã giảm giá: ưu tiên mã đã áp dụng thành công, nếu không thì lấy giá trị đang nhập
+        coupon_code: (typeof appliedCoupon !== 'undefined' && appliedCoupon) ? appliedCoupon : document.getElementById('coupon_code').value.trim(),
         note: document.getElementById('order_note').value.trim()
     };
+    
+    // Disable nút bấm để tránh double-click
+    const orderBtn = event.target || document.querySelector('button[onclick="placeOrder()"]');
+    if(orderBtn) {
+        orderBtn.disabled = true;
+        orderBtn.textContent = 'ĐANG CHUYỂN HƯỚNG...';
+    }
+    
     fetch('<?php echo BASE_URL; ?>/api/create-order.php', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-    }).then(r=>r.json()).then(res=>{
-        if(res && res.success){
-            window.location.href = '<?php echo BASE_URL; ?>/payment/payment.php?order_code=' + encodeURIComponent(res.order_code);
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res && res.success) {
+            // --- LOGIC MỚI CHO SEPAY GATEWAY ---
+            
+            if (res.payment_url && res.params) {
+                // Trường hợp 1: API trả về dữ liệu để POST sang SePay (Mới)
+                
+                // 1. Tạo form ẩn
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = res.payment_url; // Link SePay Sandbox
+                
+                // 2. Đổ dữ liệu vào các input ẩn
+                for (const key in res.params) {
+                    if (res.params.hasOwnProperty(key)) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = key;
+                        input.value = res.params[key];
+                        form.appendChild(input);
+                    }
+                }
+                
+                // 3. Gắn vào body và tự động submit
+                document.body.appendChild(form);
+                form.submit();
+                
+            } else if (res.redirect_url) {
+                // Trường hợp 2: Fallback cho logic cũ (nếu API chưa cập nhật kịp)
+                window.location.href = res.redirect_url;
+            } else {
+                // Trường hợp lỗi: Thành công nhưng không có link
+                alert('Lỗi: Không tìm thấy đường dẫn thanh toán.');
+                if(orderBtn) {
+                    orderBtn.disabled = false;
+                    orderBtn.textContent = 'ĐẶT HÀNG NGAY';
+                }
+            }
+            // -----------------------------------
+        } else {
+            alert(res.message || 'Không thể tạo đơn hàng.');
+            if(orderBtn) {
+                orderBtn.disabled = false;
+                orderBtn.textContent = 'ĐẶT HÀNG NGAY';
+            }
         }
-        else { alert(res.message || 'Không thể tạo đơn hàng.'); }
-    }).catch(()=>alert('Có lỗi xảy ra.'));
+    })
+    .catch(err => {
+        console.error('Lỗi kết nối:', err);
+        alert('Có lỗi xảy ra khi kết nối tới server. Vui lòng thử lại.');
+        if(orderBtn) {
+            orderBtn.disabled = false;
+            orderBtn.textContent = 'ĐẶT HÀNG NGAY';
+        }
+    });
 }
 </script>
 

@@ -718,6 +718,36 @@ include 'includes/header.php';
       function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
       function formatPrice(p){ if(!p) return ''; return Number(p).toLocaleString('vi-VN') + '₫'; }
 
+      // Load tất cả cây đã trồng (hiển thị ngay khi load trang)
+      var allPlantedTrees = [];
+      fetch('<?php echo BASE_URL; ?>/api/all-planted-trees.php')
+        .then(function(res){ return res.json(); })
+        .then(function(json){
+          if(!json.success) return;
+          allPlantedTrees = json.data || [];
+          console.log('Loaded ' + allPlantedTrees.length + ' planted trees');
+          
+          // Hiển thị tất cả cây đã trồng trên map
+          allPlantedTrees.forEach(function(tree){
+            var treeMarker = L.marker([tree.center_lat, tree.center_lng], {icon: treeIcon})
+              .addTo(plantingLayer)
+              .bindPopup(
+                '<div style="min-width: 200px;">' +
+                '<h4 style="margin: 0 0 10px 0; color: #4caf50;">🌳 ' + escapeHtml(tree.product_name) + '</h4>' +
+                '<div style="font-size: 13px;">' +
+                '<p style="margin: 5px 0;"><strong>Mẫu đất:</strong> ' + escapeHtml(tree.land_name) + '</p>' +
+                '<p style="margin: 5px 0;"><strong>Vị trí:</strong> Ô [' + tree.grid_row + ',' + tree.grid_col + ']</p>' +
+                '<p style="margin: 5px 0;"><strong>Người trồng:</strong> ' + escapeHtml(tree.user_name || tree.username || 'Ẩn danh') + '</p>' +
+                '<p style="margin: 5px 0;"><strong>Mã đơn:</strong> ' + escapeHtml(tree.order_code) + '</p>' +
+                '<p style="margin: 5px 0;"><strong>Ngày trồng:</strong> ' + new Date(tree.planted_at).toLocaleDateString('vi-VN') + '</p>' +
+                '<p style="margin: 5px 0;"><strong>Tình trạng:</strong> <span style="color: #4caf50;">🌱 Khỏe mạnh</span></p>' +
+                '</div>' +
+                '</div>'
+              );
+          });
+        })
+        .catch(function(err){ console.error('Lỗi load planted trees:', err); });
+
       // load sites (mẫu đất)
       fetch('<?php echo BASE_URL; ?>/api/sites.php')
         .then(function(res){ return res.json(); })
@@ -766,43 +796,9 @@ include 'includes/header.php';
                   map.setView([lat, lng], 15);
                 }
 
-                // load plantings for this site only if it's an actual 'site' (plantings belong to sites table)
-                plantingLayer.clearLayers();
-                if (site.type === 'site') {
-                  fetch('<?php echo BASE_URL; ?>/api/site_trees.php?site_id=' + site.id)
-                    .then(function(r){ return r.json(); })
-                    .then(function(d){
-                      if(!d.success) return;
-                      d.data.forEach(function(pl){
-                        var pm = L.marker([pl.lat, pl.lng], {icon: treeIcon})
-                          .addTo(plantingLayer)
-                          .bindPopup(
-                            '<strong>' + escapeHtml(pl.product_name) + '</strong><br/>' +
-                            (pl.product_category ? 'Danh mục: ' + escapeHtml(pl.product_category) + '<br/>' : '') +
-                            (pl.product_price ? 'Giá: ' + formatPrice(pl.product_price) + '<br/>' : '') +
-                            'Người trồng: ' + escapeHtml(pl.user_name) + '<br/>' +
-                            'Thời gian: ' + escapeHtml(pl.planted_at)
-                          )
-                          .on('click', function(e){
-                            try {
-                              map.setView([pl.lat, pl.lng], 18, {animate: true});
-                            } catch(err) {
-                              map.setView([pl.lat, pl.lng], 18);
-                            }
-                            this.openPopup();
-                            if (selectedPlantingLayer) {
-                              map.removeLayer(selectedPlantingLayer);
-                            }
-                            selectedPlantingLayer = L.circle([pl.lat, pl.lng], {
-                              radius: 8,
-                              color: '#2e8b57',
-                              weight: 3,
-                              fill: false
-                            }).addTo(map);
-                          });
-                      });
-                    });
-                }
+                // Không xóa plantingLayer nữa vì đã có tất cả cây trồng
+                // Chỉ highlight các cây thuộc land này nếu cần
+                // (Giữ nguyên tất cả cây đã trồng trên map)
               });
           });
         })

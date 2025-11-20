@@ -13,12 +13,13 @@ $products = [];
 
 if ($pdo) {
     try {
-        $categoryStmt = $pdo->query('SELECT category_id, category_name, slug FROM categories ORDER BY category_name ASC');
+        $categoryStmt = $pdo->query('SELECT category_id, category_name, slug FROM categories WHERE is_active = 1 ORDER BY category_name ASC');
         $categories = $categoryStmt->fetchAll();
 
         $productStmt = $pdo->query('SELECT p.product_id, p.code, p.name, p.price, p.short_description, p.category_id, c.slug AS category_slug, c.category_name
                                     FROM products p
                                     INNER JOIN categories c ON p.category_id = c.category_id
+                                    WHERE c.is_active = 1
                                     ORDER BY p.created_at DESC');
         $products = $productStmt->fetchAll();
     } catch (PDOException $e) {

@@ -14,7 +14,7 @@ CREATE TABLE categories (
     category_name VARCHAR(255) NOT NULL,
     slug VARCHAR(255) NOT NULL UNIQUE,
     description TEXT,
-    image VARCHAR(255),
+    image VARCHAR(255), 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

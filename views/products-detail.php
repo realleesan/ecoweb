@@ -34,6 +34,16 @@ $tagStmt->bindValue(':id', $product_id, PDO::PARAM_INT);
 $tagStmt->execute();
 $product_tags = $tagStmt->fetchAll(PDO::FETCH_COLUMN);
 
+// Get product images
+$productImages = [];
+try {
+    $imgStmt = $pdo->prepare('SELECT image_id, image_url, alt_text FROM product_images WHERE product_id = :id ORDER BY is_primary DESC, created_at ASC');
+    $imgStmt->execute([':id' => $product_id]);
+    $productImages = $imgStmt->fetchAll();
+} catch (Exception $e) {
+    $productImages = [];
+}
+
 // Check if product is in wishlist (if user is logged in)
 $isFavorite = false;
 if (isLoggedIn()) {
@@ -611,21 +621,33 @@ function renderStars(float $rating): string
             <!-- Column 1: Images -->
             <div class="product-images">
                 <div class="main-image" id="main-image">
-                    <div class="main-image-placeholder">Hình ảnh sản phẩm chính</div>
+                    <?php if (!empty($productImages)): ?>
+                        <img id="main-image-img" src="<?php echo htmlspecialchars($productImages[0]['image_url']); ?>" alt="<?php echo htmlspecialchars($productImages[0]['alt_text'] ?? ''); ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                    <?php else: ?>
+                        <div class="main-image-placeholder">Hình ảnh sản phẩm chính</div>
+                    <?php endif; ?>
                 </div>
                 <div class="thumbnail-images">
-                    <div class="thumbnail active" onclick="changeMainImage(0)">
-                        <span>Hình 1</span>
-                    </div>
-                    <div class="thumbnail" onclick="changeMainImage(1)">
-                        <span>Hình 2</span>
-                    </div>
-                    <div class="thumbnail" onclick="changeMainImage(2)">
-                        <span>Hình 3</span>
-                    </div>
-                    <div class="thumbnail" onclick="changeMainImage(3)">
-                        <span>Hình 4</span>
-                    </div>
+                    <?php if (!empty($productImages)): ?>
+                        <?php foreach ($productImages as $index => $img): ?>
+                            <div class="thumbnail <?php echo $index === 0 ? 'active' : ''; ?>" onclick="changeMainImage(<?php echo $index; ?>)">
+                                <img src="<?php echo htmlspecialchars($img['image_url']); ?>" alt="<?php echo htmlspecialchars($img['alt_text'] ?? ''); ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="thumbnail active" onclick="changeMainImage(0)">
+                            <span>Hình 1</span>
+                        </div>
+                        <div class="thumbnail" onclick="changeMainImage(1)">
+                            <span>Hình 2</span>
+                        </div>
+                        <div class="thumbnail" onclick="changeMainImage(2)">
+                            <span>Hình 3</span>
+                        </div>
+                        <div class="thumbnail" onclick="changeMainImage(3)">
+                            <span>Hình 4</span>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -725,12 +747,12 @@ function renderStars(float $rating): string
             </div>
 
             <div id="tab-specifications" class="tab-content">
-                <p><strong>Kích thước:</strong> Đang cập nhật</p>
-                <p><strong>Màu sắc:</strong> Đang cập nhật</p>
-                <p><strong>Chất liệu:</strong> Đang cập nhật</p>
-                <p><strong>Xuất xứ:</strong> Việt Nam</p>
-                <p><strong>Bảo hành:</strong> 12 tháng</p>
-                <p><strong>Hướng dẫn sử dụng:</strong> Trồng ở nơi có ánh sáng mặt trời, tưới nước đều đặn.</p>
+                <p><strong>Kích thước:</strong> <?php echo !empty($product['size']) ? htmlspecialchars($product['size']) : 'Đang cập nhật'; ?></p>
+                <p><strong>Màu sắc:</strong> <?php echo !empty($product['color']) ? htmlspecialchars($product['color']) : 'Đang cập nhật'; ?></p>
+                <p><strong>Chất liệu:</strong> <?php echo !empty($product['material']) ? htmlspecialchars($product['material']) : 'Đang cập nhật'; ?></p>
+                <p><strong>Xuất xứ:</strong> <?php echo !empty($product['origin']) ? htmlspecialchars($product['origin']) : 'Việt Nam'; ?></p>
+                <p><strong>Bảo hành:</strong> <?php echo !empty($product['warranty']) ? htmlspecialchars($product['warranty']) : '12 tháng'; ?></p>
+                <p><strong>Hướng dẫn sử dụng:</strong> <?php echo !empty($product['care_instructions']) ? nl2br(htmlspecialchars($product['care_instructions'])) : 'Trồng ở nơi có ánh sáng mặt trời, tưới nước đều đặn.'; ?></p>
             </div>
 
             <div id="tab-reviews" class="tab-content">
@@ -814,14 +836,27 @@ function renderStars(float $rating): string
     // Change main image
     function changeMainImage(index) {
         const thumbnails = document.querySelectorAll('.thumbnail');
+        const mainImage = document.getElementById('main-image');
+        
         thumbnails.forEach((thumb, i) => {
             if (i === index) {
                 thumb.classList.add('active');
+                // Get image from thumbnail
+                const img = thumb.querySelector('img');
+                if (img) {
+                    const mainImageImg = document.getElementById('main-image-img');
+                    if (mainImageImg) {
+                        mainImageImg.src = img.src;
+                        mainImageImg.alt = img.alt;
+                    } else {
+                        // Create img element if it doesn't exist
+                        mainImage.innerHTML = `<img id="main-image-img" src="${img.src}" alt="${img.alt}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                    }
+                }
             } else {
                 thumb.classList.remove('active');
             }
         });
-        // In a real application, you would change the main image source here
     }
 
     // Quantity controls

@@ -2,24 +2,27 @@
 require_once '../includes/config.php';
 require_once '../includes/database.php';
 
+
 try {
     $pdo = getPDO();
 } catch (RuntimeException $e) {
     $pdo = null;
 }
 
+
 $categories = [];
 $products = [];
 
+
 if ($pdo) {
     try {
-        $categoryStmt = $pdo->query('SELECT category_id, category_name, slug FROM categories WHERE is_active = 1 ORDER BY category_name ASC');
+        $categoryStmt = $pdo->query('SELECT category_id, category_name, slug FROM categories ORDER BY category_name ASC');
         $categories = $categoryStmt->fetchAll();
+
 
         $productStmt = $pdo->query('SELECT p.product_id, p.code, p.name, p.price, p.short_description, p.category_id, c.slug AS category_slug, c.category_name
                                     FROM products p
                                     INNER JOIN categories c ON p.category_id = c.category_id
-                                    WHERE c.is_active = 1
                                     ORDER BY p.created_at DESC');
         $products = $productStmt->fetchAll();
     } catch (PDOException $e) {
@@ -28,7 +31,22 @@ if ($pdo) {
     }
 }
 
-$productData = array_map(function ($product) {
+
+$productData = array_map(function ($product) use ($pdo) {
+    $image = null;
+    if ($pdo) {
+        try {
+            $imgStmt = $pdo->prepare('SELECT image_url FROM product_images WHERE product_id = :id ORDER BY is_primary DESC, created_at ASC LIMIT 1');
+            $imgStmt->execute([':id' => $product['product_id']]);
+            $imgRow = $imgStmt->fetch();
+            if ($imgRow) {
+                $image = $imgRow['image_url'];
+            }
+        } catch (Exception $e) {
+            $image = null;
+        }
+    }
+   
     return [
         'id' => (int) $product['product_id'],
         'code' => $product['code'],
@@ -37,16 +55,20 @@ $productData = array_map(function ($product) {
         'description' => $product['short_description'],
         'category' => $product['category_slug'],
         'categoryName' => $product['category_name'],
+        'image' => $image,
     ];
 }, $products);
+
 
 $categoryMap = [];
 foreach ($categories as $category) {
     $categoryMap[$category['slug']] = $category['category_name'];
 }
 
+
 include '../includes/header.php';
 ?>
+
 
 <style>
     /* Products Page Styles */
@@ -59,6 +81,9 @@ include '../includes/header.php';
 
 
 
+
+
+
     .products-info {
         font-family: 'Poppins', sans-serif;
         font-weight: 400;
@@ -67,12 +92,14 @@ include '../includes/header.php';
         margin-bottom: 20px;
     }
 
+
     .products-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: <?php echo GRID_GAP_SMALL; ?>;
         margin-bottom: 40px;
     }
+
 
     .product-card {
         background-color: var(--white);
@@ -84,10 +111,12 @@ include '../includes/header.php';
         cursor: pointer;
     }
 
+
     .product-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 5px 20px rgba(0,0,0,0.15);
     }
+
 
     .product-image {
         width: 100%;
@@ -100,15 +129,19 @@ include '../includes/header.php';
         overflow: hidden;
     }
 
+
     .product-image-placeholder {
         color: var(--dark);
         font-size: 14px;
     }
 
 
+
+
     .product-info {
         padding: 16px;
     }
+
 
     .product-name {
         font-family: 'Poppins', sans-serif;
@@ -123,15 +156,18 @@ include '../includes/header.php';
         min-height: 50px;
     }
 
+
     .product-name a {
         color: var(--dark);
         text-decoration: none;
         transition: color 0.3s ease;
     }
 
+
     .product-name a:hover {
         color: var(--primary);
     }
+
 
     .product-price {
         font-family: 'Poppins', sans-serif;
@@ -141,6 +177,7 @@ include '../includes/header.php';
         margin-bottom: 8px;
     }
 
+
     .product-description {
         font-family: 'Poppins', sans-serif;
         font-weight: 400;
@@ -149,6 +186,7 @@ include '../includes/header.php';
         margin-bottom: 12px;
         line-height: 1.5;
     }
+
 
     .add-to-cart-btn {
         width: 100%;
@@ -167,9 +205,11 @@ include '../includes/header.php';
         transition: background-color 0.3s ease;
     }
 
+
     .add-to-cart-btn:hover {
         background-color: #2d4a2d;
     }
+
 
     /* Toast notification */
     .toast {
@@ -189,9 +229,11 @@ include '../includes/header.php';
         animation: slideIn 0.3s ease;
     }
 
+
     .toast.show {
         display: block;
     }
+
 
     @keyframes slideIn {
         from {
@@ -204,6 +246,7 @@ include '../includes/header.php';
         }
     }
 
+
     /* Pagination styles - matching component */
     .pagination-component {
         display: flex;
@@ -213,6 +256,7 @@ include '../includes/header.php';
         margin: 40px 0;
         flex-wrap: wrap;
     }
+
 
     .pagination-component .page-link,
     .pagination-component .page-item {
@@ -233,19 +277,23 @@ include '../includes/header.php';
         background: none;
     }
 
+
     .pagination-component .page-link {
         background-color: #e8e8e8;
         color: var(--dark);
     }
 
+
     .pagination-component .page-link:hover {
         background-color: #d8d8d8;
     }
+
 
     .pagination-component .page-item.active .page-link {
         background-color: var(--primary);
         color: var(--white);
     }
+
 
     .pagination-component .page-item.disabled .page-link {
         opacity: 0.5;
@@ -253,21 +301,25 @@ include '../includes/header.php';
         pointer-events: none;
     }
 
+
     .pagination-component .page-link.next,
     .pagination-component .page-link.prev {
         background-color: #e8e8e8;
         color: var(--dark);
     }
 
+
     .pagination-component .page-link.next:hover,
     .pagination-component .page-link.prev:hover {
         background-color: #d8d8d8;
     }
 
+
     @media (max-width: <?php echo BREAKPOINT_XS; ?>) {
         .pagination-component {
             gap: 4px;
         }
+
 
         .pagination-component .page-link,
         .pagination-component .page-item {
@@ -277,11 +329,13 @@ include '../includes/header.php';
         }
     }
 
+
     @media (max-width: <?php echo BREAKPOINT_XL; ?>) {
         .products-grid {
             grid-template-columns: repeat(3, 1fr);
         }
     }
+
 
     @media (max-width: <?php echo BREAKPOINT_MD; ?>) {
         .products-grid {
@@ -289,16 +343,19 @@ include '../includes/header.php';
             gap: <?php echo GRID_GAP_SMALL; ?>;
         }
 
+
         .filters-section {
             flex-direction: column;
             align-items: stretch;
         }
+
 
         .filter-group {
             width: 100%;
             justify-content: space-between;
         }
     }
+
 
     @media (max-width: <?php echo BREAKPOINT_XS; ?>) {
         .products-grid {
@@ -307,13 +364,14 @@ include '../includes/header.php';
     }
 </style>
 
+
 <!-- Main Content -->
 <main style="min-height: 60vh; padding: 0; background-color: var(--light);">
     <?php
     $page_title = "Sản Phẩm";
     include __DIR__ . '/../includes/components/page-header.php';
     ?>
-    
+   
     <div class="products-container">
         <!-- Filters Section -->
         <?php
@@ -325,7 +383,7 @@ include '../includes/header.php';
                 'label' => $category['category_name']
             ];
         }
-        
+       
         $filter_fields = [
             [
                 'type' => 'select',
@@ -346,15 +404,17 @@ include '../includes/header.php';
                 'value' => isset($_GET['price_sort']) ? $_GET['price_sort'] : ''
             ]
         ];
-        
+       
         $type = 'products';
         include __DIR__ . '/../includes/components/filter.php';
         ?>
+
 
         <!-- Products Info -->
         <div class="products-info" id="products-info">
             Hiển thị <span id="display-count">8</span> trên tổng số <span id="total-count">8</span> sản phẩm
         </div>
+
 
         <!-- Products Grid -->
         <div class="products-grid" id="products-grid">
@@ -365,6 +425,7 @@ include '../includes/header.php';
             <h3>Không có sản phẩm nào</h3>
         </div>
 
+
         <!-- Pagination -->
         <div class="pagination" id="pagination">
             <!-- Pagination will be generated by JavaScript -->
@@ -372,19 +433,23 @@ include '../includes/header.php';
     </div>
 </main>
 
+
 <script>
     const products = <?php echo json_encode($productData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
     const categoryMap = <?php echo json_encode($categoryMap, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+
 
     // Configuration
     const PRODUCTS_PER_PAGE = <?php echo PAGINATION_PRODUCTS_PER_PAGE; ?>;
     let currentPage = 1;
     let filteredProducts = [...products];
 
+
     // Format price
     function formatPrice(price) {
         return new Intl.NumberFormat('vi-VN').format(price) + ' đ';
     }
+
 
     // Truncate description to 8 words
     function truncateDescription(text) {
@@ -393,6 +458,7 @@ include '../includes/header.php';
         return words.slice(0, 8).join(' ') + '...';
     }
 
+
     // Get category name
     function getCategoryName(category) {
         if (categoryMap.hasOwnProperty(category)) {
@@ -400,6 +466,7 @@ include '../includes/header.php';
         }
         return category;
     }
+
 
     // Add to cart function
     function handleAddToCart(productId, productName) {
@@ -414,7 +481,7 @@ include '../includes/header.php';
                     }
                     return;
                 }
-                
+               
                 // Add to cart
                 return fetch('<?php echo BASE_URL; ?>/api/add-to-cart.php', {
                     method: 'POST',
@@ -449,6 +516,7 @@ include '../includes/header.php';
             });
     }
 
+
     function updateCartCount() {
         fetch('<?php echo BASE_URL; ?>/api/get-cart-count.php')
             .then(response => response.json())
@@ -470,6 +538,7 @@ include '../includes/header.php';
             });
     }
 
+
     function showToast(message) {
         let toast = document.getElementById('toast-notification');
         if (!toast) {
@@ -480,18 +549,23 @@ include '../includes/header.php';
         }
         toast.textContent = message;
         toast.classList.add('show');
-        
+       
         setTimeout(() => {
             toast.classList.remove('show');
         }, 3000);
     }
 
+
     // Render product card
     function renderProductCard(product) {
+        const imageHtml = product.image
+            ? `<img src="${product.image}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">`
+            : `<div class="product-image-placeholder">Hình ảnh sản phẩm</div>`;
+       
         return `
             <div class="product-card">
                 <div class="product-image">
-                    <div class="product-image-placeholder">Hình ảnh sản phẩm</div>
+                    ${imageHtml}
                 </div>
                 <div class="product-info">
                     <h3 class="product-name">
@@ -507,6 +581,7 @@ include '../includes/header.php';
         `;
     }
 
+
     // Render products grid
     function renderProducts() {
         const grid = document.getElementById('products-grid');
@@ -515,7 +590,9 @@ include '../includes/header.php';
         const endIndex = startIndex + PRODUCTS_PER_PAGE;
         const pageProducts = filteredProducts.slice(startIndex, endIndex);
 
+
         grid.innerHTML = pageProducts.map(product => renderProductCard(product)).join('');
+
 
         if (pageProducts.length === 0) {
             emptyState.style.display = 'block';
@@ -523,25 +600,31 @@ include '../includes/header.php';
             emptyState.style.display = 'none';
         }
 
+
         // Update products info
         document.getElementById('display-count').textContent = pageProducts.length;
         document.getElementById('total-count').textContent = filteredProducts.length;
 
+
         // Render pagination
         renderPagination();
     }
+
 
     // Render pagination
     function renderPagination() {
         const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
         const pagination = document.getElementById('pagination');
 
+
         if (totalPages <= 1) {
             pagination.innerHTML = '';
             return;
         }
 
+
         let paginationHTML = '<nav class="pagination-component" aria-label="Phân trang">';
+
 
         // Previous button
         if (currentPage > 1) {
@@ -550,10 +633,12 @@ include '../includes/header.php';
             paginationHTML += `<span class="page-item disabled"><span class="page-link prev" aria-label="Trang trước"><i class="fas fa-chevron-left"></i></span></span>`;
         }
 
+
         // Calculate page range
         const maxVisible = 2;
         let startPage = Math.max(1, currentPage - maxVisible);
         let endPage = Math.min(totalPages, currentPage + maxVisible);
+
 
         // Adjust to show enough pages
         if (endPage - startPage < (maxVisible * 2)) {
@@ -564,6 +649,7 @@ include '../includes/header.php';
             }
         }
 
+
         // First page with ellipsis if needed
         if (startPage > 1) {
             paginationHTML += `<a href="#" onclick="changePage(1); return false;" class="page-link">1</a>`;
@@ -571,6 +657,7 @@ include '../includes/header.php';
                 paginationHTML += `<span class="page-item disabled"><span class="page-link">...</span></span>`;
             }
         }
+
 
         // Page numbers
         for (let i = startPage; i <= endPage; i++) {
@@ -581,6 +668,7 @@ include '../includes/header.php';
             }
         }
 
+
         // Last page with ellipsis if needed
         if (endPage < totalPages) {
             if (endPage < totalPages - 1) {
@@ -589,6 +677,7 @@ include '../includes/header.php';
             paginationHTML += `<a href="#" onclick="changePage(${totalPages}); return false;" class="page-link">${totalPages}</a>`;
         }
 
+
         // Next button
         if (currentPage < totalPages) {
             paginationHTML += `<a href="#" onclick="changePage(${currentPage + 1}); return false;" class="page-link next" aria-label="Trang sau"><i class="fas fa-chevron-right"></i></a>`;
@@ -596,9 +685,11 @@ include '../includes/header.php';
             paginationHTML += `<span class="page-item disabled"><span class="page-link next" aria-label="Trang sau"><i class="fas fa-chevron-right"></i></span></span>`;
         }
 
+
         paginationHTML += '</nav>';
         pagination.innerHTML = paginationHTML;
     }
+
 
     // Change page
     function changePage(page) {
@@ -607,6 +698,7 @@ include '../includes/header.php';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+
     // Apply filters từ URL params
     function applyFilters() {
         // Lấy từ URL params hoặc từ form
@@ -614,11 +706,13 @@ include '../includes/header.php';
         const categoryFilter = urlParams.get('category') || '';
         const priceSort = urlParams.get('price_sort') || '';
 
+
         // Filter by category
         filteredProducts = products.filter(product => {
             if (!categoryFilter) return true;
             return product.category === categoryFilter;
         });
+
 
         // Sort by price
         if (priceSort === 'low-to-high') {
@@ -627,23 +721,26 @@ include '../includes/header.php';
             filteredProducts.sort((a, b) => b.price - a.price);
         }
 
+
         // Reset to first page
         currentPage = 1;
+
 
         // Render products
         renderProducts();
     }
 
+
     // Search functionality (integrate with header search bar)
     document.addEventListener('DOMContentLoaded', function() {
         // Apply filters từ URL params khi trang load
         applyFilters();
-        
+       
         const searchInput = document.querySelector('.search-bar input');
         if (searchInput) {
             searchInput.addEventListener('input', function(e) {
                 const searchTerm = e.target.value.toLowerCase().trim();
-                
+               
                 if (searchTerm === '') {
                     // Nếu không có search term, áp dụng lại filters từ URL
                     applyFilters();
@@ -652,7 +749,7 @@ include '../includes/header.php';
                     const urlParams = new URLSearchParams(window.location.search);
                     const categoryFilter = urlParams.get('category') || '';
                     const priceSort = urlParams.get('price_sort') || '';
-                    
+                   
                     filteredProducts = products.filter(product => {
                         // Filter by category
                         if (categoryFilter && product.category !== categoryFilter) {
@@ -662,7 +759,7 @@ include '../includes/header.php';
                         return product.name.toLowerCase().includes(searchTerm) ||
                                product.code.toLowerCase().includes(searchTerm);
                     });
-                    
+                   
                     // Sort by price
                     if (priceSort === 'low-to-high') {
                         filteredProducts.sort((a, b) => a.price - b.price);
@@ -671,22 +768,24 @@ include '../includes/header.php';
                     }
                 }
 
+
                 currentPage = 1;
                 renderProducts();
             });
         }
-        
+       
         // Update cart count on page load (if logged in)
-        <?php 
+        <?php
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])): 
+        if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])):
         ?>
         updateCartCount();
         <?php endif; ?>
     });
 </script>
+
 
 <?php
 $cta_heading = 'Theo dõi tin tức mới nhất về môi trường và trồng rừng';
@@ -696,4 +795,8 @@ $cta_button_link = BASE_URL . '/public/news.php';
 include '../includes/components/cta-section.php';
 ?>
 <?php include '../includes/footer.php'; ?>
+
+
+
+
 

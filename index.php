@@ -242,36 +242,23 @@ include 'includes/header.php';
         margin-bottom: 20px;
     }
 
-    /* Map Section */
+    /* Map Section - synced with partners.php style */
     .map-container {
-        background-color: var(--white);
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        height: 400px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 3px solid var(--bg-green);
-    }
-
-    .map-placeholder {
-        text-align: center;
-        color: var(--dark);
-    }
-
-    .map-placeholder i {
-        font-size: 64px;
-        color: var(--bg-green);
-        margin-bottom: 20px;
+        background: transparent;
+        border-radius: 12px;
+        padding: 0;
+        box-shadow: none;
+        height: auto;
         display: block;
+        border: none;
     }
 
-    .map-placeholder h3 {
-        font-size: 24px;
-        font-weight: 700;
-        color: var(--primary);
-        margin-bottom: 10px;
+    /* map full size */
+    #map {
+        width: 100%;
+        height: 480px;
+        margin-top: 8px;
+        border-radius: 12px;
     }
 
     /* Products Section */
@@ -553,13 +540,19 @@ include 'includes/header.php';
         attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and others'
       });
 
-      var map = L.map('map', { layers: [osm] }).setView([14.0583, 108.2772], 5);
+      var map = L.map('map', { layers: [esriSat] }).setView([14.0583, 108.2772], 5);
 
       var baseMaps = {
         "Bản đồ": osm,
         "Vệ tinh": esriSat
       };
       L.control.layers(baseMaps).addTo(map);
+      
+      // ensure a pane for grid so grid rectangles appear above tiles
+      if (!map.getPane('gridPane')) {
+        map.createPane('gridPane');
+        map.getPane('gridPane').style.zIndex = 650;
+      }
 
       // Use FontAwesome icons as divIcons (no image files needed)
       var siteIcon = L.divIcon({
@@ -579,6 +572,147 @@ include 'includes/header.php';
       var currentSiteLayer = null;
       var plantingLayer = L.layerGroup().addTo(map);
       var selectedPlantingLayer = null;
+      var gridLayer = null;
+      var gridToggleControl = null;
+      var currentGridJson = null;
+
+      function createGridLayerFromGridJson(gjson) {
+        console.log('createGridLayerFromGridJson input', gjson);
+        if (!gjson) return null;
+        var rows = gjson.rows || 10;
+        var cols = gjson.cols || 10;
+        var base = gjson.baseBBox;
+        // try to derive baseBBox from cells/validCells/allCells if missing
+        var sourceCells = null;
+        if (!base) {
+          if (gjson.validCells && gjson.validCells.length) sourceCells = gjson.validCells;
+          else if (gjson.allCells && gjson.allCells.length) sourceCells = gjson.allCells;
+          else if (gjson.cells && gjson.cells.length) sourceCells = gjson.cells;
+          if (sourceCells) {
+            var minLat = Infinity, minLng = Infinity, maxLat = -Infinity, maxLng = -Infinity;
+            sourceCells.forEach(function(cell){
+              var b = cell.bbox || cell;
+              if (b && typeof b.minLat === 'number') {
+                if (b.minLat < minLat) minLat = b.minLat;
+                if (b.minLng < minLng) minLng = b.minLng;
+                if (b.maxLat > maxLat) maxLat = b.maxLat;
+                if (b.maxLng > maxLng) maxLng = b.maxLng;
+              } else if (typeof cell.minLat === 'number') {
+                if (cell.minLat < minLat) minLat = cell.minLat;
+                if (cell.minLng < minLng) minLng = cell.minLng;
+                if (cell.maxLat > maxLat) maxLat = cell.maxLat;
+                if (cell.maxLng > maxLng) maxLng = cell.maxLng;
+              }
+            });
+            if (isFinite(minLat)) base = {minLat: minLat, minLng: minLng, maxLat: maxLat, maxLng: maxLng};
+          }
+        }
+        if (!base) {
+          console.warn('createGridLayerFromGridJson: no baseBBox and no cells to derive from');
+          return null;
+        }
+        var latStep = (base.maxLat - base.minLat) / rows;
+        var lngStep = (base.maxLng - base.minLng) / cols;
+        var layer = L.layerGroup();
+        // Prefer explicit validCells/allCells/cells in that order
+        var used = 'none';
+        if (gjson.validCells && gjson.validCells.length) {
+          used = 'validCells';
+          gjson.validCells.forEach(function(vc){
+            var b = vc.bbox || vc;
+            if (b) L.rectangle([[b.minLat,b.minLng],[b.maxLat,b.maxLng]], {color:'#2e8b57', weight:1, pane:'gridPane'}).addTo(layer);
+          });
+        } else if (gjson.allCells && gjson.allCells.length) {
+          used = 'allCells';
+          gjson.allCells.forEach(function(cell){
+            var b = cell.bbox || cell;
+            var color = (cell.inside || (b && b.inside)) ? '#ff9800' : '#cccccc';
+            var weight = (cell.inside || (b && b.inside)) ? 1.5 : 1;
+            if (b) L.rectangle([[b.minLat,b.minLng],[b.maxLat,b.maxLng]], {color: color, weight: weight, pane:'gridPane'}).addTo(layer);
+          });
+        } else if (gjson.cells && gjson.cells.length) {
+          used = 'cells';
+          gjson.cells.forEach(function(cell){
+            var b = cell.bbox || (cell.cell && cell.cell.bbox) || cell;
+            var inside = cell.inside || (b && b.inside) || false;
+            if (b && typeof b.minLat === 'number') {
+              L.rectangle([[b.minLat,b.minLng],[b.maxLat,b.maxLng]], {color: inside ? '#ff9800' : '#cccccc', weight: inside ? 1.5 : 1, pane:'gridPane'}).addTo(layer);
+            } else if (typeof cell.r === 'number' && typeof cell.c === 'number') {
+              // compute bbox from r,c using base and steps
+              var rr = cell.r, cc = cell.c;
+              var cellMinLat = base.minLat + rr*latStep;
+              var cellMaxLat = base.minLat + (rr+1)*latStep;
+              var cellMinLng = base.minLng + cc*lngStep;
+              var cellMaxLng = base.minLng + (cc+1)*lngStep;
+              L.rectangle([[cellMinLat,cellMinLng],[cellMaxLat,cellMaxLng]], {color: inside ? '#ff9800' : '#cccccc', weight: inside ? 1.5 : 1, pane:'gridPane'}).addTo(layer);
+            }
+          });
+        } else {
+          used = 'computed';
+          for (var r=0;r<rows;r++){
+            for (var c=0;c<cols;c++){
+              var cellMinLat = base.minLat + r*latStep;
+              var cellMaxLat = base.minLat + (r+1)*latStep;
+              var cellMinLng = base.minLng + c*lngStep;
+              var cellMaxLng = base.minLng + (c+1)*lngStep;
+              L.rectangle([[cellMinLat,cellMinLng],[cellMaxLat,cellMaxLng]], {color:'#cccccc', weight:1, pane:'gridPane'}).addTo(layer);
+            }
+          }
+        }
+        console.log('createGridLayerFromGridJson created layer using', used, 'rows=', rows, 'cols=', cols);
+        return layer;
+      }
+
+      function addGridToggleControl() {
+        removeGridToggleControl();
+        var GridControl = L.Control.extend({
+          options: { position: 'topright' },
+          onAdd: function () {
+            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control grid-toggle-control');
+            container.style.background = '#fff';
+            container.style.padding = '4px';
+            container.style.borderRadius = '6px';
+            container.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+            container.style.zIndex = 1000;
+            var btn = L.DomUtil.create('a', '', container);
+            btn.href = '#';
+            btn.innerHTML = 'Hiện ô lưới';
+            btn.style.display = 'inline-block';
+            btn.style.padding = '6px 8px';
+            btn.style.textDecoration = 'none';
+            btn.style.color = '#2e8b57';
+            btn.style.fontWeight = '700';
+            L.DomEvent.disableClickPropagation(container);
+            L.DomEvent.on(btn, 'click', function (e) {
+              L.DomEvent.stop(e);
+              console.log('Grid toggle clicked, currentGridJson=', currentGridJson, 'gridLayer exists=', gridLayer!==null);
+              var showing = gridLayer !== null;
+              if (showing) {
+                if (gridLayer) map.removeLayer(gridLayer);
+                gridLayer = null;
+                btn.innerHTML = 'Hiện ô lưới';
+              } else {
+                if (currentGridJson) {
+                  gridLayer = createGridLayerFromGridJson(currentGridJson);
+                  if (gridLayer) gridLayer.addTo(map);
+                  btn.innerHTML = 'Ẩn ô lưới';
+                }
+              }
+            });
+            console.log('Grid toggle control added');
+            return container;
+          }
+        });
+        gridToggleControl = new GridControl();
+        map.addControl(gridToggleControl);
+      }
+
+      function removeGridToggleControl() {
+        try {
+          if (gridToggleControl) { map.removeControl(gridToggleControl); gridToggleControl = null; }
+        } catch (e) {}
+        if (gridLayer) { map.removeLayer(gridLayer); gridLayer = null; }
+      }
 
       // helper functions
       function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -590,60 +724,85 @@ include 'includes/header.php';
         .then(function(json){
           if(!json.success) return;
           json.data.forEach(function(site){
-            var m = L.marker([site.center_lat, site.center_lng], {icon: siteIcon})
+            var lat = site.center_lat || 0;
+            var lng = site.center_lng || 0;
+            var m = L.marker([lat, lng], {icon: siteIcon})
               .addTo(map)
               .bindTooltip(site.name, {className: 'my-tooltip', direction: 'top', offset:[0,-8]})
               .on('mouseover', function(){ this.openTooltip(); })
               .on('mouseout', function(){ this.closeTooltip(); })
               .on('click', function(){
-                // zoom to bbox if exists
-                if (site.bbox_lat1 && site.bbox_lng1 && site.bbox_lat2 && site.bbox_lng2) {
+                // reset any existing grid control/state
+                currentGridJson = null;
+                removeGridToggleControl();
+                // prefer drawing polygon if available (lands), otherwise fall back to bbox rectangle or center zoom
+                if (site.polygon_geojson) {
+                  try {
+                    if (currentSiteLayer) map.removeLayer(currentSiteLayer);
+                    var coords = site.polygon_geojson.geometry.coordinates[0].map(function(c){ return [c[1], c[0]]; });
+                    currentSiteLayer = L.polygon(coords, {color:'#d9534f', weight:3, fill:false}).addTo(map);
+                    map.fitBounds(currentSiteLayer.getBounds(), {padding:[40,40]});
+                  } catch (err) {
+                    console.error('Lỗi vẽ polygon:', err);
+                  }
+                  if (site.grid_json) {
+                    try {
+                      currentGridJson = (typeof site.grid_json === 'string') ? JSON.parse(site.grid_json) : site.grid_json;
+                    } catch (e) { currentGridJson = site.grid_json; }
+                    addGridToggleControl();
+                  }
+                } else if (site.bbox_lat1 && site.bbox_lng1 && site.bbox_lat2 && site.bbox_lng2) {
                   var bounds = L.latLngBounds([site.bbox_lat1, site.bbox_lng1], [site.bbox_lat2, site.bbox_lng2]);
                   map.fitBounds(bounds, {padding: [40,40]});
                   if (currentSiteLayer) map.removeLayer(currentSiteLayer);
                   currentSiteLayer = L.rectangle(bounds, {color:'#d9534f', weight:4, fill:false}).addTo(map);
+                  if (site.grid_json) {
+                    try {
+                      currentGridJson = (typeof site.grid_json === 'string') ? JSON.parse(site.grid_json) : site.grid_json;
+                    } catch (e) { currentGridJson = site.grid_json; }
+                    addGridToggleControl();
+                  }
                 } else {
-                  map.setView([site.center_lat, site.center_lng], 15);
+                  map.setView([lat, lng], 15);
                 }
 
-                // load plantings for this site
+                // load plantings for this site only if it's an actual 'site' (plantings belong to sites table)
                 plantingLayer.clearLayers();
-                fetch('<?php echo BASE_URL; ?>/api/site_trees.php?site_id=' + site.id)
-                  .then(function(r){ return r.json(); })
-                  .then(function(d){
-                    if(!d.success) return;
-                    d.data.forEach(function(pl){
-                      var pm = L.marker([pl.lat, pl.lng], {icon: treeIcon})
-                        .addTo(plantingLayer)
-                        .bindPopup(
-                          '<strong>' + escapeHtml(pl.product_name) + '</strong><br/>' +
-                          (pl.product_category ? 'Danh mục: ' + escapeHtml(pl.product_category) + '<br/>' : '') +
-                          (pl.product_price ? 'Giá: ' + formatPrice(pl.product_price) + '<br/>' : '') +
-                          'Người trồng: ' + escapeHtml(pl.user_name) + '<br/>' +
-                          'Thời gian: ' + escapeHtml(pl.planted_at)
-                        )
-                        .on('click', function(e){
-                          // Zoom to the planting location and open popup
-                          try {
-                            map.setView([pl.lat, pl.lng], 18, {animate: true});
-                          } catch(err) {
-                            map.setView([pl.lat, pl.lng], 18);
-                          }
-                          this.openPopup();
-
-                          // highlight the selected planting (circle)
-                          if (selectedPlantingLayer) {
-                            map.removeLayer(selectedPlantingLayer);
-                          }
-                          selectedPlantingLayer = L.circle([pl.lat, pl.lng], {
-                            radius: 8,
-                            color: '#2e8b57',
-                            weight: 3,
-                            fill: false
-                          }).addTo(map);
-                        });
+                if (site.type === 'site') {
+                  fetch('<?php echo BASE_URL; ?>/api/site_trees.php?site_id=' + site.id)
+                    .then(function(r){ return r.json(); })
+                    .then(function(d){
+                      if(!d.success) return;
+                      d.data.forEach(function(pl){
+                        var pm = L.marker([pl.lat, pl.lng], {icon: treeIcon})
+                          .addTo(plantingLayer)
+                          .bindPopup(
+                            '<strong>' + escapeHtml(pl.product_name) + '</strong><br/>' +
+                            (pl.product_category ? 'Danh mục: ' + escapeHtml(pl.product_category) + '<br/>' : '') +
+                            (pl.product_price ? 'Giá: ' + formatPrice(pl.product_price) + '<br/>' : '') +
+                            'Người trồng: ' + escapeHtml(pl.user_name) + '<br/>' +
+                            'Thời gian: ' + escapeHtml(pl.planted_at)
+                          )
+                          .on('click', function(e){
+                            try {
+                              map.setView([pl.lat, pl.lng], 18, {animate: true});
+                            } catch(err) {
+                              map.setView([pl.lat, pl.lng], 18);
+                            }
+                            this.openPopup();
+                            if (selectedPlantingLayer) {
+                              map.removeLayer(selectedPlantingLayer);
+                            }
+                            selectedPlantingLayer = L.circle([pl.lat, pl.lng], {
+                              radius: 8,
+                              color: '#2e8b57',
+                              weight: 3,
+                              fill: false
+                            }).addTo(map);
+                          });
+                      });
                     });
-                  });
+                }
               });
           });
         })

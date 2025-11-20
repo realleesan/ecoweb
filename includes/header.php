@@ -2,14 +2,20 @@
 require_once __DIR__ . '/config.php';
 
 
+
+
 // Check if user is logged in
 $is_logged_in = false;
 $current_user_name = 'Tài khoản';
 
 
+
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+
 
 
 // Verify session is valid
@@ -32,9 +38,13 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
 }
 
 
+
+
 // Get current page and set active states
 $current_page = basename($_SERVER['PHP_SELF']);
 $is_home = ($current_page == 'index.php' || $current_page == '');
+
+
 
 
 // Determine current directory from script path
@@ -44,6 +54,8 @@ $is_auth = (strpos($script_path, '/auth/') !== false);
 $is_views = (strpos($script_path, '/views/') !== false);
 $is_admin = (strpos($script_path, '/admin/') !== false);
 $is_root = !$is_public && !$is_auth && !$is_views && !$is_admin;
+
+
 
 
 // Set paths based on current directory
@@ -93,6 +105,8 @@ if ($is_root) {
         }
 
 
+
+
         * {
             margin: 0;
             padding: 0;
@@ -101,9 +115,13 @@ if ($is_root) {
         }
 
 
+
+
         h1, h2, h3, h4, h5, h6, .bold {
             font-weight: 600;
         }
+
+
 
 
         /* Top Bar Styles */
@@ -118,6 +136,8 @@ if ($is_root) {
         }
 
 
+
+
         .logo {
             font-size: 24px;
             font-weight: bold;
@@ -129,10 +149,14 @@ if ($is_root) {
         }
 
 
+
+
         .logo img {
             height: 40px;
             margin-right: 10px;
         }
+
+
 
 
         .search-bar {
@@ -141,6 +165,8 @@ if ($is_root) {
             margin-left: 20px;
             position: relative;
         }
+
+
 
 
         .search-bar input {
@@ -153,6 +179,8 @@ if ($is_root) {
         }
 
 
+
+
         .search-bar i {
             position: absolute;
             right: 15px;
@@ -162,12 +190,16 @@ if ($is_root) {
         }
 
 
+
+
         .contact-info {
             display: flex;
             align-items: center;
             gap: 15px;
             flex-shrink: 0;
         }
+
+
 
 
         .hotline, .account, .cart-icon {
@@ -179,11 +211,15 @@ if ($is_root) {
         }
 
 
+
+
         .cart-icon {
             position: relative;
             cursor: pointer;
             font-size: 20px;
         }
+
+
 
 
         .cart-icon span {
@@ -203,9 +239,13 @@ if ($is_root) {
         }
 
 
+
+
         .hotline i {
             color: var(--secondary);
         }
+
+
 
 
         .account {
@@ -216,9 +256,13 @@ if ($is_root) {
         }
 
 
+
+
         .account:hover {
             opacity: 0.8;
         }
+
+
 
 
         .account i {
@@ -226,66 +270,17 @@ if ($is_root) {
         }
 
 
+
+
         /* Admin dropdown */
         .admin-account { position: relative; }
-        .admin-dropdown { 
-            position: absolute; 
-            top: calc(100% + 8px); 
-            right: 0; 
-            background: var(--white); 
-            border: 1px solid #e0e0e0; 
-            border-radius: 12px; 
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15); 
-            min-width: 220px; 
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s 0.3s;
-            overflow: hidden; 
-            z-index: 1000; 
-        }
-        .admin-account:hover .admin-dropdown,
-        .admin-dropdown:hover { 
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s 0s;
-        }
-        .admin-dropdown::before {
-            content: '';
-            position: absolute;
-            top: -8px;
-            right: 20px;
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-bottom: 8px solid var(--white);
-        }
-        .admin-dropdown a { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            padding: 14px 18px; 
-            text-decoration: none; 
-            color: var(--dark); 
-            transition: background 0.2s ease;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        .admin-dropdown a:hover { 
-            background: rgba(210,100,38,0.08); 
-        }
-        .admin-dropdown a i {
-            width: 20px;
-            color: var(--secondary);
-            font-size: 16px;
-        }
-        .admin-dropdown .divider { 
-            height: 1px; 
-            background: rgba(210,100,38,0.15); 
-            margin: 0; 
-        }
+        .admin-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: var(--white); border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); min-width: 220px; display: none; overflow: hidden; z-index: 1000; }
+        .admin-account:hover .admin-dropdown { display: block; }
+        .admin-dropdown a { display: flex; align-items: center; gap: 10px; padding: 12px 14px; text-decoration: none; color: var(--dark); transition: background 0.25s ease; }
+        .admin-dropdown a:hover { background: var(--light); }
+        .admin-dropdown .divider { height: 1px; background: #eee; margin: 0; }
+
+
 
 
         .land-management-btn {
@@ -305,12 +300,16 @@ if ($is_root) {
         }
 
 
+
+
         .land-management-btn:hover {
             background-color: var(--secondary);
             color: var(--white);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
+
+
 
 
         /* Navigation Menu */
@@ -320,6 +319,8 @@ if ($is_root) {
             display: flex;
             justify-content: center;
         }
+
+
 
 
         .menu-list {
@@ -333,11 +334,15 @@ if ($is_root) {
         }
 
 
+
+
         .menu-list li {
             position: relative;
             flex: 1;
             text-align: center;
         }
+
+
 
 
         .menu-list li a {
@@ -352,10 +357,14 @@ if ($is_root) {
         }
 
 
+
+
         .menu-list li a:hover,
         .menu-list li a.active {
             background-color: var(--secondary);
         }
+
+
 
 
         /* Responsive */
@@ -367,11 +376,15 @@ if ($is_root) {
             }
 
 
+
+
             .search-bar {
                 width: 100%;
                 max-width: 100%;
                 margin: 0;
             }
+
+
 
 
             .land-management-btn {
@@ -380,11 +393,15 @@ if ($is_root) {
             }
 
 
+
+
             .contact-info {
                 width: 100%;
                 justify-content: space-between;
             }
         }
+
+
 
 
         @media (max-width: <?php echo BREAKPOINT_SM; ?>) {
@@ -411,7 +428,7 @@ if ($is_root) {
        
         <div style="flex: 1;"></div>
        
-        <a href="#" class="land-management-btn">
+        <a href="<?php echo BASE_URL; ?>/auth/login.php?next=<?php echo rawurlencode(BASE_URL . '/auth/lands.php'); ?>" class="land-management-btn">
             Quản lý đất đai
         </a>
        
@@ -446,6 +463,8 @@ if ($is_root) {
     </div>
 
 
+
+
     <!-- Main Navigation -->
     <nav class="main-menu">
         <?php
@@ -461,6 +480,8 @@ if ($is_root) {
             <li><a href="<?php echo $base_path; ?>contact.php" class="<?php echo ($current_page == 'contact.php') ? 'active' : ''; ?>">Liên hệ</a></li>
         </ul>
     </nav>
+
+
 
 
 <script>
@@ -486,4 +507,8 @@ if ($is_root) {
         });
     <?php endif; ?>
 </script>
+
+
+
+
 

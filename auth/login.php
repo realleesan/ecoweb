@@ -3,13 +3,20 @@ require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/auth.php';
 
 
-// Redirect if already logged in
-if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin' && isset($_SESSION['user_id'])) {
-    header('Location: ' . BASE_URL . '/admin/index.php');
-    exit;
-} elseif (isLoggedIn()) {
-    header('Location: ' . BASE_URL . '/index.php');
-    exit;
+// Redirect if already logged in; if a safe "next" is provided, honor it first
+$preNext = $_GET['next'] ?? '';
+if (isLoggedIn()) {
+    if (!empty($preNext) && stripos($preNext, BASE_URL) === 0) {
+        header('Location: ' . $preNext);
+        exit;
+    }
+    if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin' && isset($_SESSION['user_id'])) {
+        header('Location: ' . BASE_URL . '/admin/index.php');
+        exit;
+    } else {
+        header('Location: ' . BASE_URL . '/index.php');
+        exit;
+    }
 }
 
 
@@ -27,6 +34,8 @@ if (isset($_GET['registered']) && $_GET['registered'] == '1') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usernameOrEmail = trim($_POST['username_or_email'] ?? '');
     $password = $_POST['password'] ?? '';
+    // next param (preserve redirect target)
+    $next = $_GET['next'] ?? $_POST['next'] ?? '';
    
     if (empty($usernameOrEmail) || empty($password)) {
         $error = 'Vui lòng điền đầy đủ thông tin';
@@ -34,6 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = loginUser($usernameOrEmail, $password);
         if ($result['success']) {
             // Redirect based on role
+            if (!empty($next)) {
+                // Basic safety: only allow internal redirects beginning with BASE_URL
+                if (stripos($next, BASE_URL) === 0) {
+                    header('Location: ' . $next);
+                    exit;
+                }
+            }
             if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
                 header('Location: ' . BASE_URL . '/admin/index.php');
             } else {

@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Test - Grid 10x10 + Hull</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0; }
+    #map { width: 100%; height: 600px; }
+    .controls { padding: 12px; background: #f7f7f7; border-bottom: 1px solid #e5e5e5; }
+    .controls button { margin-right: 8px; padding: 6px 10px; }
+    .log { white-space: pre-wrap; font-family: monospace; background:#111; color:#bfb; padding:8px; height:140px; overflow:auto; }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <button id="add-sample">Add sample points</button>
+    <button id="compute-hull">Compute Hull</button>
+    <button id="create-grid">Create fixed 10x10 Grid</button>
+    <button id="clear-grid">Clear Grid</button>
+  </div>
+  <div id="map"></div>
+  <div style="padding:8px;">
+    <div class="log" id="log"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script>
+    const logEl = document.getElementById('log');
+    function log() { logEl.textContent += Array.from(arguments).join(' ') + '\n'; logEl.scrollTop = logEl.scrollHeight; }
+
+    const map = L.map('map').setView([20.99, 105.75], 10);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OSM' }).addTo(map);
+
+    // ensure a pane for grid
+    if (!map.getPane('gridPane')) {
+      map.createPane('gridPane');
+      map.getPane('gridPane').style.zIndex = 650;
+    }
+
+    let markers = [];
+    let hullLayer = null;
+    let gridLayer = null;
+
+    function addPoint(lat,lng) {
+      const m = L.marker([lat,lng]).addTo(map);
+      markers.push({lat, lng, marker: m});
+    }
+
+    document.getElementById('add-sample').addEventListener('click', function(){
+      // sample points around a small area (avoid collinear)
+      const sample = [
+        [21.012, 105.78],
+        [21.018, 105.77],
+        [21.01, 105.76],
+        [21.005, 105.765],
+        [21.0065,105.775],
+        [21.02,105.779],
+        [21.015,105.785]
+      ];
+      sample.forEach(p => addPoint(p[0], p[1]));
+      log('Added sample points:', sample.length);
+    });
+
+    function computeHull() {
+      if (markers.length < 3) {
+        log('Need at least 3 points to compute hull. Current:', markers.length);
+        return null;
+      }
+      const pts = markers.map(p => [p.lng, p.lat]).filter(c => isFinite(c[0]) && isFinite(c[1]));
+      log('computeHull points count=', pts.length);
+      const fc = turf.featureCollection(pts.map(c => turf.point(c)));
+      let hull = null;
+      try {
+        hull = turf.convex(fc);
+        if (!hull) {
+          // close ring fallback
+          const closed = pts.slice();
+          if (closed.length > 0 && (closed[0][0] !== closed[closed.length-1][0] || closed[0][1] !== closed[closed.length-1][1])) closed.push(closed[0]);
+          if (closed.length >= 4) hull = turf.polygon([closed]);
+        }
+      } catch (err) {
+        log('turf error:', err.message || err);
+        hull = null;
+      }
+      if (!hull || !hull.geometry || !hull.geometry.coordinates || !hull.geometry.coordinates[0] || hull.geometry.coordinates[0].length < 4) {
+        log('Invalid hull produced.');
+        return null;
+      }
+      if (hullLayer) map.removeLayer(hullLayer);
+      const latlngs = hull.geometry.coordinates[0].map(c => [c[1], c[0]]);
+      hullLayer = L.polygon(latlngs, {color:'#d9534f', weight:3}).addTo(map);
+      map.fitBounds(hullLayer.getBounds(), {padding:[20,20]});
+      log('Hull created, vertices=', hull.geometry.coordinates[0].length);
+      return hull;
+    }
+
+    function clearGrid() {
+      if (gridLayer) { map.removeLayer(gridLayer); gridLayer = null; log('Grid cleared'); }
+    }
+
+    function createGridFromHull(hull) {
+      if (!hull) { log('No hull'); return; }
+      const coords = hull.geometry.coordinates[0].map(c => [c[1], c[0]]);
+      const lats = coords.map(c => c[0]);
+      const lngs = coords.map(c => c[1]);
+      const bb = {minLat: Math.min.apply(null,lats), maxLat: Math.max.apply(null,lats),
+                  minLng: Math.min.apply(null,lngs), maxLng: Math.max.apply(null,lngs)};
+      const rows = 10, cols = 10;
+      const latStep = (bb.maxLat - bb.minLat) / rows;
+      const lngStep = (bb.maxLng - bb.minLng) / cols;
+      if (gridLayer) map.removeLayer(gridLayer);
+      gridLayer = L.layerGroup().addTo(map);
+      let valid = 0;
+      for (let r=0;r<rows;r++){
+        for (let c=0;c<cols;c++){
+          const cellMinLat = bb.minLat + r*latStep;
+          const cellMaxLat = bb.minLat + (r+1)*latStep;
+          const cellMinLng = bb.minLng + c*lngStep;
+          const cellMaxLng = bb.minLng + (c+1)*lngStep;
+          const center = [(cellMinLat+cellMaxLat)/2, (cellMinLng+cellMaxLng)/2];
+          const pt = turf.point([center[1], center[0]]);
+          const inside = turf.booleanPointInPolygon(pt, hull);
+          const rect = L.rectangle([[cellMinLat, cellMinLng],[cellMaxLat, cellMaxLng]], {color: inside ? '#ff9800' : '#cccccc', weight: inside?1.5:1, pane:'gridPane'}).addTo(gridLayer);
+          if (inside) valid++;
+        }
+      }
+      log('Grid drawn. Valid cells:', valid, 'of', rows*cols);
+    }
+
+    document.getElementById('compute-hull').addEventListener('click', function(){
+      const hull = computeHull();
+      if (hull) log('Hull OK');
+    });
+    document.getElementById('create-grid').addEventListener('click', function(){
+      const hull = computeHull();
+      if (!hull) { log('Cannot create grid: hull invalid'); return; }
+      createGridFromHull(hull);
+    });
+    document.getElementById('clear-grid').addEventListener('click', function(){ clearGrid(); });
+
+    // Allow clicking to add points for manual test
+    map.on('click', function(e){
+      const lat = e.latlng.lat, lng = e.latlng.lng;
+      addPoint(lat,lng);
+      log('Added point:', lat.toFixed(6), lng.toFixed(6));
+    });
+
+    log('Test page loaded. Click map to add points, or use "Add sample points".');
+  </script>
+</body>
+</html>
+
+

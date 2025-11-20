@@ -12,6 +12,7 @@ $menu = [
     ['key' => 'products/index.php', 'match' => 'products/', 'label' => 'Sản phẩm', 'icon' => 'fas fa-leaf', 'href' => BASE_URL . '/admin/products/index.php'],
     ['key' => 'coupons/index.php', 'match' => 'coupons/', 'label' => 'Khuyến mại', 'icon' => 'fas fa-tags', 'href' => BASE_URL . '/admin/coupons/index.php'],
     ['key' => 'news/index.php', 'match' => 'news/', 'label' => 'Tin Tức', 'icon' => 'fas fa-newspaper', 'href' => BASE_URL . '/admin/news/index.php'],
+    ['key' => 'lands/index.php', 'match' => 'lands/', 'label' => 'Mẫu đất', 'icon' => 'fas fa-map', 'href' => BASE_URL . '/admin/lands/index.php'],
     ['key' => 'contacts/index.php', 'match' => 'contacts/', 'label' => 'Liên hệ', 'icon' => 'fas fa-envelope', 'href' => BASE_URL . '/admin/contacts/index.php'],
     ['key' => 'reviews/index.php', 'match' => 'reviews/', 'label' => 'Đánh giá', 'icon' => 'fas fa-comments', 'href' => BASE_URL . '/admin/reviews/index.php'],
     ['key' => 'users/index.php', 'match' => 'users/', 'label' => 'Người dùng', 'icon' => 'fas fa-users', 'href' => BASE_URL . '/admin/users/index.php'],

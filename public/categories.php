@@ -28,7 +28,7 @@ $offset = ($page - 1) * $items_per_page;
 $categories = [];
 $total_categories = 0;
 $query_params = [];
-$where_clauses = [];
+$where_clauses = ['c.is_active = 1'];
 
 if ($search !== '') {
     $where_clauses[] = '(c.category_name LIKE :search OR c.description LIKE :search)';

@@ -1,16 +1,21 @@
 <?php
 require_once __DIR__ . '/../../includes/config.php';
-$current_page = basename($_SERVER['PHP_SELF']);
+$uriPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$adminBase = rtrim(BASE_URL, '/') . '/admin/';
+$current_page = trim(str_replace($adminBase, '', $uriPath), '/');
+$current_page = $current_page === '' ? 'index.php' : $current_page;
+
 $menu = [
     ['key' => 'index.php', 'label' => 'Tổng quát', 'icon' => 'fas fa-chart-pie', 'href' => BASE_URL . '/admin/index.php'],
-    ['key' => 'categories.php', 'label' => 'Danh mục', 'icon' => 'fas fa-list', 'href' => BASE_URL . '/admin/categories.php'],
-    ['key' => 'orders.php', 'label' => 'Đơn hàng', 'icon' => 'fas fa-shopping-bag', 'href' => BASE_URL . '/admin/orders.php'],
-    ['key' => 'products.php', 'label' => 'Sản phẩm', 'icon' => 'fas fa-leaf', 'href' => BASE_URL . '/admin/products.php'],
-    ['key' => 'promotions.php', 'label' => 'Khuyến mại', 'icon' => 'fas fa-tags', 'href' => BASE_URL . '/admin/promotions.php'],
-    ['key' => 'news.php', 'label' => 'Tin Tức', 'icon' => 'fas fa-newspaper', 'href' => BASE_URL . '/admin/news.php'],
-    ['key' => 'reviews.php', 'label' => 'Đánh giá', 'icon' => 'fas fa-comments', 'href' => BASE_URL . '/admin/reviews.php'],
-    ['key' => 'users.php', 'label' => 'Người dùng', 'icon' => 'fas fa-users', 'href' => BASE_URL . '/admin/users.php'],
-    ['key' => 'settings.php', 'label' => 'Cài đặt', 'icon' => 'fas fa-cog', 'href' => BASE_URL . '/admin/settings.php'],
+    ['key' => 'categories/index.php', 'match' => 'categories/', 'label' => 'Danh mục', 'icon' => 'fas fa-list', 'href' => BASE_URL . '/admin/categories/index.php'],
+    ['key' => 'orders/index.php', 'match' => 'orders/', 'label' => 'Đơn hàng', 'icon' => 'fas fa-shopping-bag', 'href' => BASE_URL . '/admin/orders/index.php'],
+    ['key' => 'products/index.php', 'match' => 'products/', 'label' => 'Sản phẩm', 'icon' => 'fas fa-leaf', 'href' => BASE_URL . '/admin/products/index.php'],
+    ['key' => 'coupons/index.php', 'match' => 'coupons/', 'label' => 'Khuyến mại', 'icon' => 'fas fa-tags', 'href' => BASE_URL . '/admin/coupons/index.php'],
+    ['key' => 'news/index.php', 'match' => 'news/', 'label' => 'Tin Tức', 'icon' => 'fas fa-newspaper', 'href' => BASE_URL . '/admin/news/index.php'],
+    ['key' => 'contacts/index.php', 'match' => 'contacts/', 'label' => 'Liên hệ', 'icon' => 'fas fa-envelope', 'href' => BASE_URL . '/admin/contacts/index.php'],
+    ['key' => 'reviews/index.php', 'match' => 'reviews/', 'label' => 'Đánh giá', 'icon' => 'fas fa-comments', 'href' => BASE_URL . '/admin/reviews/index.php'],
+    ['key' => 'users/index.php', 'match' => 'users/', 'label' => 'Người dùng', 'icon' => 'fas fa-users', 'href' => BASE_URL . '/admin/users/index.php'],
+    ['key' => 'settings/index.php', 'match' => 'settings/', 'label' => 'Cài đặt', 'icon' => 'fas fa-cog', 'href' => BASE_URL . '/admin/settings/index.php'],
 ];
 ?>
 <style>
@@ -26,9 +31,13 @@ $menu = [
 <aside class="admin-sidebar" aria-label="Admin Sidebar">
     <div class="menu-title">Điều hướng</div>
     <ul class="admin-menu">
-        <?php foreach ($menu as $item): $active = ($current_page === $item['key']); ?>
+        <?php foreach ($menu as $item):
+            $active = ($current_page === $item['key']);
+            if (!$active && isset($item['match'])) {
+                $active = strpos($current_page, $item['match']) === 0;
+            }
+        ?>
             <li><a class="<?php echo $active ? 'active' : ''; ?>" href="<?php echo htmlspecialchars($item['href']); ?>"><i class="<?php echo $item['icon']; ?>"></i><span><?php echo htmlspecialchars($item['label']); ?></span></a></li>
         <?php endforeach; ?>
     </ul>
 </aside>
-

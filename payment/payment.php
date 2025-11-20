@@ -10,7 +10,7 @@ if ($orderCode === '') { header('Location: ' . BASE_URL . '/public/products.php'
 
 $order = null;
 try {
-    $stmt = $pdo->prepare('SELECT order_id, order_code, total_amount, created_at FROM orders WHERE order_code = :code AND user_id = :uid LIMIT 1');
+    $stmt = $pdo->prepare('SELECT order_id, order_code, total_amount, discount_amount, final_amount, coupon_code, created_at FROM orders WHERE order_code = :code AND user_id = :uid LIMIT 1');
     $stmt->execute([':code' => $orderCode, ':uid' => $_SESSION['user_id']]);
     $order = $stmt->fetch();
 } catch (Exception $e) {}
@@ -19,7 +19,11 @@ if (!$order) { header('Location: ' . BASE_URL . '/public/products.php'); exit; }
 $bankAccount = '123456789';
 $bankName = 'VCB';
 $accountName = 'GROWHOPE COMPANY';
-$amount = (int)round($order['total_amount']);
+$subtotal = (float)$order['total_amount'];
+$discountAmount = isset($order['discount_amount']) ? (float)$order['discount_amount'] : 0.0;
+$finalAmount = isset($order['final_amount']) && (float)$order['final_amount'] > 0 ? (float)$order['final_amount'] : max($subtotal - $discountAmount, 0);
+$amount = (int)round($finalAmount > 0 ? $finalAmount : $subtotal);
+
 $qrUrl = 'https://qr.sepay.vn/img?acc=' . urlencode($bankAccount) . '&bank=' . urlencode($bankName) . '&amount=' . $amount . '&des=' . urlencode($order['order_code']);
 
 include __DIR__ . '/../includes/header.php';
@@ -50,7 +54,11 @@ include __DIR__ . '/../includes/header.php';
             <div class="order-info">
                 <div><strong>Mã đơn:</strong> <?php echo htmlspecialchars($order['order_code']); ?></div>
                 <div><strong>Ngày đặt:</strong> <?php echo date(DATETIME_FORMAT, strtotime($order['created_at'])); ?></div>
-                <div><strong>Tổng tiền:</strong> <span style="color:var(--secondary); font-weight:700;"><?php echo number_format($order['total_amount'], 0, ',', '.'); ?> đ</span></div>
+                <div><strong>Tạm tính:</strong> <?php echo number_format($subtotal, 0, ',', '.'); ?> đ</div>
+                <?php if ($discountAmount > 0): ?>
+                    <div><strong>Giảm giá<?php echo !empty($order['coupon_code']) ? ' (mã ' . htmlspecialchars($order['coupon_code']) . ')' : ''; ?>:</strong> -<?php echo number_format($discountAmount, 0, ',', '.'); ?> đ</div>
+                <?php endif; ?>
+                <div><strong>Tổng phải thanh toán:</strong> <span style="color:var(--secondary); font-weight:700;">&nbsp;<?php echo number_format($finalAmount > 0 ? $finalAmount : $subtotal, 0, ',', '.'); ?> đ</span></div>
             </div>
             <div class="status"><span class="spinner"></span> Đang chờ thanh toán...</div>
             <div style="margin-top:15px; display:flex; gap:10px;">

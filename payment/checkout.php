@@ -42,7 +42,12 @@ include __DIR__ . '/../includes/header.php';
     .input, textarea { width: 100%; padding: 10px 12px; border:1px solid #ddd; border-radius:6px; font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; }
     .summary { position: sticky; top: 20px; }
     .summary-item { display:flex; justify-content: space-between; margin: 8px 0; }
-    .product-row { display:flex; justify-content: space-between; gap:10px; margin-bottom:8px; }
+    .summary-item--discount { color: #c0392b; font-weight: 600; }
+    .summary-item--final strong { color: var(--secondary); font-size: 18px; }
+    .coupon-feedback { margin-top: 10px; font-size: 14px; }
+    .coupon-feedback--success { color: #2f7f2f; }
+    .coupon-feedback--error { color: #c0392b; }
+    #coupon-spinner { display: none; }
 </style>
 
 <main class="checkout-container">
@@ -76,8 +81,9 @@ include __DIR__ . '/../includes/header.php';
             <h2 class="section-title" style="margin-top:20px;">Mã giảm giá</h2>
             <div style="display:flex; gap:10px;">
                 <input class="input" type="text" id="coupon_code" placeholder="Nhập mã giảm giá">
-                <button class="btn btn-primary" type="button" onclick="applyCoupon()">Áp dụng</button>
+                <button class="btn btn-primary" type="button" id="coupon_apply_btn" onclick="applyCoupon()">Áp dụng</button>
             </div>
+            <div class="coupon-feedback" id="coupon_feedback" aria-live="polite"></div>
 
             <h2 class="section-title" style="margin-top:20px;">Ghi chú đơn hàng</h2>
             <textarea id="order_note" rows="4" placeholder="Ghi chú cho đơn hàng"></textarea>
@@ -93,31 +99,103 @@ include __DIR__ . '/../includes/header.php';
                     </div>
                 <?php endforeach; ?>
             </div>
-            <div class="summary-item"><span>Tạm tính</span><strong><?php echo number_format($subtotal, 0, ',', '.'); ?> đ</strong></div>
+            <div class="summary-item"><span>Tạm tính</span><strong id="summary_subtotal" data-value="<?php echo (float) $subtotal; ?>"><?php echo number_format($subtotal, 0, ',', '.'); ?> đ</strong></div>
             <div class="summary-item"><span>Phí vận chuyển</span><strong>Miễn phí</strong></div>
-            <div class="summary-item"><span>Tổng cộng</span><strong style="color:var(--secondary)"><?php echo number_format($subtotal, 0, ',', '.'); ?> đ</strong></div>
+            <div class="summary-item summary-item--discount" id="summary_discount" style="display:none;"><span>Giảm giá</span><strong>-0 đ</strong></div>
+            <div class="summary-item summary-item--final"><span>Tổng cộng</span><strong id="summary_final" data-value="<?php echo (float) $subtotal; ?>"><?php echo number_format($subtotal, 0, ',', '.'); ?> đ</strong></div>
             <button class="btn btn-secondary" style="width:100%; margin-top:12px; padding:14px; font-size:16px;" onclick="placeOrder()">ĐẶT HÀNG NGAY</button>
         </div>
     </div>
 </main>
 
 <script>
-function applyCoupon(){ alert('Mã giảm giá sẽ được xử lý khi tạo đơn hàng.'); }
+let appliedCoupon = null;
+let discountAmount = 0;
+let finalAmount = <?php echo (float) $subtotal; ?>;
+
+function displayCouponFeedback(message, type) {
+    const feedbackEl = document.getElementById('coupon_feedback');
+    feedbackEl.textContent = message;
+    feedbackEl.className = 'coupon-feedback ' + (type === 'success' ? 'coupon-feedback--success' : 'coupon-feedback--error');
+}
+
+function updateSummary() {
+    const discountRow = document.getElementById('summary_discount');
+    const finalEl = document.getElementById('summary_final');
+    const subtotalValue = parseFloat(document.getElementById('summary_subtotal').dataset.value || '0');
+
+    if (discountAmount > 0) {
+        discountRow.style.display = 'flex';
+        discountRow.querySelector('strong').textContent = '-' + new Intl.NumberFormat('vi-VN').format(discountAmount) + ' đ';
+    } else {
+        discountRow.style.display = 'none';
+        discountRow.querySelector('strong').textContent = '-0 đ';
+    }
+
+    finalEl.dataset.value = finalAmount.toString();
+    finalEl.textContent = new Intl.NumberFormat('vi-VN').format(finalAmount) + ' đ';
+}
+
+function toggleCouponLoading(isLoading) {
+    const btn = document.getElementById('coupon_apply_btn');
+    btn.disabled = isLoading;
+    btn.textContent = isLoading ? 'Đang kiểm tra...' : 'Áp dụng';
+}
+
+function applyCoupon() {
+    const codeInput = document.getElementById('coupon_code');
+    const code = codeInput.value.trim().toUpperCase();
+    if (code === '') {
+        displayCouponFeedback('Vui lòng nhập mã giảm giá.', 'error');
+        return;
+    }
+
+    toggleCouponLoading(true);
+    displayCouponFeedback('Đang kiểm tra mã...', 'success');
+
+    fetch('<?php echo BASE_URL; ?>/api/apply-coupon.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ coupon_code: code })
+    }).then(res => res.json()).then(data => {
+        if (data && data.success) {
+            appliedCoupon = data.coupon_code;
+            discountAmount = data.discount_amount;
+            finalAmount = data.final_amount;
+            displayCouponFeedback('Áp dụng mã thành công. Giảm ' + new Intl.NumberFormat('vi-VN').format(discountAmount) + ' đ.', 'success');
+            updateSummary();
+        } else {
+            appliedCoupon = null;
+            discountAmount = 0;
+            finalAmount = parseFloat(document.getElementById('summary_subtotal').dataset.value || '0');
+            displayCouponFeedback(data.message || 'Không thể áp dụng mã giảm giá.', 'error');
+            updateSummary();
+        }
+    }).catch(() => {
+        displayCouponFeedback('Không thể kiểm tra mã giảm giá. Vui lòng thử lại.', 'error');
+    }).finally(() => {
+        toggleCouponLoading(false);
+    });
+}
+
 function placeOrder(){
     const addr = document.querySelector('input[name="shipping_address_id"]:checked');
     if (!addr) { alert('Vui lòng chọn địa chỉ giao hàng.'); return; }
     const payload = {
         shipping_address_id: parseInt(addr.value),
         payment_method: 'bank_transfer',
-        coupon_code: document.getElementById('coupon_code').value.trim(),
+        coupon_code: appliedCoupon ? appliedCoupon : document.getElementById('coupon_code').value.trim(),
         note: document.getElementById('order_note').value.trim()
     };
     fetch('<?php echo BASE_URL; ?>/api/create-order.php', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     }).then(r=>r.json()).then(res=>{
-        if(res && res.success){ window.location.href = '<?php echo BASE_URL; ?>/payment/payment.php?order_code=' + encodeURIComponent(res.order_code); }
+        if(res && res.success){
+            window.location.href = '<?php echo BASE_URL; ?>/payment/payment.php?order_code=' + encodeURIComponent(res.order_code);
+        }
         else { alert(res.message || 'Không thể tạo đơn hàng.'); }
     }).catch(()=>alert('Có lỗi xảy ra.'));
 }
 </script>
+
 <?php include __DIR__ . '/../includes/footer.php'; ?>

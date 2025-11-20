@@ -2,20 +2,24 @@
 require_once '../includes/config.php';
 require_once '../includes/database.php';
 
+
 try {
     $pdo = getPDO();
 } catch (RuntimeException $e) {
     $pdo = null;
 }
 
+
 // Hỗ trợ cả slug và id để tương thích
 $slug = isset($_GET['slug']) ? trim($_GET['slug']) : '';
 $news_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+
 
 if (!$pdo) {
     header('Location: ' . BASE_URL . '/public/news.php');
     exit;
 }
+
 
 // Tìm tin tức theo slug hoặc id
 if (!empty($slug)) {
@@ -36,26 +40,38 @@ if (!empty($slug)) {
     $article = false;
 }
 
+
 if (!$article) {
     header('Location: ' . BASE_URL . '/public/news.php');
     exit;
 }
 
-// Lấy news_id từ article để lấy tags
+
+// Lấy news_id để lấy tags và ảnh
 $news_id = (int) $article['news_id'];
+
 
 $tagStmt = $pdo->prepare('SELECT tag FROM news_tags WHERE news_id = :id ORDER BY tag ASC');
 $tagStmt->bindValue(':id', $news_id, PDO::PARAM_INT);
 $tagStmt->execute();
 $article_tags = $tagStmt->fetchAll(PDO::FETCH_COLUMN);
 
+
+$thumbStmt = $pdo->prepare('SELECT image_url FROM news_images WHERE news_id = :id ORDER BY display_order ASC, id ASC LIMIT 1');
+$thumbStmt->bindValue(':id', $news_id, PDO::PARAM_INT);
+$thumbStmt->execute();
+$thumb_url = $thumbStmt->fetchColumn();
+
+
 include '../includes/header.php';
 ?>
+
 
 <style>
     body {
         background-color: var(--light);
     }
+
 
     /* News Detail Page Styles */
     .news-detail-container {
@@ -66,6 +82,7 @@ include '../includes/header.php';
         min-height: 80vh;
     }
 
+
     .news-detail-wrapper {
         max-width: <?php echo CONTAINER_MAX_WIDTH_SMALL; ?>;
         margin: 0 auto;
@@ -75,10 +92,13 @@ include '../includes/header.php';
         box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
     }
 
+
     .news-detail-header {
         padding: 40px 40px 30px;
         border-bottom: 1px solid #e0e0e0;
     }
+
+
 
 
     .news-category {
@@ -92,6 +112,7 @@ include '../includes/header.php';
         margin-bottom: 15px;
     }
 
+
     .news-title {
         font-size: 36px;
         font-weight: 700;
@@ -99,6 +120,7 @@ include '../includes/header.php';
         margin-bottom: 20px;
         line-height: 1.3;
     }
+
 
     .news-meta {
         display: flex;
@@ -109,6 +131,7 @@ include '../includes/header.php';
         border-bottom: 1px solid #e0e0e0;
     }
 
+
     .news-meta-item {
         display: flex;
         align-items: center;
@@ -117,10 +140,12 @@ include '../includes/header.php';
         font-size: 14px;
     }
 
+
     .news-meta-item i {
         color: var(--secondary);
         width: 16px;
     }
+
 
     .news-description {
         font-size: 18px;
@@ -132,6 +157,7 @@ include '../includes/header.php';
         border-left: 4px solid var(--secondary);
         margin-bottom: 30px;
     }
+
 
     .news-image {
         width: 100%;
@@ -146,9 +172,11 @@ include '../includes/header.php';
         margin-bottom: 30px;
     }
 
+
     .news-content {
         padding: 0 40px 40px;
     }
+
 
     .news-body {
         font-size: 16px;
@@ -157,9 +185,11 @@ include '../includes/header.php';
         margin-bottom: 30px;
     }
 
+
     .news-body p {
         margin-bottom: 20px;
     }
+
 
     .news-tags {
         display: flex;
@@ -170,11 +200,13 @@ include '../includes/header.php';
         border-top: 1px solid #e0e0e0;
     }
 
+
     .news-tags-label {
         font-weight: 600;
         color: var(--primary);
         margin-right: 10px;
     }
+
 
     .news-tag {
         display: inline-block;
@@ -188,11 +220,13 @@ include '../includes/header.php';
         border: 1px solid #e0e0e0;
     }
 
+
     .news-tag:hover {
         background-color: var(--secondary);
         color: var(--white);
         border-color: var(--secondary);
     }
+
 
     .news-actions {
         display: flex;
@@ -201,6 +235,7 @@ include '../includes/header.php';
         padding-top: 30px;
         border-top: 1px solid #e0e0e0;
     }
+
 
     .news-action-btn {
         display: inline-flex;
@@ -216,10 +251,12 @@ include '../includes/header.php';
         transition: all 0.3s ease;
     }
 
+
     .news-action-btn:hover {
         background-color: var(--secondary);
         transform: translateY(-2px);
     }
+
 
     .news-action-btn.secondary {
         background-color: transparent;
@@ -227,10 +264,12 @@ include '../includes/header.php';
         border: 2px solid var(--primary);
     }
 
+
     .news-action-btn.secondary:hover {
         background-color: var(--primary);
         color: var(--white);
     }
+
 
     /* Responsive */
     @media (max-width: <?php echo BREAKPOINT_MD; ?>) {
@@ -239,23 +278,28 @@ include '../includes/header.php';
             padding: 30px 20px;
         }
 
+
         .news-title {
             font-size: 28px;
         }
+
 
         .news-image {
             height: 250px;
             font-size: 48px;
         }
 
+
         .news-meta {
             flex-direction: column;
             gap: 10px;
         }
 
+
         .news-actions {
             flex-direction: column;
         }
+
 
         .news-action-btn {
             width: 100%;
@@ -263,6 +307,8 @@ include '../includes/header.php';
         }
     }
 </style>
+
+
 
 
 <?php
@@ -275,13 +321,16 @@ $breadcrumbs = [
 include __DIR__ . '/../includes/components/page-header.php';
 ?>
 
+
 <div class="news-detail-container">
     <div class="news-detail-wrapper">
         <!-- Header -->
         <div class="news-detail-header">
             <div class="news-category"><?php echo htmlspecialchars($article['category']); ?></div>
 
+
             <h1 class="news-title" style="display: none;"><?php echo htmlspecialchars($article['title']); ?></h1>
+
 
             <div class="news-meta">
                 <div class="news-meta-item">
@@ -298,6 +347,7 @@ include __DIR__ . '/../includes/components/page-header.php';
                 </div>
             </div>
 
+
             <?php if (!empty($article['description'])): ?>
             <div class="news-description">
                 <?php echo htmlspecialchars($article['description']); ?>
@@ -305,16 +355,23 @@ include __DIR__ . '/../includes/components/page-header.php';
             <?php endif; ?>
         </div>
 
+
         <!-- Image -->
         <div class="news-image">
-            <i class="fas fa-leaf"></i>
+            <?php if (!empty($thumb_url)): ?>
+                <img src="<?php echo htmlspecialchars($thumb_url); ?>" alt="<?php echo htmlspecialchars($article['title']); ?>" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
+            <?php else: ?>
+                <i class="fas fa-leaf"></i>
+            <?php endif; ?>
         </div>
+
 
         <!-- Content -->
         <div class="news-content">
             <div class="news-body">
                 <?php echo nl2br(htmlspecialchars($article['content'])); ?>
             </div>
+
 
             <!-- Tags -->
             <?php if (!empty($article_tags)): ?>
@@ -327,6 +384,7 @@ include __DIR__ . '/../includes/components/page-header.php';
                 <?php endforeach; ?>
             </div>
             <?php endif; ?>
+
 
             <!-- Actions -->
             <div class="news-actions">
@@ -343,6 +401,7 @@ include __DIR__ . '/../includes/components/page-header.php';
     </div>
 </div>
 
+
 <!-- Related News Section -->
 <div style="background-color: var(--light); padding: 40px 0;">
     <?php
@@ -354,5 +413,10 @@ include __DIR__ . '/../includes/components/page-header.php';
     ?>
 </div>
 
+
 <?php include '../includes/footer.php'; ?>
+
+
+
+
 

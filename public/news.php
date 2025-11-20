@@ -2,46 +2,55 @@
 require_once '../includes/config.php';
 require_once '../includes/database.php';
 
+
 try {
     $pdo = getPDO();
 } catch (RuntimeException $e) {
     $pdo = null;
 }
 
+
 $news = [];
 $total_news = 0;
 $categories_list = [];
 $authors_list = [];
+$filter_tag = isset($_GET['tag']) ? trim($_GET['tag']) : '';
+
 
 // Lấy filter params
 $filter_category = isset($_GET['category']) ? trim($_GET['category']) : '';
 $filter_author = isset($_GET['author']) ? trim($_GET['author']) : '';
+
 
 if ($pdo) {
     try {
         // Lấy danh sách categories và authors
         $categoriesStmt = $pdo->query('SELECT DISTINCT category FROM news WHERE category IS NOT NULL AND category != "" ORDER BY category ASC');
         $categories_list = $categoriesStmt->fetchAll(PDO::FETCH_COLUMN);
-        
+       
         $authorsStmt = $pdo->query('SELECT DISTINCT author FROM news WHERE author IS NOT NULL AND author != "" ORDER BY author ASC');
         $authors_list = $authorsStmt->fetchAll(PDO::FETCH_COLUMN);
-        
+       
         // Xây dựng query với filter
         $where_conditions = [];
         $query_params = [];
-        
+       
         if (!empty($filter_category)) {
             $where_conditions[] = 'category = :category';
             $query_params[':category'] = $filter_category;
         }
-        
+       
         if (!empty($filter_author)) {
             $where_conditions[] = 'author = :author';
             $query_params[':author'] = $filter_author;
         }
-        
+       
+        if (!empty($filter_tag)) {
+            $where_conditions[] = 'news_id IN (SELECT news_id FROM news_tags WHERE tag = :tag)';
+            $query_params[':tag'] = $filter_tag;
+        }
         $where_sql = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
-        
+       
         // Đếm tổng số tin tức
         $count_sql = "SELECT COUNT(*) FROM news $where_sql";
         $countStmt = $pdo->prepare($count_sql);
@@ -51,16 +60,19 @@ if ($pdo) {
         $countStmt->execute();
         $total_news = (int) $countStmt->fetchColumn();
 
+
         // Phân trang
         $items_per_page = PAGINATION_NEWS_PER_PAGE;
         $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
         $offset = ($page - 1) * $items_per_page;
 
+
         // Lấy tin tức với phân trang và filter
-        $news_sql = "SELECT news_id, title, slug, publish_date, author, category, excerpt, description 
-                     FROM news 
+        $news_sql = "SELECT news_id, title, slug, publish_date, author, category, excerpt, description,
+                     (SELECT i.image_url FROM news_images i WHERE i.news_id = news.news_id ORDER BY i.display_order ASC, i.id ASC LIMIT 1) AS thumb_url
+                     FROM news
                      $where_sql
-                     ORDER BY publish_date DESC, created_at DESC 
+                     ORDER BY publish_date DESC, created_at DESC
                      LIMIT :limit OFFSET :offset";
         $newsStmt = $pdo->prepare($news_sql);
         foreach ($query_params as $key => $value) {
@@ -76,10 +88,13 @@ if ($pdo) {
     }
 }
 
+
 $total_pages = $total_news > 0 ? (int)ceil($total_news / PAGINATION_NEWS_PER_PAGE) : 0;
+
 
 include '../includes/header.php';
 ?>
+
 
 <style>
     /* News Page Styles - Matching Products Page */
@@ -90,6 +105,7 @@ include '../includes/header.php';
         padding-top: 20px;
     }
 
+
     .news-info {
         font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
         font-weight: 400;
@@ -98,12 +114,14 @@ include '../includes/header.php';
         margin-bottom: 20px;
     }
 
+
     .news-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: <?php echo GRID_GAP_SMALL; ?>;
         margin-bottom: 40px;
     }
+
 
     .news-card {
         background-color: var(--white);
@@ -117,10 +135,12 @@ include '../includes/header.php';
         flex-direction: column;
     }
 
+
     .news-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 5px 20px rgba(0,0,0,0.15);
     }
+
 
     .news-image {
         width: 100%;
@@ -133,10 +153,12 @@ include '../includes/header.php';
         overflow: hidden;
     }
 
+
     .news-image-placeholder {
         color: var(--dark);
         font-size: 14px;
     }
+
 
     .news-info-card {
         padding: 16px;
@@ -144,6 +166,7 @@ include '../includes/header.php';
         display: flex;
         flex-direction: column;
     }
+
 
     .news-category {
         font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
@@ -153,6 +176,7 @@ include '../includes/header.php';
         text-transform: uppercase;
         margin-bottom: 8px;
     }
+
 
     .news-title {
         font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
@@ -168,15 +192,18 @@ include '../includes/header.php';
         line-height: 1.4;
     }
 
+
     .news-title a {
         color: var(--dark);
         text-decoration: none;
         transition: color 0.3s ease;
     }
 
+
     .news-title a:hover {
         color: var(--primary);
     }
+
 
     .news-excerpt {
         font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
@@ -192,6 +219,7 @@ include '../includes/header.php';
         flex: 1;
     }
 
+
     .news-meta {
         display: flex;
         justify-content: space-between;
@@ -204,17 +232,20 @@ include '../includes/header.php';
         color: #666;
     }
 
+
     .news-date {
         display: flex;
         align-items: center;
         gap: 5px;
     }
 
+
     .news-author {
         display: flex;
         align-items: center;
         gap: 5px;
     }
+
 
     .read-more-btn {
         width: 100%;
@@ -234,9 +265,12 @@ include '../includes/header.php';
         margin-top: 12px;
     }
 
+
     .read-more-btn:hover {
         background-color: #2d4a2d;
     }
+
+
 
 
     .no-news {
@@ -245,11 +279,13 @@ include '../includes/header.php';
         color: var(--dark);
     }
 
+
     .no-news i {
         font-size: 48px;
         color: var(--secondary);
         margin-bottom: 20px;
     }
+
 
     .no-news h3 {
         font-family: '<?php echo FONT_FAMILY; ?>', sans-serif;
@@ -258,11 +294,13 @@ include '../includes/header.php';
         margin-bottom: 10px;
     }
 
+
     @media (max-width: <?php echo BREAKPOINT_XL; ?>) {
         .news-grid {
             grid-template-columns: repeat(3, 1fr);
         }
     }
+
 
     @media (max-width: <?php echo BREAKPOINT_MD; ?>) {
         .news-grid {
@@ -271,6 +309,7 @@ include '../includes/header.php';
         }
     }
 
+
     @media (max-width: <?php echo BREAKPOINT_XS; ?>) {
         .news-grid {
             grid-template-columns: 1fr;
@@ -278,13 +317,14 @@ include '../includes/header.php';
     }
 </style>
 
+
 <!-- Main Content -->
 <main style="min-height: 60vh; padding: 0; background-color: var(--light);">
     <?php
     $page_title = "Tin Tức";
     include __DIR__ . '/../includes/components/page-header.php';
     ?>
-    
+   
     <div class="news-container">
         <!-- Filter Section -->
         <?php
@@ -296,7 +336,7 @@ include '../includes/header.php';
                 'label' => $cat
             ];
         }
-        
+       
         $author_options = [['value' => '', 'label' => 'Tất cả']];
         foreach ($authors_list as $author) {
             $author_options[] = [
@@ -304,7 +344,7 @@ include '../includes/header.php';
                 'label' => $author
             ];
         }
-        
+       
         $filter_fields = [
             [
                 'type' => 'select',
@@ -321,16 +361,17 @@ include '../includes/header.php';
                 'value' => $filter_author
             ]
         ];
-        
+       
         $type = 'news';
         $preserve_params = ['page'];
         include __DIR__ . '/../includes/components/filter.php';
         ?>
-        
+       
         <!-- News Info -->
         <div class="news-info">
             Hiển thị <span id="display-count"><?php echo count($news); ?></span> trên tổng số <span id="total-count"><?php echo $total_news; ?></span> tin tức
         </div>
+
 
         <!-- News Grid -->
         <?php if (empty($news)): ?>
@@ -344,7 +385,11 @@ include '../includes/header.php';
                 <?php foreach ($news as $item): ?>
                     <div class="news-card">
                         <div class="news-image">
-                            <div class="news-image-placeholder">Hình ảnh tin tức</div>
+                            <?php if (!empty($item['thumb_url'])): ?>
+                                <img src="<?php echo htmlspecialchars($item['thumb_url']); ?>" alt="<?php echo htmlspecialchars($item['title']); ?>" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
+                            <?php else: ?>
+                                <div class="news-image-placeholder">Hình ảnh tin tức</div>
+                            <?php endif; ?>
                         </div>
                         <div class="news-info-card">
                             <div class="news-category"><?php echo htmlspecialchars($item['category']); ?></div>
@@ -375,6 +420,7 @@ include '../includes/header.php';
             </div>
         <?php endif; ?>
 
+
         <!-- Pagination -->
         <?php
         // Giữ lại filter params trong pagination
@@ -382,13 +428,14 @@ include '../includes/header.php';
         if (!empty($filter_category)) $pagination_params['category'] = $filter_category;
         if (!empty($filter_author)) $pagination_params['author'] = $filter_author;
         $base_url = 'news.php?' . (!empty($pagination_params) ? http_build_query($pagination_params) . '&' : '');
-        
+       
         $current_page = $page;
         $total_pages = $total_pages;
         include __DIR__ . '/../includes/components/pagination.php';
         ?>
     </div>
 </main>
+
 
 <?php
 $cta_heading = 'Theo dõi tin tức mới nhất về môi trường và trồng rừng';
@@ -398,4 +445,8 @@ $cta_button_link = BASE_URL . '/public/products.php';
 include '../includes/components/cta-section.php';
 ?>
 <?php include '../includes/footer.php'; ?>
+
+
+
+
 

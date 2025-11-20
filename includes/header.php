@@ -228,11 +228,64 @@ if ($is_root) {
 
         /* Admin dropdown */
         .admin-account { position: relative; }
-        .admin-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: var(--white); border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); min-width: 220px; display: none; overflow: hidden; z-index: 1000; }
-        .admin-account:hover .admin-dropdown { display: block; }
-        .admin-dropdown a { display: flex; align-items: center; gap: 10px; padding: 12px 14px; text-decoration: none; color: var(--dark); transition: background 0.25s ease; }
-        .admin-dropdown a:hover { background: var(--light); }
-        .admin-dropdown .divider { height: 1px; background: #eee; margin: 0; }
+        .admin-dropdown { 
+            position: absolute; 
+            top: calc(100% + 8px); 
+            right: 0; 
+            background: var(--white); 
+            border: 1px solid #e0e0e0; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15); 
+            min-width: 220px; 
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s 0.3s;
+            overflow: hidden; 
+            z-index: 1000; 
+        }
+        .admin-account:hover .admin-dropdown,
+        .admin-dropdown:hover { 
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s 0s;
+        }
+        .admin-dropdown::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 20px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid var(--white);
+        }
+        .admin-dropdown a { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            padding: 14px 18px; 
+            text-decoration: none; 
+            color: var(--dark); 
+            transition: background 0.2s ease;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .admin-dropdown a:hover { 
+            background: rgba(210,100,38,0.08); 
+        }
+        .admin-dropdown a i {
+            width: 20px;
+            color: var(--secondary);
+            font-size: 16px;
+        }
+        .admin-dropdown .divider { 
+            height: 1px; 
+            background: rgba(210,100,38,0.15); 
+            margin: 0; 
+        }
 
 
         .land-management-btn {

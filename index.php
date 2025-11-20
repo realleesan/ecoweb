@@ -526,13 +526,131 @@ include 'includes/header.php';
         <p>Theo dõi các dự án trồng rừng của chúng tôi trên khắp cả nước</p>
     </div>
     <div class="map-container">
-        <div class="map-placeholder">
-            <i class="fas fa-map-marked-alt"></i>
-            <h3>Bản đồ phủ xanh</h3>
-            <p>Bản đồ tương tác hiển thị các khu vực đã được phủ xanh</p>
-            <p style="font-size: 14px; margin-top: 10px; color: #999;">Bản đồ sẽ được tích hợp tại đây</p>
-        </div>
+        <div id="map" style="width:100%; height:100%; min-height:380px; border-radius:12px;"></div>
     </div>
+
+    <style>
+    /* small custom tooltip style for map */
+    .leaflet-tooltip.my-tooltip {
+      background: #fff;
+      color: #333;
+      border: 1px solid #eee;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize map centered on Vietnam with base layers (OSM + ESRI satellite)
+      var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      });
+
+      var esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics, and others'
+      });
+
+      var map = L.map('map', { layers: [osm] }).setView([14.0583, 108.2772], 5);
+
+      var baseMaps = {
+        "Bản đồ": osm,
+        "Vệ tinh": esriSat
+      };
+      L.control.layers(baseMaps).addTo(map);
+
+      // Use FontAwesome icons as divIcons (no image files needed)
+      var siteIcon = L.divIcon({
+        className: 'site-divicon',
+        html: '<i class="fas fa-map-marker-alt" style="color:#d9534f;font-size:28px"></i>',
+        iconSize: [28, 28],
+        iconAnchor: [14, 28]
+      });
+
+      var treeIcon = L.divIcon({
+        className: 'tree-divicon',
+        html: '<i class="fas fa-seedling" style="color:#2e8b57;font-size:20px"></i>',
+        iconSize: [22, 22],
+        iconAnchor: [11, 22]
+      });
+
+      var currentSiteLayer = null;
+      var plantingLayer = L.layerGroup().addTo(map);
+      var selectedPlantingLayer = null;
+
+      // helper functions
+      function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+      function formatPrice(p){ if(!p) return ''; return Number(p).toLocaleString('vi-VN') + '₫'; }
+
+      // load sites (mẫu đất)
+      fetch('<?php echo BASE_URL; ?>/api/sites.php')
+        .then(function(res){ return res.json(); })
+        .then(function(json){
+          if(!json.success) return;
+          json.data.forEach(function(site){
+            var m = L.marker([site.center_lat, site.center_lng], {icon: siteIcon})
+              .addTo(map)
+              .bindTooltip(site.name, {className: 'my-tooltip', direction: 'top', offset:[0,-8]})
+              .on('mouseover', function(){ this.openTooltip(); })
+              .on('mouseout', function(){ this.closeTooltip(); })
+              .on('click', function(){
+                // zoom to bbox if exists
+                if (site.bbox_lat1 && site.bbox_lng1 && site.bbox_lat2 && site.bbox_lng2) {
+                  var bounds = L.latLngBounds([site.bbox_lat1, site.bbox_lng1], [site.bbox_lat2, site.bbox_lng2]);
+                  map.fitBounds(bounds, {padding: [40,40]});
+                  if (currentSiteLayer) map.removeLayer(currentSiteLayer);
+                  currentSiteLayer = L.rectangle(bounds, {color:'#d9534f', weight:4, fill:false}).addTo(map);
+                } else {
+                  map.setView([site.center_lat, site.center_lng], 15);
+                }
+
+                // load plantings for this site
+                plantingLayer.clearLayers();
+                fetch('<?php echo BASE_URL; ?>/api/site_trees.php?site_id=' + site.id)
+                  .then(function(r){ return r.json(); })
+                  .then(function(d){
+                    if(!d.success) return;
+                    d.data.forEach(function(pl){
+                      var pm = L.marker([pl.lat, pl.lng], {icon: treeIcon})
+                        .addTo(plantingLayer)
+                        .bindPopup(
+                          '<strong>' + escapeHtml(pl.product_name) + '</strong><br/>' +
+                          (pl.product_category ? 'Danh mục: ' + escapeHtml(pl.product_category) + '<br/>' : '') +
+                          (pl.product_price ? 'Giá: ' + formatPrice(pl.product_price) + '<br/>' : '') +
+                          'Người trồng: ' + escapeHtml(pl.user_name) + '<br/>' +
+                          'Thời gian: ' + escapeHtml(pl.planted_at)
+                        )
+                        .on('click', function(e){
+                          // Zoom to the planting location and open popup
+                          try {
+                            map.setView([pl.lat, pl.lng], 18, {animate: true});
+                          } catch(err) {
+                            map.setView([pl.lat, pl.lng], 18);
+                          }
+                          this.openPopup();
+
+                          // highlight the selected planting (circle)
+                          if (selectedPlantingLayer) {
+                            map.removeLayer(selectedPlantingLayer);
+                          }
+                          selectedPlantingLayer = L.circle([pl.lat, pl.lng], {
+                            radius: 8,
+                            color: '#2e8b57',
+                            weight: 3,
+                            fill: false
+                          }).addTo(map);
+                        });
+                    });
+                  });
+              });
+          });
+        })
+        .catch(function(err){ console.error('Lỗi load sites:', err); });
+
+    });
+    </script>
 </section>
 
 <!-- Trending Seeds Section -->

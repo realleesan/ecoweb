@@ -79,6 +79,9 @@ if ($is_root) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="<?php echo FONT_GOOGLE_URL; ?>" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Leaflet CSS/JS (Open-source, free) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --primary: <?php echo COLOR_PRIMARY; ?>;

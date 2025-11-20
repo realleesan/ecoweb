@@ -173,20 +173,22 @@ include '../includes/header.php';
         <!-- Đội ngũ chúng tôi -->
         <section style="margin-bottom: 60px;">
             <h2 style="font-family: '<?php echo FONT_FAMILY; ?>', sans-serif; font-weight: 700; font-size: 32px; color: var(--primary); margin-bottom: 30px; text-align: center; position: relative; padding-bottom: 20px;">
-                Đội ngũ chúng tôi
+                Đội ngũ phát triển website GROWHOPE
                 <span style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 100px; height: 3px; background: var(--secondary);"></span>
             </h2>
             
             <style>
                 .team-container {
-                    display: grid;
+                    display: flex;
+                    flex-wrap: wrap;
+                    justify-content: center;
                     grid-template-columns: repeat(3, minmax(260px, 1fr));
                     gap: 30px;
-                    justify-items: stretch;
+                    justify-items: center;
                     align-items: stretch;
                 }
 
-                .team-container .team-member-card { width: 100%; }
+                .team-container .team-member-card { width: 100%;}
 
                 .team-container .team-member-card:nth-child(4) { grid-column: 1; grid-row: 2; }
                 .team-container .team-member-card:nth-child(5) { grid-column: 3; grid-row: 2; }
@@ -205,6 +207,9 @@ include '../includes/header.php';
                     position: relative;
                     perspective: 1000px;
                     cursor: pointer;
+                    width: 300px;            
+                    max-width: 30%;
+                    margin-bottom: 20px;
                 }
 
                 .team-member-card-inner {
@@ -268,8 +273,10 @@ include '../includes/header.php';
                 }
 
                 .member-photo {
-                    width: 100%;
-                    height: 100%;
+                    width: 309px;
+                    height: 300px;
+                    object-fit: cover;
+                    object-position: top center;
                     border-radius: 12px;
                     background: #f5f7f9;
                     border: 1px dashed rgba(0,0,0,0.12);
@@ -284,6 +291,7 @@ include '../includes/header.php';
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
+                    object-position: 50% 20%;
                     border-radius: 12px;
                     display: block;
                 }
@@ -294,11 +302,11 @@ include '../includes/header.php';
                 <div class="team-member-card">
                     <div class="team-member-card-inner">
                         <div class="team-member-card-front">
-                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/team/z4708494459517_30bf1861f051d56d18ff449be58a5f36.jpg" alt="Trần Thị B"></div>
+                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/about_us/nam.png" alt="Nguyễn Văn Hoàng Nam"></div>
                         </div>
                         <div class="team-member-card-back">
                             <h3 class="member-name">Nguyễn Văn Hoàng Nam</h3>
-                            <p class="member-role"> Bố leader </p>
+                            <p class="member-role"> Coder/Designer/Bố leader/ Co-founder </p>
                         </div>
                     </div>
                 </div>
@@ -307,11 +315,11 @@ include '../includes/header.php';
                 <div class="team-member-card">
                     <div class="team-member-card-inner">
                         <div class="team-member-card-front">
-                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/team/z4708494459517_30bf1861f051d56d18ff449be58a5f36.jpg" alt="Nguyễn Văn A"></div>
+                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/about_us/nhat.png" alt="Lê Vũ Bảo Nhật"></div>
                         </div>
                         <div class="team-member-card-back">
                             <h3 class="member-name">Lê Vũ Bảo Nhật</h3>
-                            <p class="member-role">Leader dự án</p>
+                            <p class="member-role"> Leader/Founder </p>
                         </div>
                     </div>
                 </div>
@@ -320,11 +328,11 @@ include '../includes/header.php';
                 <div class="team-member-card">
                     <div class="team-member-card-inner">
                         <div class="team-member-card-front">
-                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/team/z4708494459517_30bf1861f051d56d18ff449be58a5f36.jpg" alt="Lê Văn C"></div>
+                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/about_us/nhung.png" alt="Nguyễn Thị Nhung"></div>
                         </div>
                         <div class="team-member-card-back">
                             <h3 class="member-name">Nguyễn Thị Nhung</h3>
-                            <p class="member-role"> Vợ leader </p>
+                            <p class="member-role"> Coder/Designer/Vợ leader </p>
                         </div>
                     </div>
                 </div>
@@ -333,7 +341,7 @@ include '../includes/header.php';
                 <div class="team-member-card">
                     <div class="team-member-card-inner">
                         <div class="team-member-card-front">
-                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/team/z4708494459517_30bf1861f051d56d18ff449be58a5f36.jpg" alt="Phạm Thị D"></div>
+                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/about_us/thu.png" alt="Trần Phương Thư"></div>
                         </div>
                         <div class="team-member-card-back">
                             <h3 class="member-name">Trần Phương Thư</h3>
@@ -344,11 +352,11 @@ include '../includes/header.php';
                 <div class="team-member-card">
                     <div class="team-member-card-inner">
                         <div class="team-member-card-front">
-                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/team/z7238813993706_ea0016173c9a864e4622267f2a37779a.jpg" alt="Ngô Văn E"></div>
+                            <div class="member-photo"><img src="<?php echo BASE_URL; ?>/assets/about_us/trang.png" alt="Trần Thị Thùy Trang"></div>
                         </div>
                         <div class="team-member-card-back">
                             <h3 class="member-name">Trần Thị Thùy Trang</h3>
-                            <p class="member-role"> Coder/ Designer </p>
+                            <p class="member-role"> Coder/ Designer/Chị Leader </p>
                         </div>
                     </div>
                 </div>
